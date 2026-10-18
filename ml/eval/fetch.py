@@ -49,7 +49,7 @@ SPECIES = [
     "Buteo jamaicensis",  # Red-tailed Hawk
     "Poecile atricapillus",  # Black-capped Chickadee
 ]
-PER_SPECIES = 2
+PER_SPECIES = 5
 NORTHEAST_BOX = "39.5,-76.5,42.5,-72.0"  # lat_min,lon_min,lat_max,lon_max
 
 ESC50_META = "https://raw.githubusercontent.com/karolpiczak/ESC-50/master/meta/esc50.csv"

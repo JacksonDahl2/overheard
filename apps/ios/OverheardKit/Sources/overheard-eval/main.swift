@@ -45,7 +45,7 @@ struct Manifest: Decodable { let recordings: [Recording] }
 
 let modelURL: URL
 if modelPath.hasSuffix(".mlpackage") || modelPath.hasSuffix(".mlmodel") {
-    modelURL = try await MLModel.compileModel(at: URL(fileURLWithPath: modelPath))
+    modelURL = try MLModel.compileModel(at: URL(fileURLWithPath: modelPath))
 } else {
     modelURL = URL(fileURLWithPath: modelPath)
 }
@@ -66,6 +66,7 @@ let defaultDate = dateParser.date(from: "2026-10-18")!
 struct Scored {
     let recording: Recording
     let name: String
+    let condition: String  // "clean", or the city-noise mix level, e.g. "+10 dB"
     let target: Int?
     let background: Set<Int>
     let expected: Set<Int>
@@ -78,6 +79,50 @@ var skipped: [String] = []
 let started = Date()
 var clipsTotal = 0
 
+// Bird-to-noise levels (SNR) for mixing city noise into each bird recording.
+// +10 dB: bird clearly louder · 0 dB: equally loud · -5 dB: noise louder.
+let mixLevels: [Float] = CommandLine.arguments.contains("--no-mix") ? [] : [10, 0, -5]
+
+func maxConfidences(_ samples: [Float]) throws -> (scores: [Float], clips: Int) {
+    let clips = AudioDecoding.clips(samples)
+    var best = [Float](repeating: 0, count: classifier.labels.count)
+    for clip in clips {
+        for (i, c) in try classifier.confidences(for: clip).enumerated() where c > best[i] { best[i] = c }
+    }
+    clipsTotal += clips.count
+    return (best, clips.count)
+}
+
+func rms(_ x: [Float]) -> Float {
+    guard !x.isEmpty else { return 0 }
+    var sum: Float = 0
+    for s in x { sum += s * s }
+    return (sum / Float(x.count)).squareRoot()
+}
+
+/// A continuous city-noise bed: noise clips back to back, starting at a different clip per recording.
+func noiseBed(length: Int, startingAt offset: Int, from clips: [[Float]]) -> [Float] {
+    var bed: [Float] = []
+    bed.reserveCapacity(length)
+    var i = offset
+    while bed.count < length {
+        bed.append(contentsOf: clips[i % clips.count].prefix(length - bed.count))
+        i += 1
+    }
+    return bed
+}
+
+/// Mixes `noise` under `bird` so the bird is `snr` dB louder (RMS), then prevents clipping.
+func mix(_ bird: [Float], _ noise: [Float], snr: Float) -> [Float] {
+    let gain = rms(bird) / (max(rms(noise), 1e-9) * pow(10, snr / 20))
+    var out = zip(bird, noise).map { $0 + gain * $1 }
+    let peak = out.map(abs).max() ?? 0
+    if peak > 1 { out = out.map { $0 / peak } }
+    return out
+}
+
+// Decode everything first: noise clips double as the beds for mixing.
+var decoded: [(Recording, [Float])] = []
 for recording in manifest.recordings {
     let url = baseDir.appendingPathComponent(recording.file)
     guard FileManager.default.fileExists(atPath: url.path) else {
@@ -88,36 +133,41 @@ for recording in manifest.recordings {
         skipped.append("\(recording.file) (\(recording.species ?? "no species") isn't a BirdNET label)")
         continue
     }
-    let samples: [Float]
     do {
-        samples = try AudioDecoding.load48kMono(url)
+        decoded.append((recording, try AudioDecoding.load48kMono(url)))
     } catch {
         skipped.append("\(recording.file) (\(error.localizedDescription))")
-        continue
     }
-    let clips = AudioDecoding.clips(samples)
-    var maxConfidence = [Float](repeating: 0, count: classifier.labels.count)
-    for clip in clips {
-        for (i, c) in try classifier.confidences(for: clip).enumerated() where c > maxConfidence[i] {
-            maxConfidence[i] = c
-        }
-    }
-    clipsTotal += clips.count
+}
+let noiseClips = decoded.filter { $0.0.kind == .noise }.map(\.1).filter { rms($0) > 0 }
+
+for (n, (recording, samples)) in decoded.enumerated() {
     let date = recording.date.flatMap(dateParser.date(from:)) ?? defaultDate
-    scored.append(
-        Scored(
-            recording: recording,
-            name: (recording.file as NSString).lastPathComponent,
-            target: recording.species.flatMap { indexByScientific[$0] },
-            background: Set((recording.also ?? []).compactMap { indexByScientific[$0] }),
-            expected: classifier.expectedSpecies(on: date) ?? [],
-            maxConfidence: maxConfidence,
-            clips: clips.count))
+    func record(_ condition: String, _ audio: [Float]) throws {
+        let (best, clips) = try maxConfidences(audio)
+        scored.append(
+            Scored(
+                recording: recording,
+                name: (recording.file as NSString).lastPathComponent,
+                condition: condition,
+                target: recording.species.flatMap { indexByScientific[$0] },
+                background: Set((recording.also ?? []).compactMap { indexByScientific[$0] }),
+                expected: classifier.expectedSpecies(on: date) ?? [],
+                maxConfidence: best,
+                clips: clips))
+    }
+    try record("clean", samples)
+    guard recording.kind == .bird, !noiseClips.isEmpty else { continue }
+    let bed = noiseBed(length: samples.count, startingAt: n, from: noiseClips)
+    for snr in mixLevels {
+        try record(String(format: "%+.0f dB", snr), mix(samples, bed, snr: snr))
+    }
 }
 
 // MARK: - Metrics
 
 struct Row: Encodable {
+    let condition: String
     let threshold: Float
     let filtered: Bool
     let recall: Double  // bird files whose target was detected
@@ -136,41 +186,50 @@ func detected(_ s: Scored, threshold: Float, filtered: Bool) -> Set<Int> {
     return out
 }
 
-let birds = scored.filter { $0.recording.kind == .bird }
+let allBirds = scored.filter { $0.recording.kind == .bird }
+let birds = allBirds.filter { $0.condition == "clean" }
 let noise = scored.filter { $0.recording.kind == .noise }
+let conditions = ["clean"] + mixLevels.map { String(format: "%+.0f dB", $0) }
 let thresholds: [Float] = [0.25, 0.35, 0.5, 0.65, 0.8]
-var rows: [Row] = []
 
-for filtered in [false, true] {
-    for t in thresholds {
-        var hits = 0
-        var falseSpecies = 0
-        var falseInBirdFiles = 0
-        var noisy = 0
-        var nonBirdHits = 0
-        for s in birds {
-            let d = detected(s, threshold: t, filtered: filtered)
-            if let target = s.target, d.contains(target) { hits += 1 }
-            let wrong = d.subtracting(s.background).subtracting(s.target.map { [$0] } ?? [])
-            falseSpecies += wrong.count
-            falseInBirdFiles += wrong.count
-            nonBirdHits += d.intersection(nonBird).count
-        }
-        for s in noise {
-            let d = detected(s, threshold: t, filtered: filtered)
-            falseSpecies += d.count
-            if !d.subtracting(nonBird).isEmpty { noisy += 1 }
-            nonBirdHits += d.intersection(nonBird).count
-        }
-        rows.append(
-            Row(
-                threshold: t, filtered: filtered,
-                recall: birds.isEmpty ? 0 : Double(hits) / Double(birds.count),
-                precision: hits + falseSpecies == 0 ? 0 : Double(hits) / Double(hits + falseSpecies),
-                falsePerBirdFile: birds.isEmpty ? 0 : Double(falseInBirdFiles) / Double(birds.count),
-                noiseFilesWithBirds: noise.isEmpty ? 0 : Double(noisy) / Double(noise.count),
-                nonBirdHits: nonBirdHits))
+/// Metrics over one set of bird recordings, plus the noise clips (clean only).
+func metrics(_ condition: String, _ birdSet: [Scored], threshold t: Float, filtered: Bool) -> Row {
+    var hits = 0
+    var falseSpecies = 0
+    var falseInBirdFiles = 0
+    var noisy = 0
+    var nonBirdHits = 0
+    for s in birdSet {
+        let d = detected(s, threshold: t, filtered: filtered)
+        if let target = s.target, d.contains(target) { hits += 1 }
+        let wrong = d.subtracting(s.background).subtracting(s.target.map { [$0] } ?? [])
+        falseSpecies += wrong.count
+        falseInBirdFiles += wrong.count
+        nonBirdHits += d.intersection(nonBird).count
     }
+    for s in noise {
+        let d = detected(s, threshold: t, filtered: filtered)
+        falseSpecies += d.count
+        if !d.subtracting(nonBird).isEmpty { noisy += 1 }
+        nonBirdHits += d.intersection(nonBird).count
+    }
+    return Row(
+        condition: condition, threshold: t, filtered: filtered,
+        recall: birdSet.isEmpty ? 0 : Double(hits) / Double(birdSet.count),
+        precision: hits + falseSpecies == 0 ? 0 : Double(hits) / Double(hits + falseSpecies),
+        falsePerBirdFile: birdSet.isEmpty ? 0 : Double(falseInBirdFiles) / Double(birdSet.count),
+        noiseFilesWithBirds: noise.isEmpty ? 0 : Double(noisy) / Double(noise.count),
+        nonBirdHits: nonBirdHits)
+}
+
+var rows: [Row] = []
+for filtered in [false, true] {
+    for t in thresholds { rows.append(metrics("clean", birds, threshold: t, filtered: filtered)) }
+}
+var mixedRows: [Row] = []
+for condition in conditions.dropFirst() {
+    let set = allBirds.filter { $0.condition == condition }
+    for t in thresholds { mixedRows.append(metrics(condition, set, threshold: t, filtered: true)) }
 }
 
 // MARK: - Report
@@ -193,6 +252,18 @@ for r in rows {
 print("\nrecall = target bird found · precision = right species / all species reported (bird + noise files)")
 print("Non-bird labels (Engine, Dog, …) currently count as false positives, matching the app today.")
 
+if !mixedRows.isEmpty {
+    print("\nWith city noise mixed in (filter on; +10 dB = bird louder, -5 dB = noise louder):")
+    print("noise    thresh  recall  precision  false/bird-file")
+    let cleanOn = rows.filter(\.filtered)
+    for r in cleanOn + mixedRows {
+        print(
+            String(
+                format: "%-7@  %5.2f  %@  %@     %6.2f", r.condition, r.threshold, pct(r.recall), pct(r.precision),
+                r.falsePerBirdFile))
+    }
+}
+
 // Per-species recall at 0.5, filter on.
 var perSpecies: [String: (hits: Int, total: Int)] = [:]
 for s in birds {
@@ -211,7 +282,7 @@ if !perSpecies.isEmpty {
 
 if verbose {
     print("\nPer recording (threshold 0.50, filter off; ✓ = target found):")
-    for s in scored {
+    for s in scored where s.condition == "clean" {
         let d = detected(s, threshold: 0.5, filtered: false)
         let label: String
         if let target = s.target {
@@ -237,6 +308,6 @@ if !skipped.isEmpty {
 if let jsonOut, !jsonOut.isEmpty {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-    try encoder.encode(rows).write(to: URL(fileURLWithPath: jsonOut))
+    try encoder.encode(rows + mixedRows).write(to: URL(fileURLWithPath: jsonOut))
     print("\nWrote \(jsonOut)")
 }

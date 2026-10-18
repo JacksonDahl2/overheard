@@ -72,7 +72,7 @@ open Overheard.xcodeproj                 # ⌘R onto a connected iPhone
 
 # Detection eval (same Swift pipeline as the app, runs on the Mac)
 ml/.venv/bin/python -I ml/eval/fetch.py  # data; birds need XENO_CANTO_API_KEY in .env
-swift run -c release --package-path apps/ios/OverheardKit overheard-eval --verbose
+swift run -c release --package-path apps/ios/OverheardKit overheard-eval --verbose   # ~75 s; --no-mix skips city-noise runs
 swift test --package-path apps/ios/OverheardKit
 
 # Compile check without signing (CI or agents)

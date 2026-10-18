@@ -132,6 +132,7 @@ apps/{api,art-worker,web}, packages/{db,shared,observability}, infra/terraform, 
 - **Location privacy:** blur shared points to a ~500 m grid, trim ~200 m from the start and end of routes, and show no location for sensitive species. Detection only needs approximate location.
 - **IDs:** the phone generates walk and detection IDs, which makes uploads safe to retry.
 - **Tests:** detection and app logic go in `OverheardKit` as plain, model-free types (like `SpeciesFilter` and `DetectionSession`), and each one gets unit tests (`swift test --package-path apps/ios/OverheardKit`). Quality changes are measured with `overheard-eval`. Once there's real app logic (walk flow, SwiftData, UI state), add tests for it too.
+- **Branches and PRs:** never commit to `main`. Each body of work gets a branch off an up-to-date `main` (`feat/…`, `fix/…`, `ci/…`, `docs/…`), and you push it and open a pull request. CI runs on every PR and on `main`.
 - **Commits:** small and descriptive. Update `todo.md`, `docs/decisions.md` and this file in the same commit when they change.
 
 ## Gotchas

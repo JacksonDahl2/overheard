@@ -1,9 +1,17 @@
 name: CI
 
 on:
+  # Every pull request: when it's opened, each time commits are pushed to it, and if it's reopened.
+  pull_request:
+    types: [opened, synchronize, reopened]
+  # And main itself, after a PR merges.
   push:
     branches: [main]
-  pull_request:
+
+# A new push to the same PR cancels the run it supersedes.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ios:

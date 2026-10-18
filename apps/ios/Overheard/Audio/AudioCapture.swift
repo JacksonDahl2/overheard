@@ -1,57 +1,97 @@
-import AVFoundation
+@preconcurrency import AVFoundation
 
-/// Captures microphone audio and delivers fixed-length 48 kHz mono clips.
+/// Captures microphone audio and delivers fixed-length 48 kHz mono clips as an async stream.
 ///
-/// BirdNET expects 3 s of 48 kHz mono Float32 audio. The input node runs at the
-/// hardware rate, so every tap buffer is resampled before it is accumulated.
-final class AudioCapture {
-    static let sampleRate: Double = 48_000
-    static let clipLength = 144_000  // 3 s
+/// BirdNET expects 3 s of 48 kHz mono Float32 audio. The input node runs at the hardware
+/// rate, so every tap buffer is resampled before it is accumulated.
+///
+/// Keeps listening through interruptions (calls, Siri), audio route changes (AirPods, a
+/// wired mic), and media-services resets by rebuilding the tap for the new input format.
+final class AudioCapture: @unchecked Sendable {
+    // @unchecked: all mutable state below is only touched on `queue`.
 
-    /// Called on a background queue with each complete clip and its RMS level.
-    var onClip: (([Float], Float) -> Void)?
+    struct Clip: Sendable {
+        let samples: [Float]
+        let level: Float  // RMS, used to skip silence
+        let time: Date  // when the clip ended
+    }
 
-    private let engine = AVAudioEngine()
+    let clips: AsyncStream<Clip>
+    private let continuation: AsyncStream<Clip>.Continuation
+
     private let queue = DispatchQueue(label: "app.overheardbirds.audio")
     private let targetFormat = AVAudioFormat(
-        commonFormat: .pcmFormatFloat32, sampleRate: AudioCapture.sampleRate, channels: 1, interleaved: false)!
+        commonFormat: .pcmFormatFloat32, sampleRate: 48_000, channels: 1, interleaved: false)!
+    private let clipLength = 144_000  // 3 s at 48 kHz
+
+    private var engine = AVAudioEngine()
     private var converter: AVAudioConverter?
     private var pending: [Float] = []
-    private var interruptionObserver: NSObjectProtocol?
+    private var running = false
+    private var observers: [NSObjectProtocol] = []
+
+    init() {
+        (clips, continuation) = AsyncStream.makeStream(of: Clip.self, bufferingPolicy: .bufferingNewest(4))
+    }
 
     func start() throws {
         let session = AVAudioSession.sharedInstance()
         // .measurement turns off voice processing and gain control, which would
         // otherwise suppress quiet, high-pitched birdsong.
         try session.setCategory(.record, mode: .measurement)
-        try session.setPreferredSampleRate(Self.sampleRate)
+        try session.setPreferredSampleRate(targetFormat.sampleRate)
         try session.setActive(true)
-
-        let input = engine.inputNode
-        let inputFormat = input.outputFormat(forBus: 0)
-        converter = AVAudioConverter(from: inputFormat, to: targetFormat)
-        pending.removeAll(keepingCapacity: true)
-
-        input.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, _ in
-            self?.queue.async { self?.append(buffer) }
+        try queue.sync {
+            pending.removeAll(keepingCapacity: true)
+            try startEngine()
+            running = true
         }
-        engine.prepare()
-        try engine.start()
-        observeInterruptions()
+        observe()
     }
 
     func stop() {
-        engine.inputNode.removeTap(onBus: 0)
-        engine.stop()
-        if let interruptionObserver { NotificationCenter.default.removeObserver(interruptionObserver) }
-        interruptionObserver = nil
+        observers.forEach(NotificationCenter.default.removeObserver)
+        observers = []
+        queue.sync {
+            running = false
+            engine.inputNode.removeTap(onBus: 0)
+            engine.stop()
+        }
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
 
-    // MARK: - Private
+    // MARK: - Engine (on `queue`)
+
+    /// (Re)installs the tap for the current input format and starts the engine.
+    private func startEngine() throws {
+        let input = engine.inputNode
+        input.removeTap(onBus: 0)
+        let inputFormat = input.outputFormat(forBus: 0)
+        guard inputFormat.sampleRate > 0, inputFormat.channelCount > 0 else { throw CaptureError.noInput }
+        converter = AVAudioConverter(from: inputFormat, to: targetFormat)
+        // The tap's buffer is only guaranteed valid until the callback returns, so hand the
+        // queue our own copy. (Not queue.sync: stop/restart remove the tap on `queue`, which
+        // waits for this callback, so blocking here could deadlock.)
+        input.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, _ in
+            guard let self, let copy = OwnedBuffer(copying: buffer) else { return }
+            self.queue.async { self.append(copy.buffer) }
+        }
+        engine.prepare()
+        try engine.start()
+    }
+
+    /// The input changed under us (new route, sample rate, or a media-services reset).
+    private func restart(rebuildEngine: Bool) {
+        guard running else { return }
+        engine.inputNode.removeTap(onBus: 0)
+        engine.stop()
+        if rebuildEngine { engine = AVAudioEngine() }
+        try? AVAudioSession.sharedInstance().setActive(true)
+        try? startEngine()
+    }
 
     private func append(_ buffer: AVAudioPCMBuffer) {
-        guard let converter else { return }
+        guard running, let converter else { return }
         let ratio = targetFormat.sampleRate / buffer.format.sampleRate
         let capacity = AVAudioFrameCount(Double(buffer.frameLength) * ratio) + 1024
         guard let out = AVAudioPCMBuffer(pcmFormat: targetFormat, frameCapacity: capacity) else { return }
@@ -70,30 +110,72 @@ final class AudioCapture {
         guard error == nil, let samples = out.floatChannelData?[0] else { return }
 
         pending.append(contentsOf: UnsafeBufferPointer(start: samples, count: Int(out.frameLength)))
-        while pending.count >= Self.clipLength {
-            let clip = Array(pending.prefix(Self.clipLength))
-            pending.removeFirst(Self.clipLength)
-            onClip?(clip, Self.rms(clip))
+        while pending.count >= clipLength {
+            let clip = Array(pending.prefix(clipLength))
+            pending.removeFirst(clipLength)
+            continuation.yield(Clip(samples: clip, level: Self.rms(clip), time: .now))
         }
     }
 
-    private func observeInterruptions() {
-        interruptionObserver = NotificationCenter.default.addObserver(
-            forName: AVAudioSession.interruptionNotification, object: nil, queue: nil
-        ) { [weak self] note in
-            guard let self,
-                let raw = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
-                AVAudioSession.InterruptionType(rawValue: raw) == .ended
-            else { return }
-            // A call or Siri paused us; pick back up where we left off.
-            try? AVAudioSession.sharedInstance().setActive(true)
-            try? self.engine.start()
-        }
+    // MARK: - Notifications
+
+    private func observe() {
+        let center = NotificationCenter.default
+        observers = [
+            // A call or Siri paused us; pick back up when it ends.
+            center.addObserver(forName: AVAudioSession.interruptionNotification, object: nil, queue: nil) {
+                [weak self] note in
+                guard let raw = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
+                    AVAudioSession.InterruptionType(rawValue: raw) == .ended
+                else { return }
+                guard let self else { return }
+                self.queue.async { self.restart(rebuildEngine: false) }
+            },
+            // AirPods connected, a wired mic plugged in, …: the input format changed.
+            center.addObserver(forName: .AVAudioEngineConfigurationChange, object: nil, queue: nil) {
+                [weak self] _ in
+                guard let self else { return }
+                self.queue.async { self.restart(rebuildEngine: false) }
+            },
+            // The audio daemon restarted; every engine object is invalid now.
+            center.addObserver(forName: AVAudioSession.mediaServicesWereResetNotification, object: nil, queue: nil) {
+                [weak self] _ in
+                guard let self else { return }
+                self.queue.async {
+                    try? AVAudioSession.sharedInstance().setCategory(.record, mode: .measurement)
+                    self.restart(rebuildEngine: true)
+                }
+            },
+        ]
     }
 
     private static func rms(_ clip: [Float]) -> Float {
         var sum: Float = 0
         for s in clip { sum += s * s }
         return (sum / Float(clip.count)).squareRoot()
+    }
+
+    /// A private copy of a tap buffer, safe to hand to another queue (nothing else holds it).
+    private struct OwnedBuffer: @unchecked Sendable {
+        let buffer: AVAudioPCMBuffer
+
+        init?(copying source: AVAudioPCMBuffer) {
+            guard let copy = AVAudioPCMBuffer(pcmFormat: source.format, frameCapacity: source.frameLength),
+                let from = source.floatChannelData, let to = copy.floatChannelData
+            else { return nil }
+            copy.frameLength = source.frameLength
+            let frames = Int(source.frameLength)
+            let stride = source.format.isInterleaved ? Int(source.format.channelCount) : 1
+            let planes = source.format.isInterleaved ? 1 : Int(source.format.channelCount)
+            for plane in 0..<planes {
+                to[plane].update(from: from[plane], count: frames * stride)
+            }
+            buffer = copy
+        }
+    }
+
+    enum CaptureError: LocalizedError {
+        case noInput
+        var errorDescription: String? { "No microphone input is available." }
     }
 }

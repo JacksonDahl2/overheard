@@ -3,8 +3,10 @@
 Usage (from ml/):
     .venv/bin/python -I verify.py [path/to/48kHz-mono.wav]
 
-Splits the recording into 3 s clips, runs both models, and prints the largest
-logit difference plus the top detections from each.
+Audio model: splits the recording into 3 s clips, runs both models, and prints the
+largest logit difference plus the top detections from each.
+Location model: compares occurrence scores on random places and weeks, and how often
+the 0.03 "expected here" cutoff flips.
 """
 
 import os
@@ -45,9 +47,8 @@ def main():
     clips = [audio[i : i + CLIP] for i in range(0, len(audio) - CLIP + 1, CLIP)]
     labels = open(os.path.join(HERE, "models/coreml/labels.txt")).read().splitlines()
 
-    tf_fn = tf.saved_model.load(os.path.join(HERE, "models/birdnet-v2.4/protobuf/audio-model")).signatures[
-        "basic"
-    ]
+    tf_model = tf.saved_model.load(os.path.join(HERE, "models/birdnet-v2.4/protobuf/audio-model"))
+    tf_fn = tf_model.signatures["basic"]
     ml = ct.models.MLModel(os.path.join(HERE, "models/coreml/BirdNETAudio.mlpackage"))
     ml_out = ml.get_spec().description.output[0].name
 
@@ -70,6 +71,25 @@ def main():
 
     print(f"\n{len(clips)} clips · max |logit diff| {worst:.4f} · top-1 mismatches {mismatched_top1}")
     print("(confidences shown as TensorFlow/Core ML)")
+    verify_meta()
+
+
+def verify_meta(samples=300, cutoff=0.03):
+    tf_model = tf.saved_model.load(os.path.join(HERE, "models/birdnet-v2.4/protobuf/meta-model"))
+    tf_fn = tf_model.signatures["serving_default"]
+    ml = ct.models.MLModel(os.path.join(HERE, "models/coreml/BirdNETMeta.mlpackage"))
+    ml_out = ml.get_spec().description.output[0].name
+    rng = np.random.default_rng(1)
+    worst, flips, expected = 0.0, 0, 0
+    for _ in range(samples):
+        x = np.array([[rng.uniform(-60, 75), rng.uniform(-180, 180), rng.integers(1, 49)]], dtype=np.float32)
+        ref = tf_fn(MNET_INPUT=tf.constant(x))["MNET_CLASS_ACTIVATION"].numpy()[0]
+        got = np.asarray(ml.predict({"location": x})[ml_out]).reshape(-1)
+        worst = max(worst, float(np.max(np.abs(ref - got))))
+        flips += int(np.sum((ref >= cutoff) != (got >= cutoff)))
+        expected += int(np.sum(ref >= cutoff))
+    print(f"\nLocation model: {samples} places · max |occurrence diff| {worst:.2e} · ", end="")
+    print(f"{flips} of {expected} expected-species decisions flipped at {cutoff}")
 
 
 if __name__ == "__main__":

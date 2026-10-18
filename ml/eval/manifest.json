@@ -6,6 +6,8 @@
       "species": "Cardinalis cardinalis",
       "also": [],
       "date": "2024-08-04",
+      "lat": 40.7791,
+      "lon": -73.9708,
       "url": "https://xeno-canto.org/1148843/download",
       "source": "https://xeno-canto.org/1148843",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -18,6 +20,8 @@
         "Turdus migratorius"
       ],
       "date": "2026-04-03",
+      "lat": 40.0626,
+      "lon": -75.1254,
       "url": "https://xeno-canto.org/1093667/download",
       "source": "https://xeno-canto.org/1093667",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -28,6 +32,8 @@
       "species": "Cardinalis cardinalis",
       "also": [],
       "date": "2025-07-06",
+      "lat": 41.1806,
+      "lon": -73.6846,
       "url": "https://xeno-canto.org/1012142/download",
       "source": "https://xeno-canto.org/1012142",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -38,6 +44,8 @@
       "species": "Cardinalis cardinalis",
       "also": [],
       "date": "2025-06-08",
+      "lat": 41.2482,
+      "lon": -73.5917,
       "url": "https://xeno-canto.org/1006772/download",
       "source": "https://xeno-canto.org/1006772",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -48,6 +56,8 @@
       "species": "Cardinalis cardinalis",
       "also": [],
       "date": "2021-10-11",
+      "lat": 40.6682,
+      "lon": -73.9681,
       "url": "https://xeno-canto.org/696751/download",
       "source": "https://xeno-canto.org/696751",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -58,6 +68,8 @@
       "species": "Cyanocitta cristata",
       "also": [],
       "date": "2025-10-09",
+      "lat": 40.6981,
+      "lon": -73.8907,
       "url": "https://xeno-canto.org/1046664/download",
       "source": "https://xeno-canto.org/1046664",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -68,6 +80,8 @@
       "species": "Cyanocitta cristata",
       "also": [],
       "date": "2025-05-03",
+      "lat": 41.0149,
+      "lon": -73.809,
       "url": "https://xeno-canto.org/994294/download",
       "source": "https://xeno-canto.org/994294",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -78,6 +92,8 @@
       "species": "Cyanocitta cristata",
       "also": [],
       "date": "2023-09-21",
+      "lat": 41.3775,
+      "lon": -73.964,
       "url": "https://xeno-canto.org/924514/download",
       "source": "https://xeno-canto.org/924514",
       "license": "https://creativecommons.org/publicdomain/zero/1.0/"
@@ -88,6 +104,8 @@
       "species": "Cyanocitta cristata",
       "also": [],
       "date": "2023-10-05",
+      "lat": 40.7949,
+      "lon": -73.9548,
       "url": "https://xeno-canto.org/833840/download",
       "source": "https://xeno-canto.org/833840",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -100,6 +118,8 @@
         "Setophaga pinus"
       ],
       "date": "2021-03-26",
+      "lat": 40.414,
+      "lon": -74.3523,
       "url": "https://xeno-canto.org/632164/download",
       "source": "https://xeno-canto.org/632164",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -110,6 +130,8 @@
       "species": "Turdus migratorius",
       "also": [],
       "date": "2024-08-04",
+      "lat": 40.7774,
+      "lon": -73.9687,
       "url": "https://xeno-canto.org/1176223/download",
       "source": "https://xeno-canto.org/1176223",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -123,6 +145,8 @@
         "Dryocopus pileatus"
       ],
       "date": "2025-05-16",
+      "lat": 41.0149,
+      "lon": -73.809,
       "url": "https://xeno-canto.org/999643/download",
       "source": "https://xeno-canto.org/999643",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -137,6 +161,8 @@
         "Hylocichla mustelina"
       ],
       "date": "2025-05-16",
+      "lat": 41.0149,
+      "lon": -73.809,
       "url": "https://xeno-canto.org/999642/download",
       "source": "https://xeno-canto.org/999642",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -147,6 +173,8 @@
       "species": "Turdus migratorius",
       "also": [],
       "date": "2012-04-07",
+      "lat": 40.141,
+      "lon": -75.082,
       "url": "https://xeno-canto.org/771921/download",
       "source": "https://xeno-canto.org/771921",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -157,6 +185,8 @@
       "species": "Turdus migratorius",
       "also": [],
       "date": "2021-04-21",
+      "lat": 40.8504,
+      "lon": -74.2078,
       "url": "https://xeno-canto.org/641669/download",
       "source": "https://xeno-canto.org/641669",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -170,6 +200,8 @@
         "Bombycilla cedrorum"
       ],
       "date": "2022-12-30",
+      "lat": 40.451,
+      "lon": -73.996,
       "url": "https://xeno-canto.org/772287/download",
       "source": "https://xeno-canto.org/772287",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -184,6 +216,8 @@
         "Melospiza melodia"
       ],
       "date": "2019-10-23",
+      "lat": 40.5874,
+      "lon": -74.2621,
       "url": "https://xeno-canto.org/503720/download",
       "source": "https://xeno-canto.org/503720",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -196,6 +230,8 @@
         "Melospiza melodia"
       ],
       "date": "2019-10-12",
+      "lat": 40.5874,
+      "lon": -74.2621,
       "url": "https://xeno-canto.org/502022/download",
       "source": "https://xeno-canto.org/502022",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -206,6 +242,8 @@
       "species": "Zonotrichia albicollis",
       "also": [],
       "date": "2012-10-26",
+      "lat": 40.0626,
+      "lon": -75.1254,
       "url": "https://xeno-canto.org/138152/download",
       "source": "https://xeno-canto.org/138152",
       "license": "https://creativecommons.org/licenses/by-nc-sa/3.0/"
@@ -216,6 +254,8 @@
       "species": "Zonotrichia albicollis",
       "also": [],
       "date": "2026-10-16",
+      "lat": 45.6182,
+      "lon": -111.0684,
       "url": "https://xeno-canto.org/1186497/download",
       "source": "https://xeno-canto.org/1186497",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -226,6 +266,8 @@
       "species": "Melospiza melodia",
       "also": [],
       "date": "2026-06-07",
+      "lat": 41.1815,
+      "lon": -73.8947,
       "url": "https://xeno-canto.org/1142132/download",
       "source": "https://xeno-canto.org/1142132",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -236,6 +278,8 @@
       "species": "Melospiza melodia",
       "also": [],
       "date": "2023-09-15",
+      "lat": 41.1815,
+      "lon": -73.8947,
       "url": "https://xeno-canto.org/1049227/download",
       "source": "https://xeno-canto.org/1049227",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -246,6 +290,8 @@
       "species": "Melospiza melodia",
       "also": [],
       "date": "2025-10-19",
+      "lat": 41.1815,
+      "lon": -73.8947,
       "url": "https://xeno-canto.org/1049157/download",
       "source": "https://xeno-canto.org/1049157",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -262,6 +308,8 @@
         "Troglodytes aedon"
       ],
       "date": "2024-05-07",
+      "lat": 42.0408,
+      "lon": -72.5989,
       "url": "https://xeno-canto.org/930839/download",
       "source": "https://xeno-canto.org/930839",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -275,6 +323,8 @@
         "Tringa semipalmata"
       ],
       "date": "2021-06-16",
+      "lat": 39.5497,
+      "lon": -74.3335,
       "url": "https://xeno-canto.org/660363/download",
       "source": "https://xeno-canto.org/660363",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -285,6 +335,8 @@
       "species": "Baeolophus bicolor",
       "also": [],
       "date": "2025-09-02",
+      "lat": 41.0149,
+      "lon": -73.809,
       "url": "https://xeno-canto.org/1035994/download",
       "source": "https://xeno-canto.org/1035994",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -295,6 +347,8 @@
       "species": "Baeolophus bicolor",
       "also": [],
       "date": "2023-03-10",
+      "lat": 40.141,
+      "lon": -75.082,
       "url": "https://xeno-canto.org/785277/download",
       "source": "https://xeno-canto.org/785277",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -305,6 +359,8 @@
       "species": "Baeolophus bicolor",
       "also": [],
       "date": "2022-03-05",
+      "lat": 40.5874,
+      "lon": -74.2621,
       "url": "https://xeno-canto.org/706242/download",
       "source": "https://xeno-canto.org/706242",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -315,6 +371,8 @@
       "species": "Baeolophus bicolor",
       "also": [],
       "date": "2019-06-07",
+      "lat": 42.3306,
+      "lon": -76.3351,
       "url": "https://xeno-canto.org/479486/download",
       "source": "https://xeno-canto.org/479486",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -325,6 +383,8 @@
       "species": "Baeolophus bicolor",
       "also": [],
       "date": "2000-05-16",
+      "lat": 40.7656,
+      "lon": -74.5366,
       "url": "https://xeno-canto.org/469582/download",
       "source": "https://xeno-canto.org/469582",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -335,6 +395,8 @@
       "species": "Thryothorus ludovicianus",
       "also": [],
       "date": "2025-09-01",
+      "lat": 41.1815,
+      "lon": -73.8947,
       "url": "https://xeno-canto.org/1035997/download",
       "source": "https://xeno-canto.org/1035997",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -345,6 +407,8 @@
       "species": "Thryothorus ludovicianus",
       "also": [],
       "date": "2025-06-03",
+      "lat": 40.9658,
+      "lon": -73.6739,
       "url": "https://xeno-canto.org/1004463/download",
       "source": "https://xeno-canto.org/1004463",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -355,6 +419,8 @@
       "species": "Thryothorus ludovicianus",
       "also": [],
       "date": "2021-05-08",
+      "lat": 41.3357,
+      "lon": -72.9106,
       "url": "https://xeno-canto.org/805390/download",
       "source": "https://xeno-canto.org/805390",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -367,6 +433,8 @@
         "Geothlypis formosa"
       ],
       "date": "2022-06-04",
+      "lat": 39.6063,
+      "lon": -76.1603,
       "url": "https://xeno-canto.org/729229/download",
       "source": "https://xeno-canto.org/729229",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -379,6 +447,8 @@
         "Megaceryle alcyon"
       ],
       "date": "2020-11-05",
+      "lat": 40.5874,
+      "lon": -74.2621,
       "url": "https://xeno-canto.org/600422/download",
       "source": "https://xeno-canto.org/600422",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -389,6 +459,8 @@
       "species": "Mimus polyglottos",
       "also": [],
       "date": "2022-05-28",
+      "lat": 40.6082,
+      "lon": -74.2776,
       "url": "https://xeno-canto.org/728174/download",
       "source": "https://xeno-canto.org/728174",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -399,6 +471,8 @@
       "species": "Mimus polyglottos",
       "also": [],
       "date": "2021-06-13",
+      "lat": 40.4629,
+      "lon": -74.0037,
       "url": "https://xeno-canto.org/656410/download",
       "source": "https://xeno-canto.org/656410",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -409,6 +483,8 @@
       "species": "Mimus polyglottos",
       "also": [],
       "date": "2020-10-23",
+      "lat": 40.451,
+      "lon": -73.996,
       "url": "https://xeno-canto.org/597267/download",
       "source": "https://xeno-canto.org/597267",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -419,6 +495,8 @@
       "species": "Mimus polyglottos",
       "also": [],
       "date": "2019-11-29",
+      "lat": 40.451,
+      "lon": -73.996,
       "url": "https://xeno-canto.org/509281/download",
       "source": "https://xeno-canto.org/509281",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -429,6 +507,8 @@
       "species": "Mimus polyglottos",
       "also": [],
       "date": "2019-10-18",
+      "lat": 40.451,
+      "lon": -73.996,
       "url": "https://xeno-canto.org/503060/download",
       "source": "https://xeno-canto.org/503060",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -439,6 +519,8 @@
       "species": "Dumetella carolinensis",
       "also": [],
       "date": "2024-08-04",
+      "lat": 40.778,
+      "lon": -73.9729,
       "url": "https://xeno-canto.org/1148847/download",
       "source": "https://xeno-canto.org/1148847",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -449,6 +531,8 @@
       "species": "Dumetella carolinensis",
       "also": [],
       "date": "2026-05-31",
+      "lat": 40.0626,
+      "lon": -75.1254,
       "url": "https://xeno-canto.org/1140480/download",
       "source": "https://xeno-canto.org/1140480",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -459,6 +543,8 @@
       "species": "Dumetella carolinensis",
       "also": [],
       "date": "2024-05-04",
+      "lat": 40.2129,
+      "lon": -74.9399,
       "url": "https://xeno-canto.org/998812/download",
       "source": "https://xeno-canto.org/998812",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -469,6 +555,8 @@
       "species": "Dumetella carolinensis",
       "also": [],
       "date": "2023-06-10",
+      "lat": 41.3856,
+      "lon": -73.962,
       "url": "https://xeno-canto.org/819785/download",
       "source": "https://xeno-canto.org/819785",
       "license": "https://creativecommons.org/publicdomain/zero/1.0/"
@@ -479,6 +567,8 @@
       "species": "Dumetella carolinensis",
       "also": [],
       "date": "2023-04-28",
+      "lat": 40.3306,
+      "lon": -74.1419,
       "url": "https://xeno-canto.org/796714/download",
       "source": "https://xeno-canto.org/796714",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -489,6 +579,8 @@
       "species": "Passer domesticus",
       "also": [],
       "date": "2026-08-23",
+      "lat": 38.7312,
+      "lon": -27.0593,
       "url": "https://xeno-canto.org/1175751/download",
       "source": "https://xeno-canto.org/1175751",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -499,6 +591,8 @@
       "species": "Passer domesticus",
       "also": [],
       "date": "2026-06-01",
+      "lat": 48.9547,
+      "lon": 4.3642,
       "url": "https://xeno-canto.org/1156447/download",
       "source": "https://xeno-canto.org/1156447",
       "license": "https://creativecommons.org/licenses/by-nc/4.0/"
@@ -509,6 +603,8 @@
       "species": "Passer domesticus",
       "also": [],
       "date": "2026-05-15",
+      "lat": 47.4869,
+      "lon": 1.1969,
       "url": "https://xeno-canto.org/1156445/download",
       "source": "https://xeno-canto.org/1156445",
       "license": "https://creativecommons.org/licenses/by-nc/4.0/"
@@ -519,6 +615,8 @@
       "species": "Passer domesticus",
       "also": [],
       "date": "2026-07-04",
+      "lat": 48.4014,
+      "lon": -4.2267,
       "url": "https://xeno-canto.org/1152785/download",
       "source": "https://xeno-canto.org/1152785",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -529,6 +627,8 @@
       "species": "Passer domesticus",
       "also": [],
       "date": "2026-07-02",
+      "lat": 46.6626,
+      "lon": -1.4526,
       "url": "https://xeno-canto.org/1152146/download",
       "source": "https://xeno-canto.org/1152146",
       "license": "https://creativecommons.org/publicdomain/zero/1.0/"
@@ -539,6 +639,8 @@
       "species": "Sturnus vulgaris",
       "also": [],
       "date": "2026-10-10",
+      "lat": 59.8862,
+      "lon": -1.3088,
       "url": "https://xeno-canto.org/1184861/download",
       "source": "https://xeno-canto.org/1184861",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -551,6 +653,8 @@
         "Motacilla alba"
       ],
       "date": "2026-06-06",
+      "lat": 58.0554,
+      "lon": 27.5973,
       "url": "https://xeno-canto.org/1142838/download",
       "source": "https://xeno-canto.org/1142838",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -561,6 +665,8 @@
       "species": "Sturnus vulgaris",
       "also": [],
       "date": "2026-05-22",
+      "lat": 51.4946,
+      "lon": 0.1946,
       "url": "https://xeno-canto.org/1136655/download",
       "source": "https://xeno-canto.org/1136655",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -573,6 +679,8 @@
         "Mimus polyglottos"
       ],
       "date": "2026-04-19",
+      "lat": 33.454,
+      "lon": -111.945,
       "url": "https://xeno-canto.org/1101346/download",
       "source": "https://xeno-canto.org/1101346",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -587,6 +695,8 @@
         "Larus canus"
       ],
       "date": "2026-04-17",
+      "lat": 59.1729,
+      "lon": 18.3686,
       "url": "https://xeno-canto.org/1101011/download",
       "source": "https://xeno-canto.org/1101011",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -597,6 +707,8 @@
       "species": "Zenaida macroura",
       "also": [],
       "date": "2025-04-14",
+      "lat": 22.7645,
+      "lon": -82.9938,
       "url": "https://xeno-canto.org/995959/download",
       "source": "https://xeno-canto.org/995959",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -609,6 +721,8 @@
         "Zenaida asiatica"
       ],
       "date": "2025-04-20",
+      "lat": 22.4208,
+      "lon": -81.4475,
       "url": "https://xeno-canto.org/995957/download",
       "source": "https://xeno-canto.org/995957",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -625,6 +739,8 @@
         "Callipepla gambelii"
       ],
       "date": "2023-06-16",
+      "lat": 32.2266,
+      "lon": -111.1472,
       "url": "https://xeno-canto.org/940517/download",
       "source": "https://xeno-canto.org/940517",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -635,6 +751,8 @@
       "species": "Zenaida macroura",
       "also": [],
       "date": "2023-06-03",
+      "lat": 32.7073,
+      "lon": -116.5139,
       "url": "https://xeno-canto.org/807126/download",
       "source": "https://xeno-canto.org/807126",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -645,6 +763,8 @@
       "species": "Zenaida macroura",
       "also": [],
       "date": "2022-01-09",
+      "lat": 17.1583,
+      "lon": -96.7624,
       "url": "https://xeno-canto.org/696289/download",
       "source": "https://xeno-canto.org/696289",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -655,6 +775,8 @@
       "species": "Dryobates pubescens",
       "also": [],
       "date": "2025-08-27",
+      "lat": 41.0149,
+      "lon": -73.809,
       "url": "https://xeno-canto.org/1033504/download",
       "source": "https://xeno-canto.org/1033504",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -665,6 +787,8 @@
       "species": "Dryobates pubescens",
       "also": [],
       "date": "2013-03-10",
+      "lat": 40.141,
+      "lon": -75.082,
       "url": "https://xeno-canto.org/772367/download",
       "source": "https://xeno-canto.org/772367",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -675,6 +799,8 @@
       "species": "Dryobates pubescens",
       "also": [],
       "date": "2013-03-10",
+      "lat": 40.141,
+      "lon": -75.082,
       "url": "https://xeno-canto.org/772366/download",
       "source": "https://xeno-canto.org/772366",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -685,6 +811,8 @@
       "species": "Dryobates pubescens",
       "also": [],
       "date": "2008-04-19",
+      "lat": 40.141,
+      "lon": -75.082,
       "url": "https://xeno-canto.org/772365/download",
       "source": "https://xeno-canto.org/772365",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -695,6 +823,8 @@
       "species": "Dryobates pubescens",
       "also": [],
       "date": "2008-04-19",
+      "lat": 40.141,
+      "lon": -75.082,
       "url": "https://xeno-canto.org/772363/download",
       "source": "https://xeno-canto.org/772363",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -709,6 +839,8 @@
         "Sayornis phoebe"
       ],
       "date": "2021-04-07",
+      "lat": 42.4655,
+      "lon": -76.4292,
       "url": "https://xeno-canto.org/638325/download",
       "source": "https://xeno-canto.org/638325",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -722,6 +854,8 @@
         "Thryothorus ludovicianus"
       ],
       "date": "2019-05-07",
+      "lat": 40.6946,
+      "lon": -74.5206,
       "url": "https://xeno-canto.org/471315/download",
       "source": "https://xeno-canto.org/471315",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -734,6 +868,8 @@
         "Poecile carolinensis"
       ],
       "date": "2017-01-15",
+      "lat": 40.0975,
+      "lon": -75.4497,
       "url": "https://xeno-canto.org/360972/download",
       "source": "https://xeno-canto.org/360972",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -744,6 +880,8 @@
       "species": "Melanerpes carolinus",
       "also": [],
       "date": "2017-01-15",
+      "lat": 40.0975,
+      "lon": -75.4497,
       "url": "https://xeno-canto.org/360971/download",
       "source": "https://xeno-canto.org/360971",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -754,6 +892,8 @@
       "species": "Melanerpes carolinus",
       "also": [],
       "date": "2017-01-15",
+      "lat": 40.0975,
+      "lon": -75.4497,
       "url": "https://xeno-canto.org/360970/download",
       "source": "https://xeno-canto.org/360970",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -764,6 +904,8 @@
       "species": "Spinus tristis",
       "also": [],
       "date": "2025-08-31",
+      "lat": 41.2482,
+      "lon": -73.5917,
       "url": "https://xeno-canto.org/1034479/download",
       "source": "https://xeno-canto.org/1034479",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -776,6 +918,8 @@
         "Cyanocitta cristata"
       ],
       "date": "2025-08-27",
+      "lat": 41.0149,
+      "lon": -73.809,
       "url": "https://xeno-canto.org/1033751/download",
       "source": "https://xeno-canto.org/1033751",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -786,6 +930,8 @@
       "species": "Spinus tristis",
       "also": [],
       "date": "2025-08-27",
+      "lat": 41.0149,
+      "lon": -73.809,
       "url": "https://xeno-canto.org/1033750/download",
       "source": "https://xeno-canto.org/1033750",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -798,6 +944,8 @@
         "Cyanocitta cristata"
       ],
       "date": "2020-05-01",
+      "lat": 40.7124,
+      "lon": -74.4871,
       "url": "https://xeno-canto.org/552887/download",
       "source": "https://xeno-canto.org/552887",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -810,6 +958,8 @@
         "Turdus migratorius"
       ],
       "date": "2020-04-30",
+      "lat": 40.6052,
+      "lon": -74.2495,
       "url": "https://xeno-canto.org/552440/download",
       "source": "https://xeno-canto.org/552440",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -820,6 +970,8 @@
       "species": "Quiscalus quiscula",
       "also": [],
       "date": "2025-06-03",
+      "lat": 40.9658,
+      "lon": -73.6739,
       "url": "https://xeno-canto.org/1004464/download",
       "source": "https://xeno-canto.org/1004464",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -830,6 +982,8 @@
       "species": "Quiscalus quiscula",
       "also": [],
       "date": "2023-03-18",
+      "lat": 40.1275,
+      "lon": -75.073,
       "url": "https://xeno-canto.org/786673/download",
       "source": "https://xeno-canto.org/786673",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -840,6 +994,8 @@
       "species": "Quiscalus quiscula",
       "also": [],
       "date": "2023-03-18",
+      "lat": 40.1275,
+      "lon": -75.073,
       "url": "https://xeno-canto.org/786672/download",
       "source": "https://xeno-canto.org/786672",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -850,6 +1006,8 @@
       "species": "Quiscalus quiscula",
       "also": [],
       "date": "2011-03-26",
+      "lat": 40.1226,
+      "lon": -75.0635,
       "url": "https://xeno-canto.org/786561/download",
       "source": "https://xeno-canto.org/786561",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -860,6 +1018,8 @@
       "species": "Quiscalus quiscula",
       "also": [],
       "date": "2013-03-24",
+      "lat": 40.1226,
+      "lon": -75.0635,
       "url": "https://xeno-canto.org/786560/download",
       "source": "https://xeno-canto.org/786560",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -870,6 +1030,8 @@
       "species": "Agelaius phoeniceus",
       "also": [],
       "date": "2025-06-08",
+      "lat": 41.2482,
+      "lon": -73.5917,
       "url": "https://xeno-canto.org/1006769/download",
       "source": "https://xeno-canto.org/1006769",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -880,6 +1042,8 @@
       "species": "Agelaius phoeniceus",
       "also": [],
       "date": "2025-06-08",
+      "lat": 41.2482,
+      "lon": -73.5917,
       "url": "https://xeno-canto.org/1006768/download",
       "source": "https://xeno-canto.org/1006768",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -890,6 +1054,8 @@
       "species": "Agelaius phoeniceus",
       "also": [],
       "date": "2025-06-03",
+      "lat": 40.9658,
+      "lon": -73.6739,
       "url": "https://xeno-canto.org/1004470/download",
       "source": "https://xeno-canto.org/1004470",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -900,6 +1066,8 @@
       "species": "Agelaius phoeniceus",
       "also": [],
       "date": "2021-04-14",
+      "lat": 40.6052,
+      "lon": -74.2495,
       "url": "https://xeno-canto.org/638938/download",
       "source": "https://xeno-canto.org/638938",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -910,6 +1078,8 @@
       "species": "Agelaius phoeniceus",
       "also": [],
       "date": "2021-04-09",
+      "lat": 40.5874,
+      "lon": -74.2621,
       "url": "https://xeno-canto.org/637360/download",
       "source": "https://xeno-canto.org/637360",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -920,6 +1090,8 @@
       "species": "Junco hyemalis",
       "also": [],
       "date": "2025-06-23",
+      "lat": 42.3005,
+      "lon": -72.5877,
       "url": "https://xeno-canto.org/1038383/download",
       "source": "https://xeno-canto.org/1038383",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -933,6 +1105,8 @@
         "Dryocopus pileatus"
       ],
       "date": "2020-06-05",
+      "lat": 42.3149,
+      "lon": -76.4951,
       "url": "https://xeno-canto.org/567901/download",
       "source": "https://xeno-canto.org/567901",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -946,6 +1120,8 @@
         "Pipilo erythrophthalmus"
       ],
       "date": "2016-07-19",
+      "lat": 41.5151,
+      "lon": -75.5416,
       "url": "https://xeno-canto.org/327747/download",
       "source": "https://xeno-canto.org/327747",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -956,6 +1132,8 @@
       "species": "Junco hyemalis",
       "also": [],
       "date": "2011-02-20",
+      "lat": 40.0626,
+      "lon": -75.1254,
       "url": "https://xeno-canto.org/72923/download",
       "source": "https://xeno-canto.org/72923",
       "license": "https://creativecommons.org/licenses/by-nc-nd/2.5/"
@@ -966,6 +1144,8 @@
       "species": "Junco hyemalis",
       "also": [],
       "date": "2026-08-18",
+      "lat": 48.1549,
+      "lon": -123.6885,
       "url": "https://xeno-canto.org/1186354/download",
       "source": "https://xeno-canto.org/1186354",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -976,6 +1156,8 @@
       "species": "Setophaga caerulescens",
       "also": [],
       "date": "2025-06-21",
+      "lat": 42.412,
+      "lon": -72.7249,
       "url": "https://xeno-canto.org/1038362/download",
       "source": "https://xeno-canto.org/1038362",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -986,6 +1168,8 @@
       "species": "Setophaga caerulescens",
       "also": [],
       "date": "2025-06-21",
+      "lat": 42.412,
+      "lon": -72.7249,
       "url": "https://xeno-canto.org/1038360/download",
       "source": "https://xeno-canto.org/1038360",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -996,6 +1180,8 @@
       "species": "Setophaga caerulescens",
       "also": [],
       "date": "2025-06-15",
+      "lat": 42.412,
+      "lon": -72.7249,
       "url": "https://xeno-canto.org/1037299/download",
       "source": "https://xeno-canto.org/1037299",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -1010,6 +1196,8 @@
         "Seiurus aurocapilla"
       ],
       "date": "2021-05-26",
+      "lat": 42.3005,
+      "lon": -72.5877,
       "url": "https://xeno-canto.org/690996/download",
       "source": "https://xeno-canto.org/690996",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -1024,6 +1212,8 @@
         "Seiurus aurocapilla"
       ],
       "date": "2020-05-07",
+      "lat": 40.6052,
+      "lon": -74.2495,
       "url": "https://xeno-canto.org/555000/download",
       "source": "https://xeno-canto.org/555000",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -1034,6 +1224,8 @@
       "species": "Setophaga coronata",
       "also": [],
       "date": "2022-02-11",
+      "lat": 40.451,
+      "lon": -73.996,
       "url": "https://xeno-canto.org/701682/download",
       "source": "https://xeno-canto.org/701682",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -1044,6 +1236,8 @@
       "species": "Setophaga coronata",
       "also": [],
       "date": "2000-05-17",
+      "lat": 40.7124,
+      "lon": -74.4871,
       "url": "https://xeno-canto.org/469599/download",
       "source": "https://xeno-canto.org/469599",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -1054,6 +1248,8 @@
       "species": "Setophaga coronata",
       "also": [],
       "date": "2019-01-04",
+      "lat": 39.5724,
+      "lon": -74.3439,
       "url": "https://xeno-canto.org/448725/download",
       "source": "https://xeno-canto.org/448725",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -1064,6 +1260,8 @@
       "species": "Setophaga coronata",
       "also": [],
       "date": "2018-05-04",
+      "lat": 42.268,
+      "lon": -73.181,
       "url": "https://xeno-canto.org/415419/download",
       "source": "https://xeno-canto.org/415419",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -1074,6 +1272,8 @@
       "species": "Setophaga coronata",
       "also": [],
       "date": "2010-10-24",
+      "lat": 40.12261,
+      "lon": -75.0635,
       "url": "https://xeno-canto.org/69913/download",
       "source": "https://xeno-canto.org/69913",
       "license": "https://creativecommons.org/licenses/by-nc-nd/2.5/"
@@ -1084,6 +1284,8 @@
       "species": "Buteo jamaicensis",
       "also": [],
       "date": "2025-08-29",
+      "lat": 41.0149,
+      "lon": -73.809,
       "url": "https://xeno-canto.org/1033919/download",
       "source": "https://xeno-canto.org/1033919",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -1094,6 +1296,8 @@
       "species": "Buteo jamaicensis",
       "also": [],
       "date": "2021-07-25",
+      "lat": 40.6083,
+      "lon": -74.3452,
       "url": "https://xeno-canto.org/664881/download",
       "source": "https://xeno-canto.org/664881",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -1106,6 +1310,8 @@
         "Toxostoma crissale"
       ],
       "date": "2023-12-05",
+      "lat": 31.34,
+      "lon": -109.273,
       "url": "https://xeno-canto.org/973862/download",
       "source": "https://xeno-canto.org/973862",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -1118,6 +1324,8 @@
         "Zonotrichia leucophrys"
       ],
       "date": "2024-01-31",
+      "lat": 31.34,
+      "lon": -109.273,
       "url": "https://xeno-canto.org/973857/download",
       "source": "https://xeno-canto.org/973857",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -1128,6 +1336,8 @@
       "species": "Buteo jamaicensis",
       "also": [],
       "date": "2024-01-31",
+      "lat": 31.34,
+      "lon": -109.273,
       "url": "https://xeno-canto.org/973856/download",
       "source": "https://xeno-canto.org/973856",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -1138,6 +1348,8 @@
       "species": "Poecile atricapillus",
       "also": [],
       "date": "2025-09-01",
+      "lat": 41.2279,
+      "lon": -73.914,
       "url": "https://xeno-canto.org/1035996/download",
       "source": "https://xeno-canto.org/1035996",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -1148,6 +1360,8 @@
       "species": "Poecile atricapillus",
       "also": [],
       "date": "2025-04-28",
+      "lat": 41.0149,
+      "lon": -73.809,
       "url": "https://xeno-canto.org/994313/download",
       "source": "https://xeno-canto.org/994313",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -1158,6 +1372,8 @@
       "species": "Poecile atricapillus",
       "also": [],
       "date": "2021-01-06",
+      "lat": 40.6041,
+      "lon": -74.2519,
       "url": "https://xeno-canto.org/613338/download",
       "source": "https://xeno-canto.org/613338",
       "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
@@ -1168,6 +1384,8 @@
       "species": "Poecile atricapillus",
       "also": [],
       "date": "2023-02-26",
+      "lat": 46.3137,
+      "lon": -62.6045,
       "url": "https://xeno-canto.org/1185403/download",
       "source": "https://xeno-canto.org/1185403",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -1178,6 +1396,8 @@
       "species": "Poecile atricapillus",
       "also": [],
       "date": "2025-12-10",
+      "lat": 57.821,
+      "lon": -152.3604,
       "url": "https://xeno-canto.org/1095084/download",
       "source": "https://xeno-canto.org/1095084",
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"

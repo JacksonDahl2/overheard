@@ -1,0 +1,3 @@
+// Shared signing settings. Your team ID goes in Local.xcconfig (gitignored):
+//   cp Config/Local.xcconfig.example Config/Local.xcconfig
+#include? "Local.xcconfig"

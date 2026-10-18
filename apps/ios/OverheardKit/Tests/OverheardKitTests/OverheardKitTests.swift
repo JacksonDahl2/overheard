@@ -2,7 +2,7 @@ import XCTest
 
 @testable import OverheardKit
 
-final class OverheardKitTests: XCTestCase {
+final class AudioAndCalendarTests: XCTestCase {
     func testBirdNETWeek() {
         let cal = Calendar(identifier: .gregorian)
         func week(_ month: Int, _ day: Int) -> Int {
@@ -33,38 +33,105 @@ final class OverheardKitTests: XCTestCase {
 }
 
 final class SpeciesFilterTests: XCTestCase {
-    // Labels 0–2 are birds, 3 is "Engine". Label 2 isn't expected in October.
-    let filter = SpeciesFilter(nonBird: [3], weeks: [39: [0, 1, 3]])
-    let october = SpeciesFilter.birdNETWeek(for: Date(timeIntervalSince1970: 1_792_350_000))  // 2026-10-18
+    // Labels 0–2 are birds, 3 is "Engine". Here, label 2 is unlikely (below the 0.03 cutoff).
+    let filter = SpeciesFilter(nonBird: [3])
+    let local = LocalSpecies(
+        place: Place(latitude: 40.78, longitude: -73.97, week: 39), occurrence: [0.9, 0.05, 0.01, 0.5])
 
     func testNonBirdsAreNeverReported() {
         for rules in [DetectionRules(useLocationFilter: true), DetectionRules(useLocationFilter: false)] {
-            XCTAssertFalse(filter.isReportable(3, confidence: 0.99, expected: filter.weeks[39], rules: rules))
+            XCTAssertFalse(filter.isReportable(3, confidence: 0.99, local: local, rules: rules))
+            XCTAssertFalse(filter.isReportable(3, confidence: 0.99, local: nil, rules: rules))
         }
     }
 
     func testConfidenceThreshold() {
         let rules = DetectionRules(minConfidence: 0.5)
-        XCTAssertTrue(filter.isReportable(0, confidence: 0.5, expected: filter.weeks[39], rules: rules))
-        XCTAssertFalse(filter.isReportable(0, confidence: 0.49, expected: filter.weeks[39], rules: rules))
+        XCTAssertTrue(filter.isReportable(0, confidence: 0.5, local: local, rules: rules))
+        XCTAssertFalse(filter.isReportable(0, confidence: 0.49, local: local, rules: rules))
     }
 
     func testLocationFilter() {
-        let expected = filter.weeks[39]
-        XCTAssertFalse(filter.isReportable(2, confidence: 0.9, expected: expected, rules: DetectionRules()))
+        XCTAssertTrue(filter.isReportable(1, confidence: 0.9, local: local, rules: DetectionRules()))
+        XCTAssertFalse(filter.isReportable(2, confidence: 0.9, local: local, rules: DetectionRules()))
         XCTAssertTrue(
-            filter.isReportable(2, confidence: 0.9, expected: expected, rules: DetectionRules(useLocationFilter: false))
-        )
+            filter.isReportable(2, confidence: 0.9, local: local, rules: DetectionRules(useLocationFilter: false)))
     }
 
-    func testMissingWeekDoesNotFilter() {
-        // No table for this week: fall back to reporting by confidence alone.
-        XCTAssertTrue(filter.isReportable(2, confidence: 0.9, expected: nil, rules: DetectionRules()))
+    func testUnknownLocationDoesNotFilterByPlace() {
+        XCTAssertTrue(filter.isReportable(2, confidence: 0.9, local: nil, rules: DetectionRules()))
+    }
+}
+
+final class PlaceTests: XCTestCase {
+    let centralPark = Place(latitude: 40.7812, longitude: -73.9665, week: 39)
+
+    func testDistance() {
+        let prospectPark = Place(latitude: 40.6602, longitude: -73.9690, week: 39)
+        XCTAssertEqual(centralPark.distance(to: prospectPark), 13.4, accuracy: 0.3)
+        XCTAssertEqual(centralPark.distance(to: centralPark), 0, accuracy: 1e-9)
     }
 
-    func testExpectedSpeciesUsesBirdNETWeek() {
-        XCTAssertEqual(october, 39)
-        XCTAssertEqual(
-            filter.expectedSpecies(on: Date(timeIntervalSince1970: 1_792_350_000)), [0, 1, 3])
+    func testLocalSpeciesRecomputeRules() {
+        let local = LocalSpecies(place: centralPark, occurrence: [])
+        let nearby = Place(latitude: 40.80, longitude: -73.95, week: 39)  // ~2.5 km
+        let brooklyn = Place(latitude: 40.66, longitude: -73.97, week: 39)  // ~13 km
+        let nextWeek = Place(latitude: centralPark.latitude, longitude: centralPark.longitude, week: 40)
+        XCTAssertTrue(local.covers(nearby))
+        XCTAssertFalse(local.covers(brooklyn))
+        XCTAssertFalse(local.covers(nextWeek))
+    }
+}
+
+final class DetectionSessionTests: XCTestCase {
+    let cardinal = Species(code: "norcar", commonName: "Northern Cardinal", scientificName: "C. c.", isBird: true)
+    let jay = Species(code: "blujay", commonName: "Blue Jay", scientificName: "C. c.", isBird: true)
+    let t0 = Date(timeIntervalSince1970: 0)
+
+    func testTalliesCallsAndConfidence() {
+        var session = DetectionSession()
+        session.record([BirdScore(index: 1, species: cardinal, confidence: 0.6)], at: t0)
+        session.record(
+            [
+                BirdScore(index: 1, species: cardinal, confidence: 0.9),
+                BirdScore(index: 2, species: jay, confidence: 0.7),
+            ], at: t0.addingTimeInterval(3))
+        let cardinalTally = session.byCode["norcar"]!
+        XCTAssertEqual(cardinalTally.calls, 2)
+        XCTAssertEqual(cardinalTally.bestConfidence, 0.9)
+        XCTAssertEqual(cardinalTally.firstHeard, t0)
+        XCTAssertEqual(cardinalTally.lastHeard, t0.addingTimeInterval(3))
+        XCTAssertEqual(session.birds.map(\.id), ["norcar", "blujay"])  // most calls first
+    }
+
+    func testLumpedLabelsCountOncePerClip() {
+        var session = DetectionSession()
+        // Two BirdNET labels that eBird now treats as one species share a code.
+        session.record(
+            [
+                BirdScore(index: 7, species: cardinal, confidence: 0.6),
+                BirdScore(index: 8, species: cardinal, confidence: 0.8),
+            ], at: t0)
+        XCTAssertEqual(session.byCode["norcar"]?.calls, 1)
+        XCTAssertEqual(session.byCode["norcar"]?.bestConfidence, 0.8)
+    }
+
+    func testOrderingTiesBreakByFirstHeard() {
+        var session = DetectionSession()
+        session.record([BirdScore(index: 2, species: jay, confidence: 0.7)], at: t0)
+        session.record([BirdScore(index: 1, species: cardinal, confidence: 0.7)], at: t0.addingTimeInterval(3))
+        XCTAssertEqual(session.birds.map(\.id), ["blujay", "norcar"])
+    }
+}
+
+final class SpeciesCatalogTests: XCTestCase {
+    func testNonBirdsComeFromCatalog() {
+        let catalog = SpeciesCatalog(species: [
+            Species(
+                code: "norcar", commonName: "Northern Cardinal", scientificName: "Cardinalis cardinalis", isBird: true),
+            Species(code: "birdnet:Siren", commonName: "Siren", scientificName: "Siren", isBird: false),
+        ])
+        XCTAssertEqual(catalog.nonBird, [1])
+        XCTAssertEqual(catalog.indices(scientificName: "Cardinalis cardinalis"), [0])
     }
 }

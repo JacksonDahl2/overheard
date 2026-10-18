@@ -3,49 +3,48 @@ import Foundation
 
 /// One species BirdNET scored in a clip.
 public struct BirdScore: Hashable, Sendable {
+    /// BirdNET output index. Only meaningful inside the pipeline; store `species.code`.
     public let index: Int
-    public let commonName: String
-    public let scientificName: String
+    public let species: Species
     public let confidence: Float
+
+    public init(index: Int, species: Species, confidence: Float) {
+        self.index = index
+        self.species = species
+        self.confidence = confidence
+    }
 }
 
-/// Runs the BirdNET v2.4 Core ML model on 3 s clips and applies `SpeciesFilter`.
+/// Runs the BirdNET v2.4 Core ML audio model on 3 s clips and applies `SpeciesFilter`.
 public final class BirdClassifier {
     public static let sampleRate: Double = 48_000
     public static let clipLength = 144_000  // 3 s
 
-    public let labels: [(scientific: String, common: String)]
+    public let catalog: SpeciesCatalog
     public let filter: SpeciesFilter
     private let model: MLModel
 
     /// - Parameters:
     ///   - modelURL: a compiled model (`.mlmodelc`).
-    ///   - labelsURL: BirdNET `labels.txt` (`Scientific_Common` per line, index = output index).
-    ///   - filter: which labels may be reported.
-    public init(modelURL: URL, labelsURL: URL, filter: SpeciesFilter) throws {
+    ///   - catalog: species for each output index (`species.json`).
+    public init(modelURL: URL, catalog: SpeciesCatalog) throws {
         let config = MLModelConfiguration()
         config.computeUnits = .all
         model = try MLModel(contentsOf: modelURL, configuration: config)
-        self.filter = filter
-        labels = try String(contentsOf: labelsURL, encoding: .utf8)
-            .split(separator: "\n", omittingEmptySubsequences: false)
-            .map { line in
-                let parts = line.split(separator: "_", maxSplits: 1).map(String.init)
-                return (parts.first ?? "", parts.count > 1 ? parts[1] : (parts.first ?? ""))
-            }
+        self.catalog = catalog
+        filter = SpeciesFilter(catalog: catalog)
     }
 
     /// Scores a clip and returns the reportable birds, best first.
-    public func classify(_ clip: [Float], date: Date, rules: DetectionRules) throws -> [BirdScore] {
-        let confidences = try confidences(for: clip)
-        let expected = filter.expectedSpecies(on: date)
-        return confidences.enumerated()
-            .filter { filter.isReportable($0.offset, confidence: $0.element, expected: expected, rules: rules) }
-            .map {
-                BirdScore(
-                    index: $0.offset, commonName: labels[$0.offset].common,
-                    scientificName: labels[$0.offset].scientific, confidence: $0.element)
-            }
+    public func classify(_ clip: [Float], local: LocalSpecies?, rules: DetectionRules) throws -> [BirdScore] {
+        try reportable(confidences(for: clip), local: local, rules: rules)
+    }
+
+    /// The reportable birds among per-label confidences, best first.
+    public func reportable(_ confidences: [Float], local: LocalSpecies?, rules: DetectionRules) -> [BirdScore] {
+        confidences.enumerated()
+            .filter { filter.isReportable($0.offset, confidence: $0.element, local: local, rules: rules) }
+            .map { BirdScore(index: $0.offset, species: catalog[$0.offset], confidence: $0.element) }
             .sorted { $0.confidence > $1.confidence }
     }
 
@@ -62,7 +61,7 @@ public final class BirdClassifier {
             throw ClassifierError.badOutput
         }
         return logits.withUnsafeBufferPointer(ofType: Float.self) { values in
-            (0..<min(values.count, labels.count)).map { Self.sigmoid(values[$0]) }
+            (0..<min(values.count, catalog.count)).map { Self.sigmoid(values[$0]) }
         }
     }
 

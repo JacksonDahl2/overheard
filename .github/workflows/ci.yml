@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ios:
+    name: iOS build + OverheardKit tests
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      # The models are ~100 MB in Git LFS. Cache them so CI doesn't spend the LFS
+      # bandwidth quota on every run.
+      - name: List LFS objects
+        run: git lfs ls-files --long | cut -d ' ' -f1 | sort > .lfs-ids
+      - uses: actions/cache@v4
+        with:
+          path: .git/lfs
+          key: lfs-${{ hashFiles('.lfs-ids') }}
+      - name: Pull LFS models
+        run: git lfs pull
+
+      - name: OverheardKit unit tests
+        run: swift test --package-path apps/ios/OverheardKit
+
+      - name: Build the app (no signing)
+        run: |
+          brew install xcodegen
+          cd apps/ios
+          xcodegen
+          xcodebuild -project Overheard.xcodeproj -scheme Overheard \
+            -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build | tail -20
+
+  python:
+    name: Python lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pipx run ruff==0.17.1 check ml
+      - run: pipx run ruff==0.17.1 format --check ml

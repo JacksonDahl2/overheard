@@ -4,7 +4,8 @@ node_modules/
 .DS_Store
 art/model-comparison/out/
 art/model-comparison/page/img/
-ml/models/
+ml/models/*
+!ml/models/coreml/
 .venv/
 apps/ios/Overheard.xcodeproj/
 apps/ios/Overheard/Info.plist
@@ -12,3 +13,5 @@ xcuserdata/
 ml/eval/audio/
 .build/
 .vscode/launch.json
+apps/ios/Config/Local.xcconfig
+buildServer.json

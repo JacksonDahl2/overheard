@@ -45,10 +45,18 @@ Goal: prove the core experience works in Central Park.
 - [x] Audio capture with `AVAudioEngine` (3s windows, resampled to 48kHz)
 - [x] Convert BirdNET → Core ML and bundle it (`ml/convert.py`; verified vs TensorFlow)
 - [x] Run inference on audio windows; confidence threshold (smoothing: see detection-quality plan) — ~21 ms/clip on iPhone 17 Pro
-- [ ] BirdNET location/week filter using CoreLocation — spike uses a precomputed Central Park table (`ml/species_list.py`); fix meta-model Core ML conversion or precompute a grid
+- [x] BirdNET location/week filter using CoreLocation — location model converted to Core ML and runs on device (any location; approximate location is enough); recomputes on ~10 km move or new week
 - [x] Noise gating (skip inference on quiet windows) — threshold needs field tuning
 - [x] Handle interruptions (calls, Siri, other audio) and resume — basic; verify on device
 - [x] Background audio mode so a walk keeps listening with the screen locked — verify on device
+- [x] **Architecture fixes** (2026-10-18 review):
+  - [x] Stable species IDs: eBird codes via `species.json`; HeardBird keyed by code
+  - [x] `DetectionSession` (pure, tested) + `ListeningPipeline` actor; no `DispatchQueue.main.sync`; Swift 6 strict mode
+  - [x] Eval plays recordings through `DetectionSession`, uses each recording's real location, streams audio
+  - [x] Audio route changes / media-services reset handled; tap buffers copied before leaving the callback
+  - [x] Built models in Git LFS (no TensorFlow needed to build); CI (tests, unsigned build, Ruff)
+  - [x] FP16 evaluated and rejected (confidence shifts up to ±0.17)
+  - [x] Signing team in gitignored `Config/Local.xcconfig`; BirdNET credits in the app
 - [ ] **Detection-quality plan** (do in this order; measure every step with the harness):
   1. [x] Eval harness (bird recordings pending xeno-canto key): labeled NYC recordings (xeno-canto) + no-bird noise clips → run the app's own Swift pipeline on the Mac → precision/recall report
   2. [x] Non-bird labels (Human vocal, Engine, Dog, Siren, Fireworks…) excluded from the tally always
@@ -58,7 +66,7 @@ Goal: prove the core experience works in Central Park.
   6. [ ] Adaptive noise gate (relative to recent noise floor) instead of a fixed RMS cutoff
 - [ ] "Start walk" / "End walk" flow with live detection list
 - [ ] Record walk route (CoreLocation) and show on MapKit
-- [ ] Persist walks + detections locally with SwiftData
+- [ ] Persist walks + detections locally with SwiftData — save continuously during a walk (iOS can kill the app mid-walk); store species by `Species.code`
 - [ ] Placeholder art for ~50 NYC-area species
 - [ ] Journal page view: collage of birds heard on a walk + date/time/map
 - [ ] Prototype a "being sketched" reveal animation when a new bird is heard

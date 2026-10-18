@@ -116,6 +116,8 @@ def build_birds(key):
                     "species": name,
                     "also": [a for a in r.get("also", []) if a],
                     "date": r.get("date") or None,
+                    "lat": float(r["lat"]) if r.get("lat") else None,
+                    "lon": float(r["lon"]) if r.get("lon") else None,
                     "url": r["file"],
                     "source": f"https://xeno-canto.org/{r['id']}",
                     "license": r.get("lic", ""),

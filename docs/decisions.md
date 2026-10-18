@@ -47,3 +47,19 @@ A dated log of what we decided and why. Newest at the bottom. To change a decisi
   - App-level logic (walk flow, SwiftData, UI state) gets tests once it exists.
   - *Why:* the user wants tests once there's real logic and interactivity, and putting the logic in the package makes that cheap.
 - **Non-bird labels:** BirdNET's 101 non-bird classes (sounds, frogs, insects, mammals) are never reported. They're identified by matching against the eBird taxonomy (`ml/bird_labels.py`).
+
+## 2026-10-18 (architecture review)
+
+- **Location filter works anywhere.**
+  - BirdNET's location model runs on the phone as Core ML. `convert.py` rebuilds its input-encoding layer so it converts, and the rebuild matches the original within 2e-5.
+  - The app uses approximate location: once at start, again after a ~10 km move or a new week. Without location permission it falls back to no location filter, with non-birds still blocked.
+  - Occurrence scores are kept for rarity later.
+  - *Replaces* the precomputed Central Park table.
+- **Species are identified by stable codes:** eBird species codes (`norcar`), or `birdnet:<scientific>` for 32 renamed birds. They come from `species.json`, which `bird_labels.py` builds. Model indices never leave the classifier.
+  - *Why:* indices change between BirdNET versions. Saved walks, life lists, the backend and art all need a stable key.
+- **Pipeline as an actor:** `ListeningPipeline` (OverheardKit) owns the models, the location state and `DetectionSession`. The UI only sends clips and receives updates. **Swift 6 strict concurrency** is on for the app and the package.
+- **Models stay FP32.** FP16, even mixed with the spectrogram at FP32, shifted confidences by up to ±0.17 to save about 35 MB. The app is about 104 MB.
+- **Built models live in Git LFS** (`ml/models/coreml`), with CC BY-NC-SA attribution. A fresh clone and CI build without TensorFlow. CI caches LFS objects to stay under GitHub's 1 GB/month free bandwidth.
+  - *Replaces:* "model files are gitignored."
+- **CI:** GitHub Actions runs OverheardKit tests, an unsigned iOS build (macOS 15 runner), and Ruff.
+- **Signing:** the team ID lives in gitignored `apps/ios/Config/Local.xcconfig`, not in `project.yml`.

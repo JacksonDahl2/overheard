@@ -60,4 +60,21 @@ This stands in for a walk next to traffic and people. `--no-mix` skips it, and `
 - **Filter off at 0.50:** precision 57.7% → **62.1%**, with recall unchanged.
 - **Filter on:** unchanged, because the Central Park table already excluded non-birds.
 
+### After the architecture fixes: real locations
+
+The location filter now uses BirdNET's location model at each recording's own coordinates and date, like the app, instead of a fixed Central Park table. Recordings also play through `DetectionSession`, the app's tally logic.
+
+| Condition | Threshold | Recall | Precision | False/bird-file |
+|---|---|---|---|---|
+| clean, filter off | 0.50 | 81.8% | 62.1% | 0.50 |
+| clean | 0.50 | 81.8% | 76.3% | 0.25 |
+| clean | 0.65 | 76.4% | 85.7% | 0.13 |
+| clean | 0.80 | 62.7% | 90.8% | 0.06 |
+| 0 dB city noise | 0.50 | 74.5% | 81.2% | 0.17 |
+| −5 dB city noise | 0.50 | 71.8% | 84.0% | 0.11 |
+
+- **Recall** rose slightly (80.9% → 81.8%), because birds outside Central Park's list are no longer wrongly dropped.
+- **Precision** fell (80.9% → 76.3%), because the real-location expected lists are broader than the strict Central Park table, so more lookalikes get through. Steps 4–5 of the detection plan (confirmation, likelihood-scaled thresholds) target this.
+- **Memory:** the eval now streams one recording at a time, with a peak of about 300 MB.
+
 - **Caveat:** xeno-canto is probably part of BirdNET's training data, so these numbers are likely optimistic. Real park audio is harder.

@@ -1,0 +1,2 @@
+# BirdNET Core ML models (~100 MB): stored in Git LFS so the app builds without the TensorFlow pipeline.
+ml/models/coreml/*.mlpackage/** filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,7 @@
+{
+  "include": ["ml"],
+  "exclude": ["ml/.venv", "ml/models", "**/__pycache__"],
+  "pythonVersion": "3.11",
+  "venv": ".venv",
+  "venvPath": "ml"
+}

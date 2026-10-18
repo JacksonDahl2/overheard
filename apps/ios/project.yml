@@ -1,0 +1,39 @@
+# Generate the Xcode project with:  cd apps/ios && xcodegen
+# The BirdNET files come from ml/ (gitignored); see apps/ios/README.md.
+name: Overheard
+options:
+  bundleIdPrefix: app.overheardbirds
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  Overheard:
+    type: application
+    platform: iOS
+    sources:
+      - path: Overheard
+      - path: ../../ml/models/coreml/BirdNETAudio.mlpackage
+      - path: ../../ml/models/coreml/labels.txt
+        buildPhase: resources
+      - path: ../../ml/models/coreml/species-central-park.json
+        buildPhase: resources
+    info:
+      path: Overheard/Info.plist
+      properties:
+        CFBundleDisplayName: Overheard
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIBackgroundModes: [audio]
+        NSMicrophoneUsageDescription: Overheard listens for birdsong during your walk. Audio is analyzed on your phone and never uploaded.
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.overheardbirds.Overheard
+        DEVELOPMENT_TEAM: N7D5AJD95N  # Personal Team (free signing)
+        CODE_SIGN_STYLE: Automatic
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: NO

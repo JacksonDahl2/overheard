@@ -40,15 +40,18 @@ Inspired by [AvianVisitors](https://theodore.net/projects/AvianVisitors/).
 
 Goal: prove the core experience works in Central Park.
 
-- [ ] Create Xcode project (SwiftUI) under `apps/ios/`
-- [ ] Mic permission + `AVAudioSession` setup
-- [ ] Audio capture with `AVAudioEngine` (3s windows, 48kHz as BirdNET expects)
-- [ ] Convert BirdNET TFLite model → Core ML (or run via TFLite) and bundle it
-- [ ] Run inference on audio windows; confidence threshold + smoothing
-- [ ] BirdNET location/week filter using CoreLocation
-- [ ] Noise gating (skip inference on quiet windows to save battery)
-- [ ] Handle interruptions (calls, Siri, other audio) and resume
-- [ ] Background audio mode so a walk keeps listening with the screen locked
+- [x] Create Xcode project (SwiftUI) under `apps/ios/` (XcodeGen `project.yml`; spike UI)
+- [x] Mic permission + `AVAudioSession` setup (`.record` / `.measurement` mode)
+- [x] Audio capture with `AVAudioEngine` (3s windows, resampled to 48kHz)
+- [x] Convert BirdNET → Core ML and bundle it (`ml/convert.py`; verified vs TensorFlow)
+- [x] Run inference on audio windows; confidence threshold (smoothing still TODO) — ~21 ms/clip on iPhone 17 Pro
+- [ ] Overlapping windows (e.g. 1 s hop) so birds appear faster; cheap given ~21 ms inference
+- [ ] BirdNET location/week filter using CoreLocation — spike uses a precomputed Central Park table (`ml/species_list.py`); fix meta-model Core ML conversion or precompute a grid
+- [ ] Tune location-filter threshold for migrants (0.03 drops Black-throated Blue Warbler in mid-Oct)
+- [ ] Ignore non-bird labels (Engine, Human vocal, Dog, Siren…) when the filter is off
+- [x] Noise gating (skip inference on quiet windows) — threshold needs field tuning
+- [x] Handle interruptions (calls, Siri, other audio) and resume — basic; verify on device
+- [x] Background audio mode so a walk keeps listening with the screen locked — verify on device
 - [ ] "Start walk" / "End walk" flow with live detection list
 - [ ] Record walk route (CoreLocation) and show on MapKit
 - [ ] Persist walks + detections locally with SwiftData

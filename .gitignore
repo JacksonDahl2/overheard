@@ -4,3 +4,8 @@ node_modules/
 .DS_Store
 art/model-comparison/out/
 art/model-comparison/page/img/
+ml/models/
+.venv/
+apps/ios/Overheard.xcodeproj/
+apps/ios/Overheard/Info.plist
+xcuserdata/

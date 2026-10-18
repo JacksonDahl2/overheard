@@ -1,13 +1,3 @@
-import json
-import os
-import sys
-
-import numpy as np
-import tensorflow as tf
-
-os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
-
-
 """Precompute BirdNET's location filter for one place, for all 48 weeks.
 
 The meta (location) model doesn't convert to Core ML yet, so the app ships this
@@ -19,6 +9,17 @@ Usage (from ml/):
 Defaults to Central Park. Writes models/coreml/species-<name>.json:
     {"name", "lat", "lon", "threshold", "weeks": {"1": [label indices], ...}}
 """
+
+import json
+import os
+import sys
+
+# Must be set before TensorFlow is imported.
+os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
+
+# isort: split
+import numpy as np
+import tensorflow as tf
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 THRESHOLD = 0.03  # BirdNET-Analyzer's default location-filter threshold

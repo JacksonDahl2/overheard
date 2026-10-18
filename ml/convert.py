@@ -11,8 +11,10 @@ import os
 import shutil
 import sys
 
+# Must be set before TensorFlow is imported.
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 
+# isort: split
 import coremltools as ct
 import tensorflow as tf
 from coremltools.converters.mil import Builder as mb

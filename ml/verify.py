@@ -11,8 +11,10 @@ import os
 import sys
 import wave
 
+# Must be set before TensorFlow is imported.
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 
+# isort: split
 import coremltools as ct
 import numpy as np
 import tensorflow as tf

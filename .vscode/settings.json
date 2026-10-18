@@ -1,5 +1,11 @@
 {
   "python.defaultInterpreterPath": "${workspaceFolder}/ml/.venv/bin/python",
   "pylint.interpreter": ["${workspaceFolder}/ml/.venv/bin/python"],
-  "pylint.cwd": "${workspaceFolder}/ml"
+  "pylint.cwd": "${workspaceFolder}/ml",
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": { "source.organizeImports.ruff": "explicit" }
+  },
+  "isort.check": false,
+  "ruff.interpreter": ["${workspaceFolder}/ml/.venv/bin/python"]
 }

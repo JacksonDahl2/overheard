@@ -63,3 +63,8 @@ A dated log of what we decided and why. Newest at the bottom. To change a decisi
   - *Replaces:* "model files are gitignored."
 - **CI:** GitHub Actions runs OverheardKit tests, an unsigned iOS build (macOS 15 runner), and Ruff.
 - **Signing:** the team ID lives in gitignored `apps/ios/Config/Local.xcconfig`, not in `project.yml`.
+
+## 2026-10-18 (detection step 3)
+
+- **"×count" means separate songs or bursts of calls,** not minutes present or separate visits. Each song counts once, and bird size grows on a capped log scale so a nonstop singer doesn't dominate the page.
+- **Overlapping clips:** a 3 s clip every **1 s**, and detections of a species ≤ 2.5 s apart are one call. In the eval, recall rose 4–9 points (most in city noise) and precision fell 3–5. Step 4's confirmation rule is meant to win that back.

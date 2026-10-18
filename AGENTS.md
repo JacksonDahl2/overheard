@@ -71,7 +71,7 @@ xcodebuild -project apps/ios/Overheard.xcodeproj -scheme Overheard \
 
 # Detection eval (the app's Swift pipeline, on the Mac)
 ml/.venv/bin/python -I ml/eval/fetch.py   # data; birds need XENO_CANTO_API_KEY in .env
-swift run -c release --package-path apps/ios/OverheardKit overheard-eval --verbose   # ~90 s; --no-mix skips city-noise runs
+swift run -c release --package-path apps/ios/OverheardKit overheard-eval --verbose   # ~3.5 min; --no-mix / --hop 3 for quicker runs
 
 # Regenerating the models (rarely; full steps in ml/README.md)
 cd ml && uv venv --python 3.11 .venv && uv pip install --python .venv/bin/python -r requirements.txt
@@ -97,7 +97,7 @@ npx prettier@3.3.3 --write "art/**/*.mjs"                                # JS (c
 
 ```
 apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcconfigs)
-  Overheard/Audio/        AudioCapture (mic → 48 kHz 3 s clips as an AsyncStream; survives route changes),
+  Overheard/Audio/        AudioCapture (mic → 48 kHz, 3 s clips every 1 s as an AsyncStream; survives route changes),
                           BirdNETResources+Bundle (bundled model URLs)
   Overheard/              Listener (UI state), LocationProvider (CoreLocation), ListenView (spike UI)
   OverheardKit/           Swift package shared with the Mac:
@@ -106,7 +106,8 @@ apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcc
     LocationModel         Core ML location model → LocalSpecies (occurrence per species at a Place)
     SpeciesCatalog        stable species codes/names per output index (species.json)
     SpeciesFilter         what's reportable (never non-birds; confidence; expected here)
-    DetectionSession      per-clip detections → HeardBird tally
+    DetectionSession      per-clip detections → HeardBird tally; merges a song's overlapping clips into one call
+    SlidingWindow         live samples → 3 s clips every 1 s
     AudioDecoding         file → 48 kHz clips (eval)
     overheard-eval        eval CLI · Tests/ unit tests
 ml/                       convert.py, bird_labels.py, verify.py; models/coreml/ in Git LFS, rest gitignored
@@ -128,7 +129,7 @@ apps/{api,art-worker,web}, packages/{db,shared,observability}, infra/terraform, 
 - **Python:** run it with `.venv/bin/python -I`. Python on this machine resolves through pyenv and conda, so use the venv. `.vscode/settings.json` points the editor and Ruff at `ml/.venv`, and turns off Flake8 and Pylint. `pyrightconfig.json` points basedpyright at `ml/.venv`.
 - **Editor (Swift):** `xcode-build-server config -project apps/ios/Overheard.xcodeproj -scheme Overheard` writes `buildServer.json` (gitignored). Without it, VS Code checks app files as macOS code and flags iOS-only APIs like `AVAudioSession`.
 - **UI:** tokens and fonts come from `docs/design.md`. No emoji, and touch targets are at least 44 pt.
-- **Bird size:** on Listen and Journal pages, a bird's size means call count and nothing else. Rarity is shown with the red-ink "naturalist flourish".
+- **Bird size:** on Listen and Journal pages, a bird's size means call count and nothing else. A call is one song or burst of calls: detections less than 2.5 s apart merge. Rarity is shown with the red-ink "naturalist flourish".
 - **Location privacy:** blur shared points to a ~500 m grid, trim ~200 m from the start and end of routes, and show no location for sensitive species. Detection only needs approximate location.
 - **IDs:** the phone generates walk and detection IDs, which makes uploads safe to retry.
 - **Tests:** detection and app logic go in `OverheardKit` as plain, model-free types (like `SpeciesFilter` and `DetectionSession`), and each one gets unit tests (`swift test --package-path apps/ios/OverheardKit`). Quality changes are measured with `overheard-eval`. Once there's real app logic (walk flow, SwiftData, UI state), add tests for it too.

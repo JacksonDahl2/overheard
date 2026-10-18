@@ -1,6 +1,8 @@
 @preconcurrency import AVFoundation
+import OverheardKit
 
-/// Captures microphone audio and delivers fixed-length 48 kHz mono clips as an async stream.
+/// Captures microphone audio and delivers overlapping 48 kHz mono clips (3 s, one every second)
+/// as an async stream.
 ///
 /// BirdNET expects 3 s of 48 kHz mono Float32 audio. The input node runs at the hardware
 /// rate, so every tap buffer is resampled before it is accumulated.
@@ -22,11 +24,10 @@ final class AudioCapture: @unchecked Sendable {
     private let queue = DispatchQueue(label: "app.overheardbirds.audio")
     private let targetFormat = AVAudioFormat(
         commonFormat: .pcmFormatFloat32, sampleRate: 48_000, channels: 1, interleaved: false)!
-    private let clipLength = 144_000  // 3 s at 48 kHz
 
     private var engine = AVAudioEngine()
     private var converter: AVAudioConverter?
-    private var pending: [Float] = []
+    private var window = SlidingWindow()  // 3 s clips every 1 s
     private var running = false
     private var observers: [NSObjectProtocol] = []
 
@@ -42,7 +43,7 @@ final class AudioCapture: @unchecked Sendable {
         try session.setPreferredSampleRate(targetFormat.sampleRate)
         try session.setActive(true)
         try queue.sync {
-            pending.removeAll(keepingCapacity: true)
+            window.reset()
             try startEngine()
             running = true
         }
@@ -109,10 +110,7 @@ final class AudioCapture: @unchecked Sendable {
         }
         guard error == nil, let samples = out.floatChannelData?[0] else { return }
 
-        pending.append(contentsOf: UnsafeBufferPointer(start: samples, count: Int(out.frameLength)))
-        while pending.count >= clipLength {
-            let clip = Array(pending.prefix(clipLength))
-            pending.removeFirst(clipLength)
+        for clip in window.append(UnsafeBufferPointer(start: samples, count: Int(out.frameLength))) {
             continuation.yield(Clip(samples: clip, level: Self.rms(clip), time: .now))
         }
     }

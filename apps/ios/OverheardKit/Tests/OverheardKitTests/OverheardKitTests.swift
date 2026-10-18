@@ -135,3 +135,69 @@ final class SpeciesCatalogTests: XCTestCase {
         XCTAssertEqual(catalog.indices(scientificName: "Cardinalis cardinalis"), [0])
     }
 }
+
+final class SlidingWindowTests: XCTestCase {
+    func testEmitsOverlappingClipsAcrossChunkedInput() {
+        var window = SlidingWindow(length: 6, hop: 2)
+        // Feed 0..<11 in uneven chunks, like mic buffers.
+        var clips: [[Float]] = []
+        for chunk in [0..<3, 3..<4, 4..<9, 9..<11] {
+            clips += window.append(chunk.map(Float.init))
+        }
+        XCTAssertEqual(clips, [[0, 1, 2, 3, 4, 5], [2, 3, 4, 5, 6, 7], [4, 5, 6, 7, 8, 9]])
+    }
+
+    func testDefaultIsThreeSecondClipsEverySecond() {
+        var window = SlidingWindow()
+        let second = [Float](repeating: 0, count: SlidingWindow.defaultHop)
+        XCTAssertEqual(window.append(second).count, 0)
+        XCTAssertEqual(window.append(second).count, 0)
+        XCTAssertEqual(window.append(second).count, 1)  // first clip after 3 s…
+        XCTAssertEqual(window.append(second).count, 1)  // …then one more every second
+        XCTAssertEqual(window.append(second).first?.count, BirdClassifier.clipLength)
+    }
+
+    func testResetDropsBufferedAudio() {
+        var window = SlidingWindow(length: 4, hop: 4)
+        _ = window.append([1, 2, 3])
+        window.reset()
+        XCTAssertEqual(window.append([4, 5, 6, 7]), [[4, 5, 6, 7]])
+    }
+}
+
+final class CallMergingTests: XCTestCase {
+    let wren = Species(code: "carwre", commonName: "Carolina Wren", scientificName: "T. l.", isBird: true)
+    let t0 = Date(timeIntervalSince1970: 0)
+
+    /// Records a detection of the wren at each of `seconds` (clip end times, 1 s apart when back to back).
+    func calls(detectedAt seconds: [Double]) -> Int {
+        var session = DetectionSession()
+        for s in seconds {
+            session.record([BirdScore(index: 0, species: wren, confidence: 0.8)], at: t0.addingTimeInterval(s))
+        }
+        return session.byCode["carwre"]?.calls ?? 0
+    }
+
+    func testOneSongAcrossOverlappingClipsIsOneCall() {
+        XCTAssertEqual(calls(detectedAt: [3, 4, 5]), 1)
+    }
+
+    func testOneMissedClipStaysTheSameCall() {
+        XCTAssertEqual(calls(detectedAt: [3, 4, 6, 7]), 1)
+    }
+
+    func testSilenceStartsANewCall() {
+        // Two missed clips (3 s gap) → a second song.
+        XCTAssertEqual(calls(detectedAt: [3, 4, 7]), 2)
+        XCTAssertEqual(calls(detectedAt: [3, 4, 5, 20, 21, 40]), 3)
+    }
+
+    func testLastHeardTracksLatestClip() {
+        var session = DetectionSession()
+        for s in [3.0, 4, 5] {
+            session.record([BirdScore(index: 0, species: wren, confidence: 0.8)], at: t0.addingTimeInterval(s))
+        }
+        XCTAssertEqual(session.byCode["carwre"]?.firstHeard, t0.addingTimeInterval(3))
+        XCTAssertEqual(session.byCode["carwre"]?.lastHeard, t0.addingTimeInterval(5))
+    }
+}

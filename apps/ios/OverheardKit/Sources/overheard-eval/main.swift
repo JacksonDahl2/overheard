@@ -2,6 +2,7 @@
 //
 // From the repo root:
 //   swift run -c release --package-path apps/ios/OverheardKit overheard-eval [--verbose] [--json out.json] [--no-mix]
+//     [--hop 1]   seconds between clip starts (the app uses 1: a 3 s clip every second)
 //
 // Inputs (defaults relative to the current directory):
 //   --manifest       ml/eval/manifest.json                     (from ml/eval/fetch.py)
@@ -106,6 +107,10 @@ func mix(_ bird: [Float], _ noise: [Float], snr: Float) -> [Float] {
 // Bird-to-noise levels (SNR) for mixing city noise into each bird recording.
 // +10 dB: bird clearly louder · 0 dB: equally loud · -5 dB: noise louder.
 let mixLevels: [Float] = CommandLine.arguments.contains("--no-mix") ? [] : [10, 0, -5]
+let hopSeconds = Double(argument("hop", default: "1")) ?? 1
+let hopSamples = Int(hopSeconds * BirdClassifier.sampleRate)
+// Back-to-back clips (and one missed clip) stay one call at any hop.
+let callGap = max(DetectionSession.defaultCallGap, hopSeconds * 2.5)
 let conditions = ["clean"] + mixLevels.map { String(format: "%+.0f dB", $0) }
 let thresholds: [Float] = [0.25, 0.35, 0.5, 0.65, 0.8]
 
@@ -125,23 +130,26 @@ struct Counts {
 }
 var counts: [Key: Counts] = [:]
 var perSpecies: [String: (hits: Int, total: Int)] = [:]  // clean, filter on, 0.50
+var firstDetection: [String: [Double]] = [:]  // condition → seconds into the recording (filter on, 0.50)
+var callCounts: [String: [Int]] = [:]  // condition → target's calls per recording where it was found
 var details: [String] = []  // --verbose lines (clean, filter off, 0.50)
 var skipped: [String] = []
 var clipsTotal = 0
 let started = Date()
 
-/// Plays clip confidences through a fresh DetectionSession, as the app would live (3 s per clip).
+/// Plays clip confidences through a fresh DetectionSession, as the app would live. Clip `i` ends
+/// `3 + i × hop` seconds into the recording.
 @MainActor func heard(_ clipConfidences: [[Float]], local: LocalSpecies, rules: DetectionRules) -> [String: HeardBird] {
-    var session = DetectionSession()
+    var session = DetectionSession(callGap: callGap)
     for (i, confidences) in clipConfidences.enumerated() {
         let scores = classifier.reportable(confidences, local: local, rules: rules)
-        session.record(scores, at: defaultDate.addingTimeInterval(Double(i) * 3))
+        session.record(scores, at: defaultDate.addingTimeInterval(3 + Double(i) * hopSeconds))
     }
     return session.byCode
 }
 
 @MainActor func score(_ audio: [Float]) throws -> [[Float]] {
-    let clips = AudioDecoding.clips(audio)
+    let clips = AudioDecoding.clips(audio, hop: hopSamples)
     clipsTotal += clips.count
     return try clips.map { try classifier.confidences(for: $0) }
 }
@@ -227,6 +235,10 @@ for (n, recording) in manifest.recordings.enumerated() where recording.kind == .
                 counted.nonBirdDropped += nonBirdsFired(clipConfidences, threshold: t)
                 counts[key] = counted
 
+                if filtered, t == 0.5, let bird = found.values.first(where: { target.contains($0.id) }) {
+                    firstDetection[condition, default: []].append(bird.firstHeard.timeIntervalSince(defaultDate))
+                    callCounts[condition, default: []].append(bird.calls)
+                }
                 if c == 0, filtered, t == 0.5 {
                     let name = catalog[targetIndex].commonName
                     perSpecies[name, default: (0, 0)].total += 1
@@ -280,7 +292,8 @@ print(
     "Overheard eval · \(summary.birdFiles) bird recordings, \(summary.noiseFiles) noise clips, \(clipsTotal) clips"
         + String(
             format: " in %.1f s (%.1f ms/clip incl. decoding)", elapsed, elapsed * 1000 / Double(max(clipsTotal, 1))))
-print("Location filter: BirdNET's location model at each recording's place and week.\n")
+print("Location filter: BirdNET's location model at each recording's place and week.")
+print(String(format: "Clips: 3 s every %.1f s · calls split after %.1f s without a detection.\n", hopSeconds, callGap))
 print("filter  thresh  recall  precision  false/bird-file  noise→bird  non-bird dropped")
 var rows: [Row] = []
 for filtered in [false, true] {
@@ -310,6 +323,23 @@ if conditions.count > 1 {
         }
     }
 }
+
+func median(_ xs: [Double]) -> Double {
+    let s = xs.sorted()
+    guard !s.isEmpty else { return .nan }
+    return s.count % 2 == 1 ? s[s.count / 2] : (s[s.count / 2 - 1] + s[s.count / 2]) / 2
+}
+print("\nWhen the target bird is found (filter on, 0.50):")
+print("noise    first heard (median / mean)   calls per recording (median / max)")
+for condition in conditions {
+    let times = firstDetection[condition] ?? []
+    let calls = (callCounts[condition] ?? []).map(Double.init)
+    print(
+        String(
+            format: "%-7@     %5.1f s / %5.1f s              %5.1f / %3.0f", condition, median(times),
+            times.isEmpty ? .nan : times.reduce(0, +) / Double(times.count), median(calls), calls.max() ?? .nan))
+}
+print("first heard = seconds into the recording when the target was first reported (a clip can't end before 3 s)")
 
 if !perSpecies.isEmpty {
     print("\nPer species (threshold 0.50, filter on):")

@@ -17,10 +17,12 @@ ml/.venv/bin/python -I ml/eval/fetch.py --rebuild  # re-query sources, rewrite m
 ## Run
 
 ```sh
-swift run -c release --package-path apps/ios/OverheardKit overheard-eval [--verbose] [--json results.json] [--no-mix]
+swift run -c release --package-path apps/ios/OverheardKit overheard-eval [--verbose] [--json results.json] [--no-mix] [--hop 1]
 ```
 
-A full run takes about 75 s: 110 recordings × 4 noise conditions.
+A full run takes about 3.5 minutes: 110 recordings × 4 noise conditions, with a 3 s clip every second like the app. `--hop 3` gives back-to-back clips, which is faster for quick checks.
+
+The report also shows, for recordings where the target was found, when it was **first heard** and how many **calls** (separate songs) it counted.
 
 **Main table** (clean recordings), for each threshold with the location filter off and on:
 - **recall:** the share of bird recordings whose target species was detected.
@@ -76,5 +78,21 @@ The location filter now uses BirdNET's location model at each recording's own co
 - **Recall** rose slightly (80.9% → 81.8%), because birds outside Central Park's list are no longer wrongly dropped.
 - **Precision** fell (80.9% → 76.3%), because the real-location expected lists are broader than the strict Central Park table, so more lookalikes get through. Steps 4–5 of the detection plan (confirmation, likelihood-scaled thresholds) target this.
 - **Memory:** the eval now streams one recording at a time, with a peak of about 300 MB.
+
+### After step 3: overlapping clips and call merging
+
+The eval now uses a 3 s clip every 1 s instead of every 3 s. Detections of a species within 2.5 s of each other count as one call.
+
+| Condition | Threshold | Recall (3 s → 1 s hop) | Precision (3 s → 1 s hop) |
+|---|---|---|---|
+| clean | 0.50 | 81.8% → **85.5%** | 76.3% → 72.9% |
+| clean | 0.80 | 62.7% → **71.8%** | 90.8% → 87.8% |
+| 0 dB city noise | 0.50 | 74.5% → **81.8%** | 81.2% → 75.6% |
+| −5 dB city noise | 0.50 | 71.8% → **79.1%** | 84.0% → 79.8% |
+
+- **Recall rises 4–9 points,** most in noise. Songs that straddled a clip boundary are now caught whole.
+- **Precision drops 3–5 points:** three times as many clips give a stray lookalike more chances. Step 4's confirmation rule targets this, since real songs span several overlapping clips and spurious hits usually span one.
+- **Calls per found bird:** the median is 3, against 1.5 before. Counts now reflect separate songs.
+- **First heard:** the median is 3 s for both, because xeno-canto recordings start with the bird already singing. This metric needs real walks to be informative.
 
 - **Caveat:** xeno-canto is probably part of BirdNET's training data, so these numbers are likely optimistic. Real park audio is harder.

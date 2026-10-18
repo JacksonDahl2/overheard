@@ -44,6 +44,23 @@ struct ListenView: View {
                     }
                 }
 
+                if !listener.pending.isEmpty {
+                    // In the real UI these are the faint birds being sketched: they finish drawing
+                    // when confirmed, or fade if the call ends first.
+                    Section("Sketching…") {
+                        ForEach(listener.pending) { bird in
+                            HStack {
+                                Text(bird.species.commonName).foregroundStyle(.secondary)
+                                Spacer()
+                                Text(
+                                    "\(Int(bird.peakConfidence * 100))% · \(bird.clips) clip\(bird.clips == 1 ? "" : "s")"
+                                )
+                                .font(.caption).monospacedDigit().foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
+
                 Section("Last 3 seconds") {
                     if listener.lastClip.isEmpty {
                         Text("No birds above threshold").foregroundStyle(.secondary)

@@ -12,6 +12,7 @@ final class Listener {
     var errorMessage: String?
 
     var birds: [HeardBird] = []
+    var pending: [PendingBird] = []  // heard, not yet confirmed ("sketching…")
     var lastClip: [BirdScore] = []
     var lastLevel: Float = 0
     var lastInferenceMs: Double = 0
@@ -39,6 +40,7 @@ final class Listener {
             self.pipeline = pipeline
             try capture.start()
             birds = []
+            pending = []
             lastClip = []
             clipsAnalyzed = 0
             startedAt = .now
@@ -77,6 +79,7 @@ final class Listener {
 
     private func apply(_ update: PipelineUpdate) {
         birds = update.birds
+        pending = update.pending
         lastClip = update.lastClip
         lastLevel = update.level
         if let ms = update.inferenceMs { lastInferenceMs = ms }

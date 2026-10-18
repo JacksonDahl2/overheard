@@ -95,4 +95,31 @@ The eval now uses a 3 s clip every 1 s instead of every 3 s. Detections of a spe
 - **Calls per found bird:** the median is 3, against 1.5 before. Counts now reflect separate songs.
 - **First heard:** the median is 3 s for both, because xeno-canto recordings start with the bird already singing. This metric needs real walks to be informative.
 
+### After step 4: call confirmation (the app's current default)
+
+A call counts once it has 2 clips above the threshold, or one clip ≥ 0.70. Otherwise the bird stays "sketching" and fades. The eval compares rules in a sweep table.
+
+| Condition | Threshold | Recall | Precision | False/bird-file |
+|---|---|---|---|---|
+| clean, filter off | 0.50 | 79.1% | 67.4% | 0.38 |
+| **clean** | **0.50** | **79.1%** | **83.7%** | **0.15** |
+| +10 dB city noise | 0.50 | 75.5% | 83.8% | 0.15 |
+| 0 dB city noise | 0.50 | 76.4% | 85.7% | 0.13 |
+| −5 dB city noise | 0.50 | 75.5% | 86.5% | 0.12 |
+
+- **Against step 3 (no confirmation):** wrong species per recording halved (0.32 → 0.15). Precision went 72.9% → 83.7% and recall 85.5% → 79.1%.
+- **Rules compared** (clean, 0.50, as recall / precision):
+
+  | Rule | Recall | Precision |
+  |---|---|---|
+  | none | 85.5% | 72.9% |
+  | 2 clips | 78.2% | 86.9% |
+  | 2 clips or 0.90 | 78.2% | 86.0% |
+  | 2 clips or 0.80 | 78.2% | 84.3% |
+  | **2 clips or 0.70** | 79.1% | 83.7% |
+  | 3 clips or 0.80 | 73.6% | 87.1% |
+
+  "2 clips or 0.70" won on recall in noise.
+- **Option not taken:** a 0.35 threshold with the same rule gives 83.6% recall and 78.6% precision, which beats the pre-overlap baseline on both. We chose 0.50 for fewer wrong birds; see `docs/decisions.md`.
+
 - **Caveat:** xeno-canto is probably part of BirdNET's training data, so these numbers are likely optimistic. Real park audio is harder.

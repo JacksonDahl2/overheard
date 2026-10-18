@@ -114,10 +114,22 @@ let callGap = max(DetectionSession.defaultCallGap, hopSeconds * 2.5)
 let conditions = ["clean"] + mixLevels.map { String(format: "%+.0f dB", $0) }
 let thresholds: [Float] = [0.25, 0.35, 0.5, 0.65, 0.8]
 
+// Confirmation rules to compare. The main tables use the app's default.
+let confirmationRules: [(name: String, rule: Confirmation)] = [
+    ("none", .none),
+    ("2 clips", Confirmation(minClips: 2, strongConfidence: 2)),
+    ("2 clips or 0.90", Confirmation(minClips: 2, strongConfidence: 0.9)),
+    ("2 clips or 0.80", Confirmation(minClips: 2, strongConfidence: 0.8)),
+    ("2 clips or 0.70", Confirmation(minClips: 2, strongConfidence: 0.7)),
+    ("3 clips or 0.80", Confirmation(minClips: 3, strongConfidence: 0.8)),
+]
+let defaultRule = confirmationRules.first { $0.rule == Confirmation() }!.name
+
 struct Key: Hashable {
     let condition: String
     let filtered: Bool
     let threshold: Float
+    var rule = defaultRule
 }
 struct Counts {
     var birdFiles = 0
@@ -137,12 +149,16 @@ var skipped: [String] = []
 var clipsTotal = 0
 let started = Date()
 
-/// Plays clip confidences through a fresh DetectionSession, as the app would live. Clip `i` ends
-/// `3 + i × hop` seconds into the recording.
-@MainActor func heard(_ clipConfidences: [[Float]], local: LocalSpecies, rules: DetectionRules) -> [String: HeardBird] {
-    var session = DetectionSession(callGap: callGap)
-    for (i, confidences) in clipConfidences.enumerated() {
-        let scores = classifier.reportable(confidences, local: local, rules: rules)
+/// Each clip's reportable birds under `rules` (computed once, then replayed per confirmation rule).
+@MainActor func reportable(_ clipConfidences: [[Float]], local: LocalSpecies, rules: DetectionRules) -> [[BirdScore]] {
+    clipConfidences.map { classifier.reportable($0, local: local, rules: rules) }
+}
+
+/// Plays per-clip scores through a fresh DetectionSession, as the app would live. Clip `i` ends
+/// `3 + i × hop` seconds into the recording. Returns the confirmed birds.
+@MainActor func heard(_ scoresPerClip: [[BirdScore]], confirmation: Confirmation) -> [String: HeardBird] {
+    var session = DetectionSession(callGap: callGap, confirmation: confirmation)
+    for (i, scores) in scoresPerClip.enumerated() {
         session.record(scores, at: defaultDate.addingTimeInterval(3 + Double(i) * hopSeconds))
     }
     return session.byCode
@@ -183,20 +199,24 @@ for recording in manifest.recordings where recording.kind == .noise {
     for filtered in [false, true] {
         for t in thresholds {
             let rules = DetectionRules(minConfidence: t, useLocationFilter: filtered)
-            let found = heard(clipConfidences, local: noiseLocal, rules: rules)
-            for condition in conditions {  // noise false positives count against every condition
-                let key = Key(condition: condition, filtered: filtered, threshold: t)
-                var c = counts[key] ?? Counts()
-                c.noiseFiles += 1
-                c.falseInNoise += found.count
-                c.noiseFilesWithBirds += found.isEmpty ? 0 : 1
-                c.nonBirdDropped += nonBirdsFired(clipConfidences, threshold: t)
-                counts[key] = c
-            }
-            if verbose, !filtered, t == 0.5 {
-                let names = found.values.map(\.species.commonName)
-                let extra = names.isEmpty ? "" : "  · reported: " + names.joined(separator: ", ")
-                details.append("  \(displayName(recording)) noise: \(recording.category ?? "?")\(extra)")
+            let scoresPerClip = reportable(clipConfidences, local: noiseLocal, rules: rules)
+            let nonBirds = nonBirdsFired(clipConfidences, threshold: t)
+            for (ruleName, rule) in confirmationRules {
+                let found = heard(scoresPerClip, confirmation: rule)
+                for condition in conditions {  // noise false positives count against every condition
+                    let key = Key(condition: condition, filtered: filtered, threshold: t, rule: ruleName)
+                    var c = counts[key] ?? Counts()
+                    c.noiseFiles += 1
+                    c.falseInNoise += found.count
+                    c.noiseFilesWithBirds += found.isEmpty ? 0 : 1
+                    c.nonBirdDropped += nonBirds
+                    counts[key] = c
+                }
+                if verbose, !filtered, t == 0.5, ruleName == defaultRule {
+                    let names = found.values.map(\.species.commonName)
+                    let extra = names.isEmpty ? "" : "  · reported: " + names.joined(separator: ", ")
+                    details.append("  \(displayName(recording)) noise: \(recording.category ?? "?")\(extra)")
+                }
             }
         }
     }
@@ -223,36 +243,41 @@ for (n, recording) in manifest.recordings.enumerated() where recording.kind == .
         let clipConfidences = try score(c == 0 ? audio : mix(audio, bed!, snr: mixLevels[c - 1]))
         for filtered in [false, true] {
             for t in thresholds {
-                let found = heard(
+                let scoresPerClip = reportable(
                     clipConfidences, local: local, rules: DetectionRules(minConfidence: t, useLocationFilter: filtered))
-                let codesFound = Set(found.keys)
-                let hit = !codesFound.isDisjoint(with: target)
-                let key = Key(condition: condition, filtered: filtered, threshold: t)
-                var counted = counts[key] ?? Counts()
-                counted.birdFiles += 1
-                counted.hits += hit ? 1 : 0
-                counted.falseInBirdFiles += codesFound.subtracting(target).subtracting(background).count
-                counted.nonBirdDropped += nonBirdsFired(clipConfidences, threshold: t)
-                counts[key] = counted
+                let nonBirds = nonBirdsFired(clipConfidences, threshold: t)
+                for (ruleName, rule) in confirmationRules {
+                    let found = heard(scoresPerClip, confirmation: rule)
+                    let codesFound = Set(found.keys)
+                    let hit = !codesFound.isDisjoint(with: target)
+                    let key = Key(condition: condition, filtered: filtered, threshold: t, rule: ruleName)
+                    var counted = counts[key] ?? Counts()
+                    counted.birdFiles += 1
+                    counted.hits += hit ? 1 : 0
+                    counted.falseInBirdFiles += codesFound.subtracting(target).subtracting(background).count
+                    counted.nonBirdDropped += nonBirds
+                    counts[key] = counted
+                    guard ruleName == defaultRule else { continue }
 
-                if filtered, t == 0.5, let bird = found.values.first(where: { target.contains($0.id) }) {
-                    firstDetection[condition, default: []].append(bird.firstHeard.timeIntervalSince(defaultDate))
-                    callCounts[condition, default: []].append(bird.calls)
-                }
-                if c == 0, filtered, t == 0.5 {
-                    let name = catalog[targetIndex].commonName
-                    perSpecies[name, default: (0, 0)].total += 1
-                    if hit { perSpecies[name, default: (0, 0)].hits += 1 }
-                }
-                if verbose, c == 0, !filtered, t == 0.5 {
-                    let best = clipConfidences.map { $0[targetIndex] }.max() ?? 0
-                    let wrong = found.values.filter { !target.contains($0.id) && !background.contains($0.id) }
-                        .sorted { $0.bestConfidence > $1.bestConfidence }.prefix(4)
-                        .map { "\($0.species.commonName) \(Int($0.bestConfidence * 100))%" }
-                    let extra = wrong.isEmpty ? "" : "  · also reported: " + wrong.joined(separator: ", ")
-                    details.append(
-                        "  \(displayName(recording)) \(hit ? "✓" : "✗") \(catalog[targetIndex].commonName) "
-                            + "\(Int(best * 100))%\(extra)")
+                    if filtered, t == 0.5, let bird = found.values.first(where: { target.contains($0.id) }) {
+                        firstDetection[condition, default: []].append(bird.firstHeard.timeIntervalSince(defaultDate))
+                        callCounts[condition, default: []].append(bird.calls)
+                    }
+                    if c == 0, filtered, t == 0.5 {
+                        let name = catalog[targetIndex].commonName
+                        perSpecies[name, default: (0, 0)].total += 1
+                        if hit { perSpecies[name, default: (0, 0)].hits += 1 }
+                    }
+                    if verbose, c == 0, !filtered, t == 0.5 {
+                        let best = clipConfidences.map { $0[targetIndex] }.max() ?? 0
+                        let wrong = found.values.filter { !target.contains($0.id) && !background.contains($0.id) }
+                            .sorted { $0.bestConfidence > $1.bestConfidence }.prefix(4)
+                            .map { "\($0.species.commonName) \(Int($0.bestConfidence * 100))%" }
+                        let extra = wrong.isEmpty ? "" : "  · also reported: " + wrong.joined(separator: ", ")
+                        details.append(
+                            "  \(displayName(recording)) \(hit ? "✓" : "✗") \(catalog[targetIndex].commonName) "
+                                + "\(Int(best * 100))%\(extra)")
+                    }
                 }
             }
         }
@@ -263,6 +288,7 @@ for (n, recording) in manifest.recordings.enumerated() where recording.kind == .
 
 struct Row: Encodable {
     let condition: String
+    let rule: String
     let threshold: Float
     let filtered: Bool
     let recall: Double  // bird recordings whose target species was reported
@@ -276,7 +302,7 @@ struct Row: Encodable {
     let c = counts[key] ?? Counts()
     let reported = c.hits + c.falseInBirdFiles + c.falseInNoise
     return Row(
-        condition: key.condition, threshold: key.threshold, filtered: key.filtered,
+        condition: key.condition, rule: key.rule, threshold: key.threshold, filtered: key.filtered,
         recall: c.birdFiles == 0 ? 0 : Double(c.hits) / Double(c.birdFiles),
         precision: reported == 0 ? 0 : Double(c.hits) / Double(reported),
         falsePerBirdFile: c.birdFiles == 0 ? 0 : Double(c.falseInBirdFiles) / Double(c.birdFiles),
@@ -293,7 +319,8 @@ print(
         + String(
             format: " in %.1f s (%.1f ms/clip incl. decoding)", elapsed, elapsed * 1000 / Double(max(clipsTotal, 1))))
 print("Location filter: BirdNET's location model at each recording's place and week.")
-print(String(format: "Clips: 3 s every %.1f s · calls split after %.1f s without a detection.\n", hopSeconds, callGap))
+print(String(format: "Clips: 3 s every %.1f s · calls split after %.1f s without a detection.", hopSeconds, callGap))
+print("Confirmation (main tables): \(defaultRule) — the app's default.\n")
 print("filter  thresh  recall  precision  false/bird-file  noise→bird  non-bird dropped")
 var rows: [Row] = []
 for filtered in [false, true] {
@@ -320,6 +347,21 @@ if conditions.count > 1 {
                 String(
                     format: "%-7@  %5.2f  %@  %@     %6.2f", condition, t, pct(r.recall), pct(r.precision),
                     r.falsePerBirdFile))
+        }
+    }
+}
+
+print("\nConfirmation rules (filter on):")
+print("rule               noise    thresh  recall  precision  false/bird-file")
+for (ruleName, _) in confirmationRules {
+    for condition in conditions where condition == "clean" || condition == "+0 dB" {
+        for t: Float in [0.35, 0.5] {
+            let r = row(Key(condition: condition, filtered: true, threshold: t, rule: ruleName))
+            rows.append(r)
+            print(
+                String(
+                    format: "%-17@  %-7@  %5.2f  %@  %@     %6.2f", ruleName, condition, t, pct(r.recall),
+                    pct(r.precision), r.falsePerBirdFile))
         }
     }
 }

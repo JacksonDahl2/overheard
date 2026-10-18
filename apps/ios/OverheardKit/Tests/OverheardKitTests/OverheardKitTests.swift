@@ -89,7 +89,7 @@ final class DetectionSessionTests: XCTestCase {
     let t0 = Date(timeIntervalSince1970: 0)
 
     func testTalliesCallsAndConfidence() {
-        var session = DetectionSession()
+        var session = DetectionSession(confirmation: .none)
         session.record([BirdScore(index: 1, species: cardinal, confidence: 0.6)], at: t0)
         session.record(
             [
@@ -105,7 +105,7 @@ final class DetectionSessionTests: XCTestCase {
     }
 
     func testLumpedLabelsCountOncePerClip() {
-        var session = DetectionSession()
+        var session = DetectionSession(confirmation: .none)
         // Two BirdNET labels that eBird now treats as one species share a code.
         session.record(
             [
@@ -117,7 +117,7 @@ final class DetectionSessionTests: XCTestCase {
     }
 
     func testOrderingTiesBreakByFirstHeard() {
-        var session = DetectionSession()
+        var session = DetectionSession(confirmation: .none)
         session.record([BirdScore(index: 2, species: jay, confidence: 0.7)], at: t0)
         session.record([BirdScore(index: 1, species: cardinal, confidence: 0.7)], at: t0.addingTimeInterval(3))
         XCTAssertEqual(session.birds.map(\.id), ["blujay", "norcar"])
@@ -199,5 +199,74 @@ final class CallMergingTests: XCTestCase {
         }
         XCTAssertEqual(session.byCode["carwre"]?.firstHeard, t0.addingTimeInterval(3))
         XCTAssertEqual(session.byCode["carwre"]?.lastHeard, t0.addingTimeInterval(5))
+    }
+}
+
+final class ConfirmationTests: XCTestCase {
+    let warbler = Species(
+        code: "btbwar", commonName: "Black-throated Blue Warbler", scientificName: "S. c.", isBird: true)
+    let t0 = Date(timeIntervalSince1970: 0)
+
+    func record(_ session: inout DetectionSession, _ confidence: Float?, at second: Double) {
+        let scores = confidence.map { [BirdScore(index: 0, species: warbler, confidence: $0)] } ?? []
+        session.record(scores, at: t0.addingTimeInterval(second))
+    }
+
+    func testSingleWeakClipIsOnlyPending() {
+        var session = DetectionSession()
+        record(&session, 0.6, at: 3)
+        XCTAssertNil(session.byCode["btbwar"])
+        XCTAssertEqual(session.pending.map(\.id), ["btbwar"])
+        XCTAssertEqual(session.pending.first?.clips, 1)
+    }
+
+    func testUnconfirmedCallFadesAfterTheGap() {
+        var session = DetectionSession()
+        record(&session, 0.6, at: 3)
+        for s in 4...6 { record(&session, nil, at: Double(s)) }  // quiet clips
+        XCTAssertTrue(session.pending.isEmpty)
+        XCTAssertNil(session.byCode["btbwar"])
+    }
+
+    func testTwoClipsConfirmAndCountFromTheFirst() {
+        var session = DetectionSession()
+        record(&session, 0.6, at: 3)
+        record(&session, 0.55, at: 4)
+        let bird = session.byCode["btbwar"]
+        XCTAssertEqual(bird?.calls, 1)
+        XCTAssertEqual(bird?.firstHeard, t0.addingTimeInterval(3))  // the sketch started at the first clip
+        XCTAssertEqual(bird?.bestConfidence, 0.6)
+        XCTAssertTrue(session.pending.isEmpty)
+    }
+
+    func testOneStrongClipConfirms() {
+        var session = DetectionSession()
+        record(&session, 0.85, at: 3)
+        XCTAssertEqual(session.byCode["btbwar"]?.calls, 1)
+    }
+
+    func testLaterCallsNeedConfirmingToo() {
+        var session = DetectionSession()
+        record(&session, 0.85, at: 3)  // call 1, confirmed
+        record(&session, 0.6, at: 10)  // a lone weak clip: not a second call
+        XCTAssertEqual(session.byCode["btbwar"]?.calls, 1)
+        XCTAssertTrue(session.pending.isEmpty)  // already on the page, so not "sketching"
+        record(&session, 0.6, at: 11)  // …until it repeats
+        XCTAssertEqual(session.byCode["btbwar"]?.calls, 2)
+    }
+
+    func testAdvanceClosesCallsDuringSilence() {
+        var session = DetectionSession()
+        record(&session, 0.6, at: 3)
+        session.advance(to: t0.addingTimeInterval(10))
+        record(&session, 0.6, at: 11)  // a new call, not the 2nd clip of the old one
+        XCTAssertNil(session.byCode["btbwar"])
+        XCTAssertEqual(session.pending.first?.clips, 1)
+    }
+
+    func testConfirmationNoneCountsEverything() {
+        var session = DetectionSession(confirmation: .none)
+        record(&session, 0.51, at: 3)
+        XCTAssertEqual(session.byCode["btbwar"]?.calls, 1)
     }
 }

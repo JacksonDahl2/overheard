@@ -106,7 +106,8 @@ apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcc
     LocationModel         Core ML location model → LocalSpecies (occurrence per species at a Place)
     SpeciesCatalog        stable species codes/names per output index (species.json)
     SpeciesFilter         what's reportable (never non-birds; confidence; expected here)
-    DetectionSession      per-clip detections → HeardBird tally; merges a song's overlapping clips into one call
+    DetectionSession      per-clip detections → HeardBird tally; merges a song's overlapping clips into one call;
+                          confirms calls (≥2 clips or one ≥0.70), unconfirmed new species are PendingBird ("sketching")
     SlidingWindow         live samples → 3 s clips every 1 s
     AudioDecoding         file → 48 kHz clips (eval)
     overheard-eval        eval CLI · Tests/ unit tests

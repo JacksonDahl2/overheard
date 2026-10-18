@@ -16,6 +16,8 @@ public struct BirdNETResources: Sendable {
 /// What the UI needs after each clip.
 public struct PipelineUpdate: Sendable {
     public let birds: [HeardBird]
+    /// New species heard but not yet confirmed: the faint birds "being sketched".
+    public let pending: [PendingBird]
     public let lastClip: [BirdScore]
     public let level: Float
     public let inferenceMs: Double?  // nil when the clip was skipped as quiet
@@ -69,6 +71,7 @@ public actor ListeningPipeline {
     public func process(_ clip: [Float], level: Float, at time: Date) throws -> PipelineUpdate {
         clipsAnalyzed += 1
         guard level >= quietThreshold else {
+            session.advance(to: time)  // silence still ends calls (and fades unconfirmed ones)
             return update(lastClip: [], level: level, inferenceMs: nil)
         }
         // A new week mid-session (e.g. a walk past midnight on a Sunday) needs fresh likelihoods.
@@ -84,7 +87,7 @@ public actor ListeningPipeline {
 
     private func update(lastClip: [BirdScore], level: Float, inferenceMs: Double?) -> PipelineUpdate {
         PipelineUpdate(
-            birds: session.birds, lastClip: lastClip, level: level, inferenceMs: inferenceMs,
+            birds: session.birds, pending: session.pending, lastClip: lastClip, level: level, inferenceMs: inferenceMs,
             clipsAnalyzed: clipsAnalyzed, place: local?.place)
     }
 }

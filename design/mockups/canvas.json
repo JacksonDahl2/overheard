@@ -1,0 +1,28 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-10-18T19:30:00Z" },
+  "title": "Overheard Screens",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 390, "h": 844, "title": "Listen · Parchment", "radius": 40 },
+    "Journal.dc.html": { "x": 470, "y": 0, "w": 390, "h": 844, "title": "Journal page · Parchment", "radius": 40 },
+    "Feed.dc.html": { "x": 940, "y": 0, "w": 390, "h": 844, "title": "Flock · Parchment", "radius": 40 },
+    "MainNight.dc.html": { "x": 0, "y": 1230, "w": 390, "h": 844, "title": "Listen · By Candlelight", "radius": 40 },
+    "JournalNight.dc.html": { "x": 470, "y": 1230, "w": 390, "h": 844, "title": "Journal page · By Candlelight", "radius": 40 },
+    "FeedNight.dc.html": { "x": 940, "y": 1230, "w": 390, "h": 844, "title": "Flock · By Candlelight", "radius": 40 }
+  },
+  "order": [
+    "Main.dc.html",
+    "Journal.dc.html",
+    "Feed.dc.html",
+    "MainNight.dc.html",
+    "JournalNight.dc.html",
+    "FeedNight.dc.html"
+  ],
+  "notes": {
+    "rowDay": { "x": 0, "y": -270, "text": "Parchment", "kind": "title1", "maxW": 1330 },
+    "rowNight": { "x": 0, "y": 960, "text": "By Candlelight", "kind": "title1", "maxW": 1330 }
+  },
+  "designSystems": []
+}

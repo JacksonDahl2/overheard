@@ -1,0 +1,39 @@
+# Decisions
+
+A dated log of what we decided and why. Newest at the bottom. To change a decision, add a new entry rather than editing an old one.
+
+## 2026-10-18
+
+- **Product:** an iPhone app that listens during **walks** (not all day from a window) and turns each walk into an illustrated journal page.
+  - *Why:* Manhattan window audio is noisy and has few species. Central Park is a migration hotspot. Walk sessions also avoid iOS background-recording and battery problems.
+- **Name:** *Overheard: Bird Journal*. **Domain:** `overheardbirds.app`, registered with Cloudflare.
+- **Monetization:** none. The app is free, for friends and family.
+  - *Why:* BirdNET is CC BY-NC-SA 4.0, which is fine for non-commercial use with attribution.
+- **Distribution:** TestFlight first. The public App Store later, through full App Review.
+- **Bird ID:** BirdNET, run on the device with Core ML, using its location/week filter. Audio never leaves the phone.
+- **Platform:** iOS 17+ with SwiftUI and SwiftData.
+- **Backend:** Cloudflare (Workers, D1, R2, Queues), managed with Terraform.
+  - *Why:* about $5/month, no egress fees on images, and much less infrastructure than AWS.
+  - *Rejected:* AWS (more cost and setup), and Go on Workers (only through WebAssembly, so second-class).
+- **Language:** TypeScript, using **Hono** for the API and **Drizzle** for the ORM on D1.
+- **Monorepo:** pnpm workspaces, no Turborepo. Layout is in `CLAUDE.md`.
+- **API contract:** an OpenAPI spec generated from zod schemas, then turned into a Swift client by `swift-openapi-generator`. Swagger/Scalar is served at `/docs`. Endpoints are listed in `docs/api.md`.
+- **Auth:** Sign in with Apple only. The Worker verifies Apple identity tokens itself, with no hosted auth service.
+  - *Why:* Apple requires Sign in with Apple whenever Google sign-in is offered, and it needs the least setup.
+- **Images:** files live in R2, and D1 stores only their keys. Uploads go through the Worker.
+- **Location privacy:**
+  - Shared locations snap to a ~500 m grid.
+  - Walk routes are trimmed ~200 m at the start and end.
+  - Sensitive species (owls, etc.) show no location to others.
+- **Observability:**
+  - Workers traces are exported over OTLP to **Honeycomb**.
+  - All errors, from iOS and every Worker, go to **Sentry**.
+  - No local traces. Local dev logs print to the terminal.
+- **Local dev:** `wrangler dev`, with no Docker. A dev-only fake image service and a dev login bypass.
+- **Image model:** `gemini-3-pro-image` through the **Batch API** (~$0.067 per image).
+  - *Why:* in the trial (`art/model-comparison/`), Pro had the best field-journal style and the best variations. OpenAI models gave transparency, but with halos and a digital-painting look.
+- **Art pipeline:** generate on flat white, then remove the background to get a transparent PNG, then composite onto the parchment page.
+- **Look:** a hand-drawn field journal on parchment, applied to the whole app. The dark mode is **"By Candlelight"**. Details are in `docs/design.md`.
+- **Page rules:**
+  - Bird size reflects call count on Listen and Journal pages; Flock cards use even sizes.
+  - Rare birds get a red-ink "naturalist flourish" rather than a bigger size.

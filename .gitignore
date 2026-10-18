@@ -1,0 +1,6 @@
+node_modules/
+.env
+.env.*
+.DS_Store
+art/model-comparison/out/
+art/model-comparison/page/img/

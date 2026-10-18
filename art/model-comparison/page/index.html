@@ -1,0 +1,324 @@
+<title>Overheard Art Trial</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=EB+Garamond:wght@400;500;600&family=Caveat:wght@500&display=swap">
+<style>
+  /* Layout: a field-journal ledger. Species are rows, models are columns, and each cell shows the base and its variation on a paper card. */
+  :root {
+    --page: #e9dfc8;
+    --page-deep: #ddd0b2;
+    --paper: #f3ead6;
+    --ink: #2b2118;
+    --ink-soft: #6b5a46;
+    --rule: #b9a682;
+    --accent: #7a2e1f;
+    --good: #3f5f2e;
+    --warn: #8a5a12;
+    --font-display: "IM Fell English SC", "IM Fell English", Georgia, serif;
+    --font-italic: "IM Fell English", Georgia, serif;
+    --font-body: "EB Garamond", Garamond, Georgia, serif;
+    --font-hand: "Caveat", "Bradley Hand", cursive;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --page: #1d1611;
+      --page-deep: #2a2018;
+      --paper: #efe2c6;
+      --ink: #f0e2c4;
+      --ink-soft: #c2a97e;
+      --rule: #5b4a36;
+      --accent: #e3a05a;
+      --good: #a9c48a;
+      --warn: #e6b65c;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --page: #1d1611;
+    --page-deep: #2a2018;
+    --paper: #efe2c6;
+    --ink: #f0e2c4;
+    --ink-soft: #c2a97e;
+    --rule: #5b4a36;
+    --accent: #e3a05a;
+    --good: #a9c48a;
+    --warn: #e6b65c;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background:
+      radial-gradient(ellipse at 20% 0%, transparent 40%, var(--page-deep) 100%),
+      var(--page);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.5;
+    padding-block: 40px 80px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 48px; }
+
+  header { display: grid; gap: 10px; max-width: 70ch; }
+  .eyebrow { font-family: var(--font-display); letter-spacing: 0.12em; color: var(--accent); font-size: 15px; }
+  h1 { font-family: var(--font-italic); font-weight: 400; font-size: clamp(36px, 6vw, 56px); line-height: 1.05; margin: 0; text-wrap: balance; }
+  h2 { font-family: var(--font-display); font-weight: 400; font-size: 26px; margin: 0; letter-spacing: 0.02em; text-wrap: balance; }
+  h3 { font-family: var(--font-italic); font-style: italic; font-weight: 400; font-size: 22px; margin: 0; }
+  p { margin: 0; }
+  .lede { color: var(--ink-soft); font-size: 19px; }
+
+  /* Summary ledger */
+  .ledger-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 760px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.06em; font-size: 14px; color: var(--ink-soft); }
+  td code { font-family: var(--font-body); font-weight: 600; }
+  .note { font-family: var(--font-hand); font-size: 21px; line-height: 1.15; color: var(--accent); }
+  .pill { display: inline-block; font-size: 14px; padding: 1px 9px; border-radius: 999px; border: 1px solid currentColor; }
+  .pill.yes { color: var(--good); }
+  .pill.no { color: var(--warn); }
+
+  /* Controls */
+  .controls { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+  .seg button {
+    font: inherit; font-size: 15px; background: transparent; color: var(--ink); border: 0;
+    padding: 6px 14px; cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--page); }
+  .seg button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .hint { color: var(--ink-soft); font-size: 15px; }
+
+  /* Species rows */
+  .species { display: grid; gap: 16px; padding-top: 24px; border-top: 1px solid var(--rule); }
+  .species-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+  .marks { color: var(--ink-soft); font-style: italic; font-size: 16px; }
+  .models { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  @media (max-width: 980px) { .models { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 520px) { .models { grid-template-columns: minmax(0, 1fr); } }
+
+  .cell { display: grid; gap: 8px; }
+  .cell-label { font-family: var(--font-display); font-size: 14px; letter-spacing: 0.06em; color: var(--ink-soft); }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  figure { margin: 0; display: grid; gap: 4px; }
+  figcaption { font-size: 13px; color: var(--ink-soft); font-family: var(--font-italic); font-style: italic; }
+  .card {
+    aspect-ratio: 1; max-width: 100%;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.35), transparent 60%),
+      radial-gradient(circle at 80% 90%, rgba(120,90,40,0.12), transparent 55%),
+      var(--paper);
+    border: 1px solid rgba(90,70,40,0.25);
+    border-radius: 3px;
+    overflow: hidden;
+    display: grid; place-items: center;
+    cursor: zoom-in;
+  }
+  .card img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  body[data-bg="parchment"] .card img { mix-blend-mode: multiply; }
+  body[data-bg="check"] .card {
+    background: repeating-conic-gradient(#cfcfcf 0 25%, #ffffff 0 50%) 0 0 / 16px 16px;
+  }
+  body[data-bg="check"] .card img { mix-blend-mode: normal; }
+  .missing { font-family: var(--font-hand); color: var(--ink-soft); font-size: 18px; text-align: center; padding: 8px; cursor: default; }
+
+  /* Scoring */
+  .scores { display: grid; gap: 16px; }
+  .score-grid { overflow-x: auto; }
+  .score-grid select {
+    font: inherit; font-size: 16px; color: var(--ink); background: transparent;
+    border: 1px solid var(--rule); border-radius: 4px; padding: 3px 6px;
+  }
+  .total { font-family: var(--font-italic); font-size: 24px; }
+  .total.lead { color: var(--accent); }
+
+  /* Zoom */
+  dialog {
+    border: 0; padding: 0; background: var(--paper); max-width: min(92vw, 900px); width: 100%;
+    border-radius: 4px; box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  }
+  dialog::backdrop { background: rgba(20,14,8,0.75); }
+  dialog img { width: 100%; display: block; }
+  dialog .zoom-cap { padding: 10px 14px; color: #2b2118; font-family: var(--font-italic); font-style: italic; }
+  body[data-bg="parchment"] dialog img { mix-blend-mode: multiply; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .card img { transition: transform 200ms ease; }
+    .card:hover img { transform: scale(1.03); }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Overheard · Art trial · 18 Oct 2026</div>
+    <h1>Which model draws our birds?</h1>
+    <p class="lede">Four image models each drew five species, then redrew each one as a variation (late-autumn twig, head turned). Score them at the bottom. Tap any image to enlarge it.</p>
+  </header>
+
+  <section class="ledger-wrap" aria-labelledby="summary-h">
+    <h2 id="summary-h" style="margin-bottom:12px">The candidates</h2>
+    <table>
+      <thead>
+        <tr><th>Model</th><th>Per 1K image</th><th>Avg time</th><th>Transparent</th><th>First impression</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>gemini-3.1-flash-image</code></td><td>$0.067</td><td>8.6 s</td>
+          <td><span class="pill no">No, returns JPEG</span></td>
+          <td class="note">Loose, genuinely hand-drawn. Backgrounds vary (white vs. framed sheet). Variations barely move.</td>
+        </tr>
+        <tr>
+          <td><code>gemini-3-pro-image</code></td><td>$0.134</td><td>15.8 s</td>
+          <td><span class="pill no">No, paints its own parchment</span></td>
+          <td class="note">Best field-journal feel and strong field marks. Draws stained paper behind every bird.</td>
+        </tr>
+        <tr>
+          <td><code>gpt-image-2.5-flare</code></td><td>≈ $0.05–0.06</td><td>18.2 s</td>
+          <td><span class="pill yes">Yes, with glow halo</span></td>
+          <td class="note">Clean cut-outs but a soft halo. Reads as digital painting, not ink.</td>
+        </tr>
+        <tr>
+          <td><code>gpt-image-2.5-sunburst</code></td><td>≈ $0.05–0.06</td><td>32.0 s</td>
+          <td><span class="pill yes">Yes, with glow halo</span></td>
+          <td class="note">Most detailed and slowest. Same halo; least like a sketch.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="hint" style="margin-top:10px">OpenAI cost is estimated from ~1,756 output tokens per image at a third-party-reported $30 / 1M rate. Three OpenAI images are missing because credits ran out mid-run.</p>
+  </section>
+
+  <section class="controls" aria-label="Display options">
+    <div class="seg" role="group" aria-label="Background">
+      <button type="button" id="bg-parchment" data-bg="parchment" aria-pressed="true">On parchment</button>
+      <button type="button" id="bg-raw" data-bg="raw" aria-pressed="false">Raw</button>
+      <button type="button" id="bg-check" data-bg="check" aria-pressed="false">Show transparency</button>
+    </div>
+    <p class="hint">"On parchment" multiplies each image onto paper, the way it would sit in a journal page. White backgrounds vanish; painted ones don't.</p>
+  </section>
+
+  <div id="species" style="display:grid;gap:40px"></div>
+
+  <section class="scores" aria-labelledby="score-h">
+    <h2 id="score-h">Your scores</h2>
+    <p class="hint">1 = poor, 5 = great. Saved in this browser. Tell Claude the totals, or which one you liked.</p>
+    <div class="score-grid"><table id="score-table"></table></div>
+  </section>
+</div>
+
+<dialog id="zoom"><img id="zoom-img" alt=""><div class="zoom-cap" id="zoom-cap"></div></dialog>
+
+<script>
+  const MODELS = [
+    { id: "gemini-3.1-flash-image", label: "Gemini 3.1 Flash" },
+    { id: "gemini-3-pro-image", label: "Gemini 3 Pro" },
+    { id: "gpt-image-2.5-flare", label: "GPT Image 2.5 Flare" },
+    { id: "gpt-image-2.5-sunburst", label: "GPT Image 2.5 Sunburst" },
+  ];
+  const SPECIES = [
+    { code: "norcar", name: "Northern Cardinal", marks: "red body, crest, black mask, thick orange bill" },
+    { code: "blujay", name: "Blue Jay", marks: "blue crest, black necklace, white wing bars and tail corners" },
+    { code: "btbwar", name: "Black-throated Blue Warbler", marks: "blue back, black face and throat, white wing square" },
+    { code: "whtspa", name: "White-throated Sparrow", marks: "white throat, striped crown, yellow lores" },
+    { code: "rethaw", name: "Red-tailed Hawk", marks: "brick-red tail, belly band, dark wing edge" },
+  ];
+  const MISSING = new Set([
+    "gpt-image-2.5-flare/btbwar-variation",
+    "gpt-image-2.5-flare/rethaw-base",
+    "gpt-image-2.5-flare/rethaw-variation",
+    "gpt-image-2.5-sunburst/rethaw-variation",
+  ]);
+  const CRITERIA = ["Anatomy", "Style", "Variation", "Transparency", "Cost & speed"];
+
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  };
+
+  // Species rows
+  const root = document.getElementById("species");
+  for (const s of SPECIES) {
+    const sec = document.createElement("section");
+    sec.className = "species";
+    sec.innerHTML = `<div class="species-head"><h3>${s.name}</h3><span class="marks">${s.marks}</span></div><div class="models"></div>`;
+    const grid = sec.querySelector(".models");
+    for (const m of MODELS) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.innerHTML = `<div class="cell-label">${m.label}</div><div class="pair"></div>`;
+      const pair = cell.querySelector(".pair");
+      for (const kind of ["base", "variation"]) {
+        const key = `${m.id}/${s.code}-${kind}`;
+        const fig = document.createElement("figure");
+        if (MISSING.has(key)) {
+          fig.innerHTML = `<div class="card missing">out of credits</div><figcaption>${kind}</figcaption>`;
+        } else {
+          const alt = `${s.name}, ${kind}, by ${m.label}`;
+          fig.innerHTML = `<button type="button" class="card" aria-label="Enlarge: ${alt}" style="padding:0"><img src="img/${key}.png" alt="${alt}" loading="lazy" width="480" height="480"></button><figcaption>${kind}</figcaption>`;
+          fig.querySelector("button").addEventListener("click", () => {
+            const z = document.getElementById("zoom");
+            document.getElementById("zoom-img").src = `img/${key}.png`;
+            document.getElementById("zoom-img").alt = alt;
+            document.getElementById("zoom-cap").textContent = alt;
+            z.showModal();
+          });
+        }
+        pair.appendChild(fig);
+      }
+      grid.appendChild(cell);
+    }
+    root.appendChild(sec);
+  }
+  const zoom = document.getElementById("zoom");
+  zoom.addEventListener("click", () => zoom.close());
+
+  // Background toggle
+  const bgButtons = document.querySelectorAll("[data-bg]");
+  function setBg(bg) {
+    document.body.dataset.bg = bg;
+    bgButtons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.bg === bg)));
+    store.set("trial-bg", bg);
+  }
+  bgButtons.forEach((b) => b.addEventListener("click", () => setBg(b.dataset.bg)));
+  setBg(store.get("trial-bg", "parchment"));
+
+  // Scoring
+  const scores = store.get("trial-scores", {});
+  const table = document.getElementById("score-table");
+  table.innerHTML =
+    `<thead><tr><th>Model</th>${CRITERIA.map((c) => `<th>${c}</th>`).join("")}<th>Total</th></tr></thead>` +
+    `<tbody>${MODELS.map((m) =>
+      `<tr><td>${m.label}</td>${CRITERIA.map((c, i) =>
+        `<td><label class="hint" for="s-${m.id}-${i}" hidden>${m.label} ${c}</label><select id="s-${m.id}-${i}" data-m="${m.id}" data-i="${i}"><option value="">–</option>${[1,2,3,4,5].map((n) => `<option>${n}</option>`).join("")}</select></td>`
+      ).join("")}<td class="total" id="t-${m.id}">–</td></tr>`
+    ).join("")}</tbody>`;
+
+  function renderTotals() {
+    let best = 0;
+    const totals = MODELS.map((m) => {
+      const row = scores[m.id] || [];
+      const vals = row.filter((v) => v);
+      const t = vals.reduce((a, b) => a + Number(b), 0);
+      if (t > best) best = t;
+      return [m.id, vals.length ? t : null];
+    });
+    for (const [id, t] of totals) {
+      const el = document.getElementById(`t-${id}`);
+      el.textContent = t == null ? "–" : `${t} / 25`;
+      el.classList.toggle("lead", t != null && t === best && best > 0);
+    }
+  }
+  table.querySelectorAll("select").forEach((sel) => {
+    const { m, i } = sel.dataset;
+    sel.value = (scores[m] || [])[i] || "";
+    sel.addEventListener("change", () => {
+      (scores[m] ||= [])[i] = sel.value;
+      store.set("trial-scores", scores);
+      renderTotals();
+    });
+  });
+  renderTotals();
+</script>

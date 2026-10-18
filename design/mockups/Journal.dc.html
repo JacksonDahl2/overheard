@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Journal page</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&amp;family=IM+Fell+English+SC&amp;family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&amp;family=Caveat:wght@500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#8b2f1c}a:hover{color:#6a2213}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: {{t.chromeBg}}; color: {{t.chromeInk}}; font-family: 'EB Garamond', Garamond, Georgia, serif; overflow: hidden">
+
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 50px 12px 8px">
+    <a href="Main.dc.html" style="display: flex; align-items: center; gap: 2px; min-height: 44px; padding: 0 8px; text-decoration: none; color: {{t.chromeInk}}; font-size: 17px">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>
+      Journal
+    </a>
+    <button type="button" aria-label="Share this page" style="width: 44px; height: 44px; border: 0; background: transparent; color: {{t.chromeInk}}; display: grid; place-items: center">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 3v11M7 7l4-4 4 4"/><path d="M5 11v7h12v-7"/></svg>
+    </button>
+  </div>
+
+  <div style="position: relative; flex: 1; margin: 0 12px; padding: 18px 18px 14px; border-radius: 6px; background: {{t.page}}; box-shadow: {{t.pageShadow}}; color: #2a1f15; display: flex; flex-direction: column; gap: 6px; overflow: hidden">
+    <h1 style="margin: 0; font-family: 'IM Fell English', Georgia, serif; font-weight: 400; font-size: 29px; line-height: 1.08; text-wrap: balance">A grey morning in the Ramble</h1>
+    <div style="font-size: 15px; color: {{t.pageSoft}}; font-variant-numeric: tabular-nums">Sat 18 Oct 2026 · 7:12–8:31am · 2.4 mi</div>
+
+    <div style="position: relative; height: 300px; margin: 4px -10px 0">
+      <img src="/_blob/ada809a0465b2fcb45942057d711150b" alt="White-throated Sparrow, heard 4 times" style="position: absolute; left: 0; top: 0; width: 170px; height: 170px; mix-blend-mode: multiply; filter: {{t.birdFilter}}">
+      <img src="/_blob/8f365bd7214e443ff2cf0ee234c7cdf9" alt="Blue Jay, heard 3 times" style="position: absolute; left: 168px; top: 0; width: 145px; height: 145px; mix-blend-mode: multiply; filter: {{t.birdFilter}}">
+      <img src="/_blob/262c38c964286bdc7e0966e2ddc1b902" alt="Northern Cardinal on an autumn twig, heard twice" style="position: absolute; left: 230px; top: 132px; width: 115px; height: 115px; mix-blend-mode: multiply; filter: {{t.birdFilter}}">
+      <img src="/_blob/db888ba88e4ac8533bb8d7798e61960a" alt="Red-tailed Hawk, heard once" style="position: absolute; left: 22px; top: 176px; width: 90px; height: 90px; mix-blend-mode: multiply; filter: {{t.birdFilter}}">
+      <img src="/_blob/a4dcd1b7c04ab0e4b58990c6765620fe" alt="Black-throated Blue Warbler, heard once, a life bird" style="position: absolute; left: 128px; top: 162px; width: 92px; height: 92px; mix-blend-mode: multiply; filter: {{t.birdFilter}}">
+      <svg width="40" height="34" viewBox="0 0 40 34" style="position: absolute; left: 96px; top: 238px" aria-hidden="true">
+        <path d="M6 30c4-10 14-18 28-22M34 8l-8 0M34 8l-3 7" fill="none" stroke="{{t.accentOnPage}}" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <div style="position: absolute; left: 136px; top: 254px; font-family: 'Caveat', cursive; font-size: 19px; line-height: 1.02; color: {{t.accentOnPage}}; transform: rotate(-3deg)">life bird! uncommon here<br>this late in October</div>
+    </div>
+
+    <div style="height: 1px; background: {{t.pageRule}}; margin: 8px 0 2px"></div>
+    <div style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 14px; letter-spacing: 0.12em; color: {{t.pageSoft}}">Heard · 6 species</div>
+
+    <div style="display: grid; grid-template-columns: 1fr auto auto; column-gap: 14px; row-gap: 5px; font-size: 16px; font-variant-numeric: tabular-nums; align-items: baseline">
+      <span style="font-style: italic">White-throated Sparrow</span><span style="color: {{t.pageSoft}}">7:13</span><span>×4</span>
+      <span style="font-style: italic">Northern Cardinal</span><span style="color: {{t.pageSoft}}">7:14</span><span>×2</span>
+      <span style="font-style: italic">Blue Jay</span><span style="color: {{t.pageSoft}}">7:18</span><span>×3</span>
+      <span style="font-style: italic">Black-throated Blue Warbler <span style="font-style: normal; font-size: 13px; color: {{t.accentOnPage}}">★ life bird</span></span><span style="color: {{t.pageSoft}}">7:40</span><span>×1</span>
+      <span style="font-style: italic">Red-tailed Hawk</span><span style="color: {{t.pageSoft}}">7:51</span><span>×1</span>
+      <span style="font-style: italic">American Robin</span><span style="color: {{t.pageSoft}}">8:02</span><span>×3</span>
+    </div>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 16px; padding: 12px 22px 12px; font-size: 15px; color: {{t.chromeSoft}}">
+    <span style="display: flex; align-items: center; gap: 6px">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="11" cy="7" r="2"/><path d="M1.5 14c.5-2.5 2.2-4 4.5-4s4 1.5 4.5 4M10 10.5c2 0 3.6 1.2 4.2 3.5"/></svg>
+      Visible to friends
+    </span>
+    <span style="margin-left: auto; display: flex; align-items: center; gap: 5px; color: {{t.chromeInk}}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M8 14S2 10.2 2 6.2A3.2 3.2 0 0 1 8 4.6a3.2 3.2 0 0 1 6 1.6C14 10.2 8 14 8 14z"/></svg>
+      3
+    </span>
+    <span style="display: flex; align-items: center; gap: 5px; color: {{t.chromeInk}}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h12v8H7l-3 3v-3H2z"/></svg>
+      1
+    </span>
+  </div>
+
+  <nav aria-label="Main" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 8px 8px 28px; border-top: 1px solid {{t.rule}}; background: {{t.tabBg}}">
+    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 44px; justify-content: center; text-decoration: none; color: {{t.tabSoft}}; font-size: 13px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M12 4v16M8 8v8M16 8v8M4 11v2M20 11v2"/></svg>
+      Listen
+    </a>
+    <a href="Journal.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 44px; justify-content: center; text-decoration: none; color: {{t.accent}}; font-size: 13px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 5c3-1 6-1 8 1 2-2 5-2 8-1v14c-3-1-6-1-8 1-2-2-5-2-8-1z"/><path d="M12 6v14"/></svg>
+      Journal
+    </a>
+    <a href="Feed.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 44px; justify-content: center; text-decoration: none; color: {{t.tabSoft}}; font-size: 13px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 15c3-1 4-4 7-4s3 3 6 2"/><path d="M8 19c3-1 4-4 7-4s3 3 6 2"/><path d="M5 10c2-1 3-3 5-3"/></svg>
+      Flock
+    </a>
+    <a href="#me" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 44px; justify-content: center; text-decoration: none; color: {{t.tabSoft}}; font-size: 13px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="9" r="4"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6"/></svg>
+      Me
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["parchment","candlelight"],"default":"parchment"},"$preview":{"width":390,"height":844}}'>
+const THEMES = {
+  parchment: {
+    chromeBg: '#ebdfc3', chromeInk: '#2a1f15', chromeSoft: '#665441', tabBg: '#e5d7b8', tabSoft: '#6e5b46',
+    rule: 'rgba(90,66,38,0.25)', accent: '#8b2f1c',
+    page: 'radial-gradient(120% 90% at 50% 30%, #f6edd6 0%, #efe3c6 60%, #e0cfa8 100%)',
+    pageShadow: '0 1px 0 rgba(90,66,38,0.15), 0 6px 18px rgba(90,66,38,0.12)',
+    pageSoft: '#6a5741', pageRule: 'rgba(90,66,38,0.3)', accentOnPage: '#8b2f1c', birdFilter: 'none'
+  },
+  candlelight: {
+    chromeBg: '#17100a', chromeInk: '#f2e2c0', chromeSoft: '#c4a77b', tabBg: '#120c07', tabSoft: '#a98f68',
+    rule: 'rgba(242,226,192,0.14)', accent: '#e9a24f',
+    page: 'radial-gradient(115% 100% at 50% 34%, #ecd3a4 0%, #d8b986 50%, #b8935e 85%, #8f6d42 100%)',
+    pageShadow: '0 0 40px rgba(233,162,79,0.18)',
+    pageSoft: '#4e3a22', pageRule: 'rgba(60,40,18,0.35)', accentOnPage: '#7a2812', birdFilter: 'sepia(0.12) saturate(0.95)'
+  }
+};
+class Component extends DCLogic {
+  renderVals() {
+    const theme = this.props.theme ?? 'parchment';
+    return { t: THEMES[theme] ?? THEMES.parchment };
+  }
+}
+</script>
+</body>
+</html>

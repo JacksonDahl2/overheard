@@ -32,7 +32,8 @@ struct ListenView: View {
                             Spacer()
                             VStack(alignment: .trailing) {
                                 Text("×\(bird.calls)").monospacedDigit()
-                                Text("best \(Int(bird.bestConfidence * 100))%").font(.caption).foregroundStyle(.secondary)
+                                Text("best \(Int(bird.bestConfidence * 100))%").font(.caption).foregroundStyle(
+                                    .secondary)
                             }
                         }
                     }

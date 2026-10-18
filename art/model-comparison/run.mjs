@@ -28,17 +28,14 @@ async function gemini(model, prompt, inputPng) {
     parts.push({ inline_data: { mime_type: mime, data: inputPng.toString("base64") } });
   }
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-    {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY },
-      body: JSON.stringify({
-        contents: [{ parts }],
-        generationConfig: { responseModalities: ["IMAGE"], imageConfig: { aspectRatio: "1:1" } },
-      }),
-    },
-  );
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY },
+    body: JSON.stringify({
+      contents: [{ parts }],
+      generationConfig: { responseModalities: ["IMAGE"], imageConfig: { aspectRatio: "1:1" } },
+    }),
+  });
   const json = await res.json();
   if (!res.ok) throw new Error(`${res.status} ${JSON.stringify(json.error ?? json)}`);
 
@@ -102,7 +99,8 @@ async function main() {
         for (const kind of ["base", "variation"]) {
           const file = `${m.id}/${s.code}-${kind}.png`;
           const prompt = kind === "base" ? basePrompt(s) : variationPrompt(s);
-          const input = kind === "variation" ? await readFile(join(OUT, `${m.id}/${s.code}-base.png`)).catch(() => null) : null;
+          const input =
+            kind === "variation" ? await readFile(join(OUT, `${m.id}/${s.code}-base.png`)).catch(() => null) : null;
           if (kind === "variation" && !input) continue;
 
           const started = Date.now();

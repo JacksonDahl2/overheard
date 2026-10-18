@@ -82,8 +82,8 @@ final class AudioCapture {
             forName: AVAudioSession.interruptionNotification, object: nil, queue: nil
         ) { [weak self] note in
             guard let self,
-                  let raw = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
-                  AVAudioSession.InterruptionType(rawValue: raw) == .ended
+                let raw = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
+                AVAudioSession.InterruptionType(rawValue: raw) == .ended
             else { return }
             // A call or Siri paused us; pick back up where we left off.
             try? AVAudioSession.sharedInstance().setActive(true)

@@ -1,3 +1,4 @@
 tensorflow==2.15.*
 coremltools==9.0
 numpy<2
+ruff

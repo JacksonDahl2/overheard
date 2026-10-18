@@ -43,7 +43,9 @@ def main():
     clips = [audio[i : i + CLIP] for i in range(0, len(audio) - CLIP + 1, CLIP)]
     labels = open(os.path.join(HERE, "models/coreml/labels.txt")).read().splitlines()
 
-    tf_fn = tf.saved_model.load(os.path.join(HERE, "models/birdnet-v2.4/protobuf/audio-model")).signatures["basic"]
+    tf_fn = tf.saved_model.load(os.path.join(HERE, "models/birdnet-v2.4/protobuf/audio-model")).signatures[
+        "basic"
+    ]
     ml = ct.models.MLModel(os.path.join(HERE, "models/coreml/BirdNETAudio.mlpackage"))
     ml_out = ml.get_spec().description.output[0].name
 

@@ -75,6 +75,16 @@ xcodebuild -project Overheard.xcodeproj -scheme Overheard \
 node --env-file=.env art/model-comparison/run.mjs
 ```
 
+## Formatting
+
+Run these before committing:
+
+```sh
+ml/.venv/bin/ruff format ml && ml/.venv/bin/ruff check --fix ml          # Python (config: ml/pyproject.toml)
+xcrun swift-format format --in-place --recursive apps/ios/Overheard      # Swift (config: .swift-format)
+npx prettier@3.3.3 --write "art/**/*.mjs"                                # JS (config: .prettierrc.json)
+```
+
 ## Layout
 
 ```

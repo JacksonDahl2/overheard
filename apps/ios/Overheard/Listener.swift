@@ -74,7 +74,8 @@ final class Listener {
         }
 
         let started = CFAbsoluteTimeGetCurrent()
-        let scores = (try? classifier.classify(clip, date: .now, minConfidence: minConfidence, filtered: filtered)) ?? []
+        let scores =
+            (try? classifier.classify(clip, date: .now, minConfidence: minConfidence, filtered: filtered)) ?? []
         let ms = (CFAbsoluteTimeGetCurrent() - started) * 1000
         Task { @MainActor in self.record(scores, level: level, ms: ms) }
     }
@@ -92,18 +93,19 @@ final class Listener {
                 birds[i].bestConfidence = max(birds[i].bestConfidence, score.confidence)
                 birds[i].lastHeard = now
             } else {
-                birds.append(HeardBird(
-                    id: score.index, commonName: score.commonName, scientificName: score.scientificName,
-                    calls: 1, bestConfidence: score.confidence, firstHeard: now, lastHeard: now))
+                birds.append(
+                    HeardBird(
+                        id: score.index, commonName: score.commonName, scientificName: score.scientificName,
+                        calls: 1, bestConfidence: score.confidence, firstHeard: now, lastHeard: now))
             }
         }
         birds.sort { $0.calls == $1.calls ? $0.firstHeard < $1.firstHeard : $0.calls > $1.calls }
     }
 }
 
-private extension MainActor {
+extension MainActor {
     /// Reads main-actor state from a background queue.
-    static func assumeIsolatedOrSync<T: Sendable>(_ body: @MainActor () -> T) -> T {
+    fileprivate static func assumeIsolatedOrSync<T: Sendable>(_ body: @MainActor () -> T) -> T {
         if Thread.isMainThread { return MainActor.assumeIsolated(body) }
         return DispatchQueue.main.sync { MainActor.assumeIsolated(body) }
     }

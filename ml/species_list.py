@@ -2,10 +2,10 @@ import json
 import os
 import sys
 
-os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
-
 import numpy as np
 import tensorflow as tf
+
+os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 
 
 """Precompute BirdNET's location filter for one place, for all 48 weeks.
@@ -30,7 +30,9 @@ def main():
     else:
         lat, lon, name = 40.7812, -73.9665, "central-park"
 
-    fn = tf.saved_model.load(os.path.join(HERE, "models/birdnet-v2.4/protobuf/meta-model")).signatures["serving_default"]
+    fn = tf.saved_model.load(os.path.join(HERE, "models/birdnet-v2.4/protobuf/meta-model")).signatures[
+        "serving_default"
+    ]
     labels = open(os.path.join(HERE, "models/coreml/labels.txt")).read().splitlines()
 
     weeks = {}
@@ -47,7 +49,11 @@ def main():
     counts = [len(v) for v in weeks.values()]
     print(f"wrote {path}: {min(counts)}-{max(counts)} species per week")
     oct_week = 39  # mid-October
-    print(f"week {oct_week} sample:", ", ".join(labels[i].split("_")[1] for i in weeks[str(oct_week)][:12]), "...")
+    print(
+        f"week {oct_week} sample:",
+        ", ".join(labels[i].split("_")[1] for i in weeks[str(oct_week)][:12]),
+        "...",
+    )
 
 
 if __name__ == "__main__":

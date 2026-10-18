@@ -37,9 +37,10 @@ final class BirdClassifier {
             throw ClassifierError.missingResource("species-central-park.json")
         }
         let table = try JSONDecoder().decode(SpeciesTable.self, from: Data(contentsOf: speciesURL))
-        weeks = Dictionary(uniqueKeysWithValues: table.weeks.compactMap { key, value in
-            Int(key).map { ($0, Set(value)) }
-        })
+        weeks = Dictionary(
+            uniqueKeysWithValues: table.weeks.compactMap { key, value in
+                Int(key).map { ($0, Set(value)) }
+            })
     }
 
     /// Scores a clip. Returns species above `minConfidence`, best first.
@@ -63,9 +64,10 @@ final class BirdClassifier {
                 if let allowed, !allowed.contains(i) { continue }
                 let confidence = Self.sigmoid(values[i])
                 guard confidence >= minConfidence else { continue }
-                scores.append(BirdScore(
-                    index: i, commonName: labels[i].common, scientificName: labels[i].scientific,
-                    confidence: confidence))
+                scores.append(
+                    BirdScore(
+                        index: i, commonName: labels[i].common, scientificName: labels[i].scientific,
+                        confidence: confidence))
             }
         }
         return scores.sorted { $0.confidence > $1.confidence }

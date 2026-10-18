@@ -8,7 +8,8 @@ export const SPECIES = [
   {
     code: "blujay",
     name: "Blue Jay",
-    marks: "blue crest, black necklace across a white-gray breast, white wing bars and white tail corners, barred blue wings",
+    marks:
+      "blue crest, black necklace across a white-gray breast, white wing bars and white tail corners, barred blue wings",
   },
   {
     code: "btbwar",

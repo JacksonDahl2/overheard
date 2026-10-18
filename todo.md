@@ -61,8 +61,8 @@ Goal: prove the core experience works in Central Park.
   1. [x] Eval harness (bird recordings pending xeno-canto key): labeled NYC recordings (xeno-canto) + no-bird noise clips → run the app's own Swift pipeline on the Mac → precision/recall report
   2. [x] Non-bird labels (Human vocal, Engine, Dog, Siren, Fireworks…) excluded from the tally always
   3. [x] Overlapping windows (3 s clip every 1 s) + merge back-to-back detections into one "call" (gap > ~3 s = new call) so ×counts stay honest
-  4. [ ] Confirmation: new species needs ≥0.8 in one clip or ≥0.5 in two clips within ~10 s; otherwise "maybe" (debug only)
-  5. [ ] Real location filter: convert meta model to Core ML (custom op fix like `Cast`), fallback precomputed grid; replace hard 0.03 cutoff with occurrence-scaled confidence bar (common ~0.5, unusual ~0.75, very unlikely hidden) — same score drives the rare-bird flourish
+  4. [x] Confirmation: a call counts when it has ≥2 clips above the threshold or one clip ≥0.70; until then the species is "pending" (the sketching bird), and it fades if the call ends unconfirmed
+  5. [ ] Occurrence-scaled confidence bar: replace the hard 0.03 location cutoff with a bar that rises as a species gets less likely here (common ~0.5, unusual ~0.75, very unlikely hidden) — same score drives the rare-bird flourish. (Location model on device: done.)
   6. [ ] Adaptive noise gate (relative to recent noise floor) instead of a fixed RMS cutoff
 - [ ] "Start walk" / "End walk" flow with live detection list
 - [ ] Record walk route (CoreLocation) and show on MapKit
@@ -137,7 +137,7 @@ Goal: prove the core experience works in Central Park.
 - [ ] Home screen widget (today's birds / last walk)
 - [ ] Privacy policy + terms (mic, location, user content)
 - [ ] App Store privacy labels
-- [ ] BirdNET attribution in app
+- [ ] BirdNET attribution in the final UI (spike app already has it in Credits)
 - [ ] TestFlight beta
 - [ ] App Store submission
 

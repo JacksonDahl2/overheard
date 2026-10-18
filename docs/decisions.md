@@ -68,3 +68,11 @@ A dated log of what we decided and why. Newest at the bottom. To change a decisi
 
 - **"×count" means separate songs or bursts of calls,** not minutes present or separate visits. Each song counts once, and bird size grows on a capped log scale so a nonstop singer doesn't dominate the page.
 - **Overlapping clips:** a 3 s clip every **1 s**, and detections of a species ≤ 2.5 s apart are one call. In the eval, recall rose 4–9 points (most in city noise) and precision fell 3–5. Step 4's confirmation rule is meant to win that back.
+
+## 2026-10-18 (detection step 4)
+
+- **Call confirmation:** a call counts only once it has **≥ 2 clips above the threshold, or one clip ≥ 0.70**. Until then, a new species is *pending*.
+  - In the UI, a pending bird is the faint **"sketching" bird**. It finishes drawing when confirmed and fades if the call ends unconfirmed.
+  - Later calls of an already-confirmed species need confirming too, so counts don't inflate.
+- **Operating point:** threshold **0.50** with that confirmation ("option B: fewer wrong birds"). In the eval, wrong species per recording halved (0.32 → 0.15), precision went 72.9% → 83.7%, and recall went 85.5% → 79.1%. The alternative was 0.35 for 83.6% recall and 78.6% precision.
+  - *Why:* a wrong bird drawn on a shared journal page is worse than a missed one, and pending birds still show up as sketches.

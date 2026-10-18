@@ -44,14 +44,18 @@ Goal: prove the core experience works in Central Park.
 - [x] Mic permission + `AVAudioSession` setup (`.record` / `.measurement` mode)
 - [x] Audio capture with `AVAudioEngine` (3s windows, resampled to 48kHz)
 - [x] Convert BirdNET → Core ML and bundle it (`ml/convert.py`; verified vs TensorFlow)
-- [x] Run inference on audio windows; confidence threshold (smoothing still TODO) — ~21 ms/clip on iPhone 17 Pro
-- [ ] Overlapping windows (e.g. 1 s hop) so birds appear faster; cheap given ~21 ms inference
+- [x] Run inference on audio windows; confidence threshold (smoothing: see detection-quality plan) — ~21 ms/clip on iPhone 17 Pro
 - [ ] BirdNET location/week filter using CoreLocation — spike uses a precomputed Central Park table (`ml/species_list.py`); fix meta-model Core ML conversion or precompute a grid
-- [ ] Tune location-filter threshold for migrants (0.03 drops Black-throated Blue Warbler in mid-Oct)
-- [ ] Ignore non-bird labels (Engine, Human vocal, Dog, Siren…) when the filter is off
 - [x] Noise gating (skip inference on quiet windows) — threshold needs field tuning
 - [x] Handle interruptions (calls, Siri, other audio) and resume — basic; verify on device
 - [x] Background audio mode so a walk keeps listening with the screen locked — verify on device
+- [ ] **Detection-quality plan** (do in this order; measure every step with the harness):
+  1. [x] Eval harness (bird recordings pending xeno-canto key): labeled NYC recordings (xeno-canto) + no-bird noise clips → run the app's own Swift pipeline on the Mac → precision/recall report
+  2. [ ] Non-bird labels (Human vocal, Engine, Dog, Siren, Fireworks…) excluded from the tally always
+  3. [ ] Overlapping windows (3 s clip every 1 s) + merge back-to-back detections into one "call" (gap > ~3 s = new call) so ×counts stay honest
+  4. [ ] Confirmation: new species needs ≥0.8 in one clip or ≥0.5 in two clips within ~10 s; otherwise "maybe" (debug only)
+  5. [ ] Real location filter: convert meta model to Core ML (custom op fix like `Cast`), fallback precomputed grid; replace hard 0.03 cutoff with occurrence-scaled confidence bar (common ~0.5, unusual ~0.75, very unlikely hidden) — same score drives the rare-bird flourish
+  6. [ ] Adaptive noise gate (relative to recent noise floor) instead of a fixed RMS cutoff
 - [ ] "Start walk" / "End walk" flow with live detection list
 - [ ] Record walk route (CoreLocation) and show on MapKit
 - [ ] Persist walks + detections locally with SwiftData

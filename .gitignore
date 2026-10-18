@@ -9,3 +9,6 @@ ml/models/
 apps/ios/Overheard.xcodeproj/
 apps/ios/Overheard/Info.plist
 xcuserdata/
+ml/eval/audio/
+.build/
+.vscode/launch.json

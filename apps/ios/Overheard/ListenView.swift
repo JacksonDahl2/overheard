@@ -1,3 +1,4 @@
+import OverheardKit
 import SwiftUI
 
 /// Bare-bones spike UI: start/stop, live detections, and tuning controls.

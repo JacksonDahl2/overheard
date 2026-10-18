@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import OverheardKit
 
 /// A species heard during the current session.
 struct HeardBird: Identifiable {
@@ -42,7 +43,7 @@ final class Listener {
     func start() {
         errorMessage = nil
         do {
-            if classifier == nil { classifier = try BirdClassifier() }
+            if classifier == nil { classifier = try BirdClassifier.bundled() }
             capture.onClip = { [weak self] clip, level in
                 self?.inferenceQueue.async { self?.analyze(clip, level: level) }
             }

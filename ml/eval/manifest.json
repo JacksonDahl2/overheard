@@ -1,0 +1,680 @@
+{
+  "recordings": [
+    {
+      "file": "audio/xc1148843.mp3",
+      "kind": "bird",
+      "species": "Cardinalis cardinalis",
+      "also": [],
+      "date": "2024-08-04",
+      "url": "https://xeno-canto.org/1148843/download",
+      "source": "https://xeno-canto.org/1148843",
+      "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+    },
+    {
+      "file": "audio/xc1093667.wav",
+      "kind": "bird",
+      "species": "Cardinalis cardinalis",
+      "also": [
+        "Turdus migratorius"
+      ],
+      "date": "2026-04-03",
+      "url": "https://xeno-canto.org/1093667/download",
+      "source": "https://xeno-canto.org/1093667",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1046664.wav",
+      "kind": "bird",
+      "species": "Cyanocitta cristata",
+      "also": [],
+      "date": "2025-10-09",
+      "url": "https://xeno-canto.org/1046664/download",
+      "source": "https://xeno-canto.org/1046664",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc994294.mp3",
+      "kind": "bird",
+      "species": "Cyanocitta cristata",
+      "also": [],
+      "date": "2025-05-03",
+      "url": "https://xeno-canto.org/994294/download",
+      "source": "https://xeno-canto.org/994294",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1176223.mp3",
+      "kind": "bird",
+      "species": "Turdus migratorius",
+      "also": [],
+      "date": "2024-08-04",
+      "url": "https://xeno-canto.org/1176223/download",
+      "source": "https://xeno-canto.org/1176223",
+      "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+    },
+    {
+      "file": "audio/xc999643.mp3",
+      "kind": "bird",
+      "species": "Turdus migratorius",
+      "also": [
+        "Hylocichla mustelina",
+        "Dryocopus pileatus"
+      ],
+      "date": "2025-05-16",
+      "url": "https://xeno-canto.org/999643/download",
+      "source": "https://xeno-canto.org/999643",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc772287.wav",
+      "kind": "bird",
+      "species": "Zonotrichia albicollis",
+      "also": [
+        "Turdus migratorius",
+        "Bombycilla cedrorum"
+      ],
+      "date": "2022-12-30",
+      "url": "https://xeno-canto.org/772287/download",
+      "source": "https://xeno-canto.org/772287",
+      "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+    },
+    {
+      "file": "audio/xc503720.mp3",
+      "kind": "bird",
+      "species": "Zonotrichia albicollis",
+      "also": [
+        "Corvus brachyrhynchos",
+        "Agelaius phoeniceus",
+        "Melospiza melodia"
+      ],
+      "date": "2019-10-23",
+      "url": "https://xeno-canto.org/503720/download",
+      "source": "https://xeno-canto.org/503720",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1142132.mp3",
+      "kind": "bird",
+      "species": "Melospiza melodia",
+      "also": [],
+      "date": "2026-06-07",
+      "url": "https://xeno-canto.org/1142132/download",
+      "source": "https://xeno-canto.org/1142132",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1049227.wav",
+      "kind": "bird",
+      "species": "Melospiza melodia",
+      "also": [],
+      "date": "2023-09-15",
+      "url": "https://xeno-canto.org/1049227/download",
+      "source": "https://xeno-canto.org/1049227",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1035994.mp3",
+      "kind": "bird",
+      "species": "Baeolophus bicolor",
+      "also": [],
+      "date": "2025-09-02",
+      "url": "https://xeno-canto.org/1035994/download",
+      "source": "https://xeno-canto.org/1035994",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc785277.wav",
+      "kind": "bird",
+      "species": "Baeolophus bicolor",
+      "also": [],
+      "date": "2023-03-10",
+      "url": "https://xeno-canto.org/785277/download",
+      "source": "https://xeno-canto.org/785277",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1035997.mp3",
+      "kind": "bird",
+      "species": "Thryothorus ludovicianus",
+      "also": [],
+      "date": "2025-09-01",
+      "url": "https://xeno-canto.org/1035997/download",
+      "source": "https://xeno-canto.org/1035997",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1004463.mp3",
+      "kind": "bird",
+      "species": "Thryothorus ludovicianus",
+      "also": [],
+      "date": "2025-06-03",
+      "url": "https://xeno-canto.org/1004463/download",
+      "source": "https://xeno-canto.org/1004463",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc728174.mp3",
+      "kind": "bird",
+      "species": "Mimus polyglottos",
+      "also": [],
+      "date": "2022-05-28",
+      "url": "https://xeno-canto.org/728174/download",
+      "source": "https://xeno-canto.org/728174",
+      "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+    },
+    {
+      "file": "audio/xc656410.mp3",
+      "kind": "bird",
+      "species": "Mimus polyglottos",
+      "also": [],
+      "date": "2021-06-13",
+      "url": "https://xeno-canto.org/656410/download",
+      "source": "https://xeno-canto.org/656410",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1148847.mp3",
+      "kind": "bird",
+      "species": "Dumetella carolinensis",
+      "also": [],
+      "date": "2024-08-04",
+      "url": "https://xeno-canto.org/1148847/download",
+      "source": "https://xeno-canto.org/1148847",
+      "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+    },
+    {
+      "file": "audio/xc1140480.wav",
+      "kind": "bird",
+      "species": "Dumetella carolinensis",
+      "also": [],
+      "date": "2026-05-31",
+      "url": "https://xeno-canto.org/1140480/download",
+      "source": "https://xeno-canto.org/1140480",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1175751.mp3",
+      "kind": "bird",
+      "species": "Passer domesticus",
+      "also": [],
+      "date": "2026-08-23",
+      "url": "https://xeno-canto.org/1175751/download",
+      "source": "https://xeno-canto.org/1175751",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1156447.mp3",
+      "kind": "bird",
+      "species": "Passer domesticus",
+      "also": [],
+      "date": "2026-06-01",
+      "url": "https://xeno-canto.org/1156447/download",
+      "source": "https://xeno-canto.org/1156447",
+      "license": "https://creativecommons.org/licenses/by-nc/4.0/"
+    },
+    {
+      "file": "audio/xc1184861.wav",
+      "kind": "bird",
+      "species": "Sturnus vulgaris",
+      "also": [],
+      "date": "2026-10-10",
+      "url": "https://xeno-canto.org/1184861/download",
+      "source": "https://xeno-canto.org/1184861",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1142838.mp3",
+      "kind": "bird",
+      "species": "Sturnus vulgaris",
+      "also": [
+        "Motacilla alba"
+      ],
+      "date": "2026-06-06",
+      "url": "https://xeno-canto.org/1142838/download",
+      "source": "https://xeno-canto.org/1142838",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc995959.mp3",
+      "kind": "bird",
+      "species": "Zenaida macroura",
+      "also": [],
+      "date": "2025-04-14",
+      "url": "https://xeno-canto.org/995959/download",
+      "source": "https://xeno-canto.org/995959",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc995957.mp3",
+      "kind": "bird",
+      "species": "Zenaida macroura",
+      "also": [
+        "Zenaida asiatica"
+      ],
+      "date": "2025-04-20",
+      "url": "https://xeno-canto.org/995957/download",
+      "source": "https://xeno-canto.org/995957",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1033504.mp3",
+      "kind": "bird",
+      "species": "Dryobates pubescens",
+      "also": [],
+      "date": "2025-08-27",
+      "url": "https://xeno-canto.org/1033504/download",
+      "source": "https://xeno-canto.org/1033504",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc772367.mp3",
+      "kind": "bird",
+      "species": "Dryobates pubescens",
+      "also": [],
+      "date": "2013-03-10",
+      "url": "https://xeno-canto.org/772367/download",
+      "source": "https://xeno-canto.org/772367",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc638325.mp3",
+      "kind": "bird",
+      "species": "Melanerpes carolinus",
+      "also": [
+        "Corvus brachyrhynchos",
+        "Poecile atricapillus",
+        "Sayornis phoebe"
+      ],
+      "date": "2021-04-07",
+      "url": "https://xeno-canto.org/638325/download",
+      "source": "https://xeno-canto.org/638325",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc471315.mp3",
+      "kind": "bird",
+      "species": "Melanerpes carolinus",
+      "also": [
+        "Parkesia noveboracensis",
+        "Thryothorus ludovicianus"
+      ],
+      "date": "2019-05-07",
+      "url": "https://xeno-canto.org/471315/download",
+      "source": "https://xeno-canto.org/471315",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1034479.mp3",
+      "kind": "bird",
+      "species": "Spinus tristis",
+      "also": [],
+      "date": "2025-08-31",
+      "url": "https://xeno-canto.org/1034479/download",
+      "source": "https://xeno-canto.org/1034479",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1033751.mp3",
+      "kind": "bird",
+      "species": "Spinus tristis",
+      "also": [
+        "Cyanocitta cristata"
+      ],
+      "date": "2025-08-27",
+      "url": "https://xeno-canto.org/1033751/download",
+      "source": "https://xeno-canto.org/1033751",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1004464.mp3",
+      "kind": "bird",
+      "species": "Quiscalus quiscula",
+      "also": [],
+      "date": "2025-06-03",
+      "url": "https://xeno-canto.org/1004464/download",
+      "source": "https://xeno-canto.org/1004464",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc786673.wav",
+      "kind": "bird",
+      "species": "Quiscalus quiscula",
+      "also": [],
+      "date": "2023-03-18",
+      "url": "https://xeno-canto.org/786673/download",
+      "source": "https://xeno-canto.org/786673",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1006769.mp3",
+      "kind": "bird",
+      "species": "Agelaius phoeniceus",
+      "also": [],
+      "date": "2025-06-08",
+      "url": "https://xeno-canto.org/1006769/download",
+      "source": "https://xeno-canto.org/1006769",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1006768.mp3",
+      "kind": "bird",
+      "species": "Agelaius phoeniceus",
+      "also": [],
+      "date": "2025-06-08",
+      "url": "https://xeno-canto.org/1006768/download",
+      "source": "https://xeno-canto.org/1006768",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1038383.mp3",
+      "kind": "bird",
+      "species": "Junco hyemalis",
+      "also": [],
+      "date": "2025-06-23",
+      "url": "https://xeno-canto.org/1038383/download",
+      "source": "https://xeno-canto.org/1038383",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc567901.mp3",
+      "kind": "bird",
+      "species": "Junco hyemalis",
+      "also": [
+        "Cardinalis cardinalis",
+        "Dryocopus pileatus"
+      ],
+      "date": "2020-06-05",
+      "url": "https://xeno-canto.org/567901/download",
+      "source": "https://xeno-canto.org/567901",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1038362.mp3",
+      "kind": "bird",
+      "species": "Setophaga caerulescens",
+      "also": [],
+      "date": "2025-06-21",
+      "url": "https://xeno-canto.org/1038362/download",
+      "source": "https://xeno-canto.org/1038362",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1038360.mp3",
+      "kind": "bird",
+      "species": "Setophaga caerulescens",
+      "also": [],
+      "date": "2025-06-21",
+      "url": "https://xeno-canto.org/1038360/download",
+      "source": "https://xeno-canto.org/1038360",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc701682.mp3",
+      "kind": "bird",
+      "species": "Setophaga coronata",
+      "also": [],
+      "date": "2022-02-11",
+      "url": "https://xeno-canto.org/701682/download",
+      "source": "https://xeno-canto.org/701682",
+      "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+    },
+    {
+      "file": "audio/xc469599.mp3",
+      "kind": "bird",
+      "species": "Setophaga coronata",
+      "also": [],
+      "date": "2000-05-17",
+      "url": "https://xeno-canto.org/469599/download",
+      "source": "https://xeno-canto.org/469599",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc1033919.mp3",
+      "kind": "bird",
+      "species": "Buteo jamaicensis",
+      "also": [],
+      "date": "2025-08-29",
+      "url": "https://xeno-canto.org/1033919/download",
+      "source": "https://xeno-canto.org/1033919",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc664881.mp3",
+      "kind": "bird",
+      "species": "Buteo jamaicensis",
+      "also": [],
+      "date": "2021-07-25",
+      "url": "https://xeno-canto.org/664881/download",
+      "source": "https://xeno-canto.org/664881",
+      "license": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+    },
+    {
+      "file": "audio/xc1035996.mp3",
+      "kind": "bird",
+      "species": "Poecile atricapillus",
+      "also": [],
+      "date": "2025-09-01",
+      "url": "https://xeno-canto.org/1035996/download",
+      "source": "https://xeno-canto.org/1035996",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/xc994313.mp3",
+      "kind": "bird",
+      "species": "Poecile atricapillus",
+      "also": [],
+      "date": "2025-04-28",
+      "url": "https://xeno-canto.org/994313/download",
+      "source": "https://xeno-canto.org/994313",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    },
+    {
+      "file": "audio/esc50-1-17124-A-43.wav",
+      "kind": "noise",
+      "category": "car_horn",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-17124-A-43.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-19026-A-43.wav",
+      "kind": "noise",
+      "category": "car_horn",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-19026-A-43.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-31482-A-42.wav",
+      "kind": "noise",
+      "category": "siren",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-31482-A-42.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-31482-B-42.wav",
+      "kind": "noise",
+      "category": "siren",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-31482-B-42.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-18527-A-44.wav",
+      "kind": "noise",
+      "category": "engine",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-18527-A-44.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-18527-B-44.wav",
+      "kind": "noise",
+      "category": "engine",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-18527-B-44.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-119125-A-45.wav",
+      "kind": "noise",
+      "category": "train",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-119125-A-45.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-54065-A-45.wav",
+      "kind": "noise",
+      "category": "train",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-54065-A-45.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-11687-A-47.wav",
+      "kind": "noise",
+      "category": "airplane",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-11687-A-47.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-24796-A-47.wav",
+      "kind": "noise",
+      "category": "airplane",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-24796-A-47.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-100032-A-0.wav",
+      "kind": "noise",
+      "category": "dog",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-100032-A-0.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-110389-A-0.wav",
+      "kind": "noise",
+      "category": "dog",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-110389-A-0.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-155858-A-25.wav",
+      "kind": "noise",
+      "category": "footsteps",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-155858-A-25.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-155858-B-25.wav",
+      "kind": "noise",
+      "category": "footsteps",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-155858-B-25.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-1791-A-26.wav",
+      "kind": "noise",
+      "category": "laughing",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-1791-A-26.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-30039-A-26.wav",
+      "kind": "noise",
+      "category": "laughing",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-30039-A-26.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-19111-A-24.wav",
+      "kind": "noise",
+      "category": "coughing",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-19111-A-24.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-19118-A-24.wav",
+      "kind": "noise",
+      "category": "coughing",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-19118-A-24.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-187207-A-20.wav",
+      "kind": "noise",
+      "category": "crying_baby",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-187207-A-20.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-211527-A-20.wav",
+      "kind": "noise",
+      "category": "crying_baby",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-211527-A-20.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-13571-A-46.wav",
+      "kind": "noise",
+      "category": "church_bells",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-13571-A-46.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-13572-A-46.wav",
+      "kind": "noise",
+      "category": "church_bells",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-13572-A-46.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-17367-A-10.wav",
+      "kind": "noise",
+      "category": "rain",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-17367-A-10.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-21189-A-10.wav",
+      "kind": "noise",
+      "category": "rain",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-21189-A-10.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-137296-A-16.wav",
+      "kind": "noise",
+      "category": "wind",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-137296-A-16.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "file": "audio/esc50-1-29532-A-16.wav",
+      "kind": "noise",
+      "category": "wind",
+      "url": "https://github.com/karolpiczak/ESC-50/raw/master/audio/1-29532-A-16.wav",
+      "source": "https://github.com/karolpiczak/ESC-50",
+      "license": "CC BY-NC 3.0"
+    }
+  ]
+}

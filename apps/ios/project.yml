@@ -11,10 +11,15 @@ settings:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
+packages:
+  OverheardKit:
+    path: OverheardKit
 targets:
   Overheard:
     type: application
     platform: iOS
+    dependencies:
+      - package: OverheardKit
     sources:
       - path: Overheard
       - path: ../../ml/models/coreml/BirdNETAudio.mlpackage

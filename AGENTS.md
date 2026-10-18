@@ -63,6 +63,7 @@ uv pip install --python .venv/bin/python -r requirements.txt
 # download + unzip BirdNET_v2.4_protobuf.zip into ml/models/birdnet-v2.4/protobuf (see ml/README.md)
 .venv/bin/python -I convert.py           # → models/coreml/BirdNETAudio.mlpackage, labels.txt
 .venv/bin/python -I species_list.py      # → models/coreml/species-central-park.json
+.venv/bin/python -I bird_labels.py       # → models/coreml/non-birds.json
 .venv/bin/python -I verify.py            # Core ML vs TensorFlow check
 
 # iOS
@@ -99,7 +100,7 @@ npx prettier@3.3.3 --write "art/**/*.mjs"                                # JS (c
 apps/ios/            SwiftUI app (XcodeGen project.yml; Overheard/ sources)
   Overheard/Audio/   AudioCapture (mic → 48 kHz 3 s clips), BirdClassifier+Bundle (loads bundled model)
   Overheard/         Listener (session state), ListenView (spike UI), OverheardApp
-  OverheardKit/      Swift package shared with the Mac: BirdClassifier (Core ML + week filter),
+  OverheardKit/      Swift package shared with the Mac: BirdClassifier (Core ML), SpeciesFilter (what's reportable),
                      AudioDecoding (file → 48 kHz clips), overheard-eval CLI, unit tests
 ml/                  convert.py, species_list.py, verify.py; models/ is gitignored
   eval/              fetch.py + manifest.json (committed); audio/ is gitignored
@@ -119,6 +120,7 @@ apps/{api,art-worker,web}, packages/{db,shared,observability}, infra/terraform, 
 - **Bird size:** on Listen and Journal pages, a bird's size means call count and nothing else. Rarity is shown with the red-ink "naturalist flourish".
 - **Location privacy:** blur shared points to a ~500 m grid, trim ~200 m from the start and end of routes, and show no location for sensitive species.
 - **IDs:** the phone generates walk and detection IDs, which makes uploads safe to retry.
+- **Tests:** detection and app logic go in `OverheardKit` as plain, model-free types (like `SpeciesFilter`), and each one gets unit tests (`swift test --package-path apps/ios/OverheardKit`). Quality changes are measured with `overheard-eval`. Once there's real app logic (walk flow, SwiftData, UI state), add tests for it too.
 - **Commits:** small and descriptive. Update `todo.md`, `docs/decisions.md` and this file in the same commit when they change.
 
 ## Gotchas

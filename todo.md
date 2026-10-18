@@ -51,7 +51,7 @@ Goal: prove the core experience works in Central Park.
 - [x] Background audio mode so a walk keeps listening with the screen locked — verify on device
 - [ ] **Detection-quality plan** (do in this order; measure every step with the harness):
   1. [x] Eval harness (bird recordings pending xeno-canto key): labeled NYC recordings (xeno-canto) + no-bird noise clips → run the app's own Swift pipeline on the Mac → precision/recall report
-  2. [ ] Non-bird labels (Human vocal, Engine, Dog, Siren, Fireworks…) excluded from the tally always
+  2. [x] Non-bird labels (Human vocal, Engine, Dog, Siren, Fireworks…) excluded from the tally always
   3. [ ] Overlapping windows (3 s clip every 1 s) + merge back-to-back detections into one "call" (gap > ~3 s = new call) so ×counts stay honest
   4. [ ] Confirmation: new species needs ≥0.8 in one clip or ≥0.5 in two clips within ~10 s; otherwise "maybe" (debug only)
   5. [ ] Real location filter: convert meta model to Core ML (custom op fix like `Cast`), fallback precomputed grid; replace hard 0.03 cutoff with occurrence-scaled confidence bar (common ~0.5, unusual ~0.75, very unlikely hidden) — same score drives the rare-bird flourish

@@ -28,8 +28,7 @@ final class Listener {
     var startedAt: Date?
 
     // Tuning knobs for field testing.
-    var minConfidence: Float = 0.5
-    var useLocationFilter = true
+    var rules = DetectionRules()
     var quietThreshold: Float = 0.002  // RMS below this skips inference
 
     private let capture = AudioCapture()
@@ -65,8 +64,8 @@ final class Listener {
 
     // Runs on inferenceQueue.
     nonisolated private func analyze(_ clip: [Float], level: Float) {
-        let (classifier, minConfidence, filtered, quiet) = MainActor.assumeIsolatedOrSync {
-            (self.classifier, self.minConfidence, self.useLocationFilter, self.quietThreshold)
+        let (classifier, rules, quiet) = MainActor.assumeIsolatedOrSync {
+            (self.classifier, self.rules, self.quietThreshold)
         }
         guard let classifier else { return }
         if level < quiet {
@@ -76,7 +75,7 @@ final class Listener {
 
         let started = CFAbsoluteTimeGetCurrent()
         let scores =
-            (try? classifier.classify(clip, date: .now, minConfidence: minConfidence, filtered: filtered)) ?? []
+            (try? classifier.classify(clip, date: .now, rules: rules)) ?? []
         let ms = (CFAbsoluteTimeGetCurrent() - started) * 1000
         Task { @MainActor in self.record(scores, level: level, ms: ms) }
     }

@@ -4,10 +4,11 @@ This is currently the **BirdNET spike**: a bare app that listens through the mic
 
 ## Build
 
-1. Build the model files: follow `ml/README.md`. The project bundles three files from `ml/models/coreml/`:
+1. Build the model files: follow `ml/README.md`. The project bundles four files from `ml/models/coreml/`:
    - `BirdNETAudio.mlpackage`
    - `labels.txt`
    - `species-central-park.json`
+   - `non-birds.json`
 2. Generate the Xcode project. It's gitignored, so regenerate it after changing `project.yml`:
    ```sh
    brew install xcodegen   # once

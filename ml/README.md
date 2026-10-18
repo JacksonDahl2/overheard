@@ -20,6 +20,7 @@ unzip -q protobuf.zip -d protobuf && cd ../..
 ```sh
 .venv/bin/python -I convert.py        # → models/coreml/BirdNETAudio.mlpackage + labels.txt
 .venv/bin/python -I species_list.py   # → models/coreml/species-central-park.json
+.venv/bin/python -I bird_labels.py    # → models/coreml/non-birds.json (eBird taxonomy)
 .venv/bin/python -I verify.py         # compare Core ML vs TensorFlow on a 48 kHz mono WAV
 ```
 

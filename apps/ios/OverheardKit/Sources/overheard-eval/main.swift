@@ -8,6 +8,7 @@
 //   --model    ml/models/coreml/BirdNETAudio.mlpackage
 //   --labels   ml/models/coreml/labels.txt
 //   --species  ml/models/coreml/species-central-park.json
+//   --non-birds ml/models/coreml/non-birds.json
 
 import CoreML
 import Foundation
@@ -26,6 +27,7 @@ let manifestURL = URL(fileURLWithPath: argument("manifest", default: "ml/eval/ma
 let modelPath = argument("model", default: "ml/models/coreml/BirdNETAudio.mlpackage")
 let labelsURL = URL(fileURLWithPath: argument("labels", default: "ml/models/coreml/labels.txt"))
 let speciesURL = URL(fileURLWithPath: argument("species", default: "ml/models/coreml/species-central-park.json"))
+let nonBirdURL = URL(fileURLWithPath: argument("non-birds", default: "ml/models/coreml/non-birds.json"))
 
 // MARK: - Manifest
 
@@ -49,14 +51,15 @@ if modelPath.hasSuffix(".mlpackage") || modelPath.hasSuffix(".mlmodel") {
 } else {
     modelURL = URL(fileURLWithPath: modelPath)
 }
-let classifier = try BirdClassifier(modelURL: modelURL, labelsURL: labelsURL, speciesURL: speciesURL)
+let classifier = try BirdClassifier(
+    modelURL: modelURL, labelsURL: labelsURL,
+    filter: SpeciesFilter(nonBirdURL: nonBirdURL, speciesURL: speciesURL))
 let manifest = try JSONDecoder().decode(Manifest.self, from: Data(contentsOf: manifestURL))
 let baseDir = manifestURL.deletingLastPathComponent()
 
 let indexByScientific = Dictionary(
     classifier.labels.enumerated().map { ($1.scientific, $0) }, uniquingKeysWith: { first, _ in first })
-// BirdNET's non-bird classes repeat the same text on both sides of the "_" (e.g. "Engine_Engine").
-let nonBird = Set(classifier.labels.enumerated().filter { $1.scientific == $1.common }.map(\.offset))
+let nonBird = classifier.filter.nonBird
 
 let dateParser = DateFormatter()
 dateParser.dateFormat = "yyyy-MM-dd"
@@ -152,7 +155,7 @@ for (n, (recording, samples)) in decoded.enumerated() {
                 condition: condition,
                 target: recording.species.flatMap { indexByScientific[$0] },
                 background: Set((recording.also ?? []).compactMap { indexByScientific[$0] }),
-                expected: classifier.expectedSpecies(on: date) ?? [],
+                expected: classifier.filter.expectedSpecies(on: date) ?? [],
                 maxConfidence: best,
                 clips: clips))
     }
@@ -174,16 +177,23 @@ struct Row: Encodable {
     let precision: Double  // correct species / all species reported, over every file
     let falsePerBirdFile: Double
     let noiseFilesWithBirds: Double  // share of noise clips where any species was reported
-    let nonBirdHits: Int  // reports of non-bird labels (Engine, Dog, …)
+    let nonBirdDropped: Int  // non-bird labels (Engine, Dog, …) that cleared the threshold and were dropped
 }
 
+/// Species the app would report for this recording: the same `SpeciesFilter` rule it uses live.
 func detected(_ s: Scored, threshold: Float, filtered: Bool) -> Set<Int> {
+    let rules = DetectionRules(minConfidence: threshold, useLocationFilter: filtered)
     var out = Set<Int>()
-    for (i, c) in s.maxConfidence.enumerated() where c >= threshold {
-        if filtered, !s.expected.contains(i) { continue }
+    for (i, c) in s.maxConfidence.enumerated()
+    where classifier.filter.isReportable(i, confidence: c, expected: s.expected, rules: rules) {
         out.insert(i)
     }
     return out
+}
+
+/// Non-bird labels that cleared the threshold (and were therefore dropped).
+func nonBirdsFired(_ s: Scored, threshold: Float) -> Int {
+    nonBird.filter { s.maxConfidence[$0] >= threshold }.count
 }
 
 let allBirds = scored.filter { $0.recording.kind == .bird }
@@ -198,20 +208,20 @@ func metrics(_ condition: String, _ birdSet: [Scored], threshold t: Float, filte
     var falseSpecies = 0
     var falseInBirdFiles = 0
     var noisy = 0
-    var nonBirdHits = 0
+    var nonBirdDropped = 0
     for s in birdSet {
         let d = detected(s, threshold: t, filtered: filtered)
         if let target = s.target, d.contains(target) { hits += 1 }
         let wrong = d.subtracting(s.background).subtracting(s.target.map { [$0] } ?? [])
         falseSpecies += wrong.count
         falseInBirdFiles += wrong.count
-        nonBirdHits += d.intersection(nonBird).count
+        nonBirdDropped += nonBirdsFired(s, threshold: t)
     }
     for s in noise {
         let d = detected(s, threshold: t, filtered: filtered)
         falseSpecies += d.count
-        if !d.subtracting(nonBird).isEmpty { noisy += 1 }
-        nonBirdHits += d.intersection(nonBird).count
+        if !d.isEmpty { noisy += 1 }
+        nonBirdDropped += nonBirdsFired(s, threshold: t)
     }
     return Row(
         condition: condition, threshold: t, filtered: filtered,
@@ -219,7 +229,7 @@ func metrics(_ condition: String, _ birdSet: [Scored], threshold t: Float, filte
         precision: hits + falseSpecies == 0 ? 0 : Double(hits) / Double(hits + falseSpecies),
         falsePerBirdFile: birdSet.isEmpty ? 0 : Double(falseInBirdFiles) / Double(birdSet.count),
         noiseFilesWithBirds: noise.isEmpty ? 0 : Double(noisy) / Double(noise.count),
-        nonBirdHits: nonBirdHits)
+        nonBirdDropped: nonBirdDropped)
 }
 
 var rows: [Row] = []
@@ -241,16 +251,16 @@ print(
     "Overheard eval · \(birds.count) bird recordings, \(noise.count) noise clips, \(clipsTotal) clips"
         + String(
             format: " in %.1f s (%.1f ms/clip incl. decoding)\n", elapsed, elapsed * 1000 / Double(max(clipsTotal, 1))))
-print("filter  thresh  recall  precision  false/bird-file  noise→bird  non-bird hits")
+print("filter  thresh  recall  precision  false/bird-file  noise→bird  non-bird dropped")
 for r in rows {
     print(
         String(
             format: "%-6@  %5.2f  %@  %@     %6.2f        %@        %d",
             r.filtered ? "on" : "off", r.threshold, pct(r.recall), pct(r.precision), r.falsePerBirdFile,
-            pct(r.noiseFilesWithBirds), r.nonBirdHits))
+            pct(r.noiseFilesWithBirds), r.nonBirdDropped))
 }
 print("\nrecall = target bird found · precision = right species / all species reported (bird + noise files)")
-print("Non-bird labels (Engine, Dog, …) currently count as false positives, matching the app today.")
+print("Non-bird labels (Engine, Dog, frogs, insects, …) are never reported; \"dropped\" counts how often one fired.")
 
 if !mixedRows.isEmpty {
     print("\nWith city noise mixed in (filter on; +10 dB = bird louder, -5 dB = noise louder):")

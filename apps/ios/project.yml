@@ -27,6 +27,8 @@ targets:
         buildPhase: resources
       - path: ../../ml/models/coreml/species-central-park.json
         buildPhase: resources
+      - path: ../../ml/models/coreml/non-birds.json
+        buildPhase: resources
     info:
       path: Overheard/Info.plist
       properties:

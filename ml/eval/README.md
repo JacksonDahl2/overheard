@@ -54,4 +54,10 @@ This stands in for a walk next to traffic and people. `--no-mix` skips it, and `
 - **City noise costs about 6–9 points of recall** at 0.50. Precision goes *up*, because noise drowns out faint lookalike hits along with faint real ones.
 - **Non-bird labels:** with the filter off at 0.50, they fire 11 times on the 26 noise clips: Siren, Engine, Dog, "Fireworks" for footsteps, "Human vocal".
 - **Misses** are mostly recordings where the target is faint or only giving calls.
+### After step 2: non-bird labels dropped
+
+- `SpeciesFilter` now never reports any of BirdNET's 101 non-bird labels. That's 13 sound classes plus frogs, insects and mammals, found by `ml/bird_labels.py`.
+- **Filter off at 0.50:** precision 57.7% → **62.1%**, with recall unchanged.
+- **Filter on:** unchanged, because the Central Park table already excluded non-birds.
+
 - **Caveat:** xeno-canto is probably part of BirdNET's training data, so these numbers are likely optimistic. Real park audio is harder.

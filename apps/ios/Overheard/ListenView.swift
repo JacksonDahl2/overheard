@@ -55,17 +55,17 @@ struct ListenView: View {
 
                 Section("Tuning") {
                     VStack(alignment: .leading) {
-                        Text("Min confidence: \(Int(listener.minConfidence * 100))%")
-                        Slider(value: $listener.minConfidence, in: 0.1...0.95, step: 0.05)
+                        Text("Min confidence: \(Int(listener.rules.minConfidence * 100))%")
+                        Slider(value: $listener.rules.minConfidence, in: 0.1...0.95, step: 0.05)
                     }
-                    Toggle("Central Park species filter", isOn: $listener.useLocationFilter)
+                    Toggle("Central Park species filter", isOn: $listener.rules.useLocationFilter)
                 }
 
                 Section("Stats") {
                     LabeledContent("Clips analyzed", value: "\(listener.clipsAnalyzed)")
                     LabeledContent("Inference", value: String(format: "%.0f ms", listener.lastInferenceMs))
                     LabeledContent("Level (RMS)", value: String(format: "%.4f", listener.lastLevel))
-                    LabeledContent("BirdNET week", value: "\(BirdClassifier.birdNETWeek(for: .now))")
+                    LabeledContent("BirdNET week", value: "\(SpeciesFilter.birdNETWeek(for: .now))")
                     if let started = listener.startedAt {
                         LabeledContent("Started", value: started.formatted(date: .omitted, time: .shortened))
                     }

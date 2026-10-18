@@ -1,0 +1,5 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/ml/.venv/bin/python",
+  "pylint.interpreter": ["${workspaceFolder}/ml/.venv/bin/python"],
+  "pylint.cwd": "${workspaceFolder}/ml"
+}

@@ -93,7 +93,7 @@ apps/{api,art-worker,web}, packages/{db,shared,observability}, infra/terraform, 
 - **Secrets:** keep them in `.env` (gitignored). Never commit keys, and never print them in logs or output.
 - **Licensed files:** BirdNET model files are CC BY-NC-SA and gitignored. Don't commit them.
 - **Xcode project:** don't edit or commit `Overheard.xcodeproj`. Change `apps/ios/project.yml` and run `xcodegen`.
-- **Python:** run it with `.venv/bin/python -I`. Python on this machine resolves through pyenv and conda, so use the venv.
+- **Python:** run it with `.venv/bin/python -I`. Python on this machine resolves through pyenv and conda, so use the venv. `.vscode/settings.json` points the editor and Pylint at `ml/.venv`.
 - **UI:** tokens and fonts come from `docs/design.md`. No emoji, and touch targets are at least 44 pt.
 - **Bird size:** on Listen and Journal pages, a bird's size means call count and nothing else. Rarity is shown with the red-ink "naturalist flourish".
 - **Location privacy:** blur shared points to a ~500 m grid, trim ~200 m from the start and end of routes, and show no location for sensitive species.

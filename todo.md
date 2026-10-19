@@ -64,7 +64,8 @@ Goal: prove the core experience works in Central Park.
   4. [x] Confirmation: a call counts when it has ≥2 clips above the threshold or one clip ≥0.70; until then the species is "pending" (the sketching bird), and it fades if the call ends unconfirmed
   5. [x] Occurrence-scaled confidence bar (`ConfidenceBar`, steep tiers +0.20/+0.40; `Commonness` on every score/bird): replace the hard 0.03 location cutoff with a bar that rises as a species gets less likely here (common ~0.5, unusual ~0.75, very unlikely hidden) — same score drives the rare-bird flourish. (Location model on device: done.)
   5b. [x] Rare-bird eval set (`ml/eval/fetch_rare.py`, 40 recordings; steep bar finds 70%, old cutoff 0%): ~20 xeno-canto recordings of species the location model rates 1–3% at their place/date (out-of-season migrants, western vagrants) — the current set has none, so the rare-bird upside is unmeasured
-  6. [ ] Adaptive noise gate (relative to recent noise floor) instead of a fixed RMS cutoff
+  6. [x] Adaptive noise gate (`AdaptiveGate`: bird-band level vs. recent background) — built and evaluated, **off by default** (cost 2–6 pts recall, most in city noise)
+  6b. [ ] Measure battery on a device (Xcode energy gauge, 30+ min walk) with the gate off vs. 1.5×; turn it on only if it matters
 - [ ] "Start walk" / "End walk" flow with live detection list
 - [ ] Record walk route (CoreLocation) and show on MapKit
 - [ ] Persist walks + detections locally with SwiftData — save continuously during a walk (iOS can kill the app mid-walk); store species by `Species.code`

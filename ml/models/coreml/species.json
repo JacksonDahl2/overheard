@@ -3541,10 +3541,14 @@
    "bird": true
   },
   {
-   "code": "slabru1",
-   "common": "Northern Slaty Brushfinch",
+   "code": "birdnet:Atlapetes schistaceus",
+   "common": "Slaty Brushfinch",
    "scientific": "Atlapetes schistaceus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "slabru1",
+    "slabru2"
+   ]
   },
   {
    "code": "obbfin1",
@@ -4987,10 +4991,18 @@
    "bird": true
   },
   {
-   "code": "brucuc3",
-   "common": "Sahul Brush Cuckoo",
+   "code": "birdnet:Cacomantis variolosus",
+   "common": "Brush Cuckoo",
    "scientific": "Cacomantis variolosus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "brucuc10",
+    "brucuc13",
+    "brucuc2",
+    "brucuc3",
+    "brucuc5",
+    "molcuc1"
+   ]
   },
   {
    "code": "musduc",
@@ -6253,10 +6265,15 @@
    "bird": true
   },
   {
-   "code": "y00621",
-   "common": "Eastern Red-rumped Swallow",
+   "code": "rerswa1",
+   "common": "Red-rumped Swallow",
    "scientific": "Cecropis daurica",
-   "bird": true
+   "bird": true,
+   "split": [
+    "rerswa12",
+    "rerswa8",
+    "y00621"
+   ]
   },
   {
    "code": "rucswa2",
@@ -8917,10 +8934,14 @@
    "bird": true
   },
   {
-   "code": "brnpig1",
-   "common": "Western Bronze-naped Pigeon",
+   "code": "birdnet:Columba iriditorques",
+   "common": "Bronze-naped Pigeon",
    "scientific": "Columba iriditorques",
-   "bird": true
+   "bird": true,
+   "split": [
+    "brnpig1",
+    "delpig1"
+   ]
   },
   {
    "code": "jawpig1",
@@ -9199,10 +9220,14 @@
    "bird": true
   },
   {
-   "code": "tropew3",
-   "common": "Southern Tropical Pewee",
+   "code": "birdnet:Contopus cinereus",
+   "common": "Tropical Pewee",
    "scientific": "Contopus cinereus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "tropew3",
+    "tropew4"
+   ]
   },
   {
    "code": "olsfly",
@@ -10639,10 +10664,14 @@
    "bird": true
   },
   {
-   "code": "bluvan3",
-   "common": "Madagascar Blue Vanga",
+   "code": "birdnet:Cyanolanius madagascarinus",
+   "common": "Blue Vanga",
    "scientific": "Cyanolanius madagascarinus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "bluvan2",
+    "bluvan3"
+   ]
   },
   {
    "code": "burpar",
@@ -10969,10 +10998,14 @@
    "bird": true
   },
   {
-   "code": "chbwre3",
-   "common": "Southern Chestnut-breasted Wren",
+   "code": "birdnet:Cyphorhinus thoracicus",
+   "common": "Chestnut-breasted Wren",
    "scientific": "Cyphorhinus thoracicus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "chbwre2",
+    "chbwre3"
+   ]
   },
   {
    "code": "blkswi",
@@ -11107,10 +11140,15 @@
    "bird": true
   },
   {
-   "code": "lotwoo4",
-   "common": "Whistling Long-tailed Woodcreeper",
+   "code": "birdnet:Deconychura longicauda",
+   "common": "Long-tailed Woodcreeper",
    "scientific": "Deconychura longicauda",
-   "bird": true
+   "bird": true,
+   "split": [
+    "lotwoo3",
+    "lotwoo4",
+    "lotwoo5"
+   ]
   },
   {
    "code": "ashmar1",
@@ -14041,10 +14079,14 @@
    "bird": true
   },
   {
-   "code": "whfant3",
-   "common": "Southern White-fringed Antwren",
+   "code": "whfant1",
+   "common": "White-fringed Antwren",
    "scientific": "Formicivora grisea",
-   "bird": true
+   "bird": true,
+   "split": [
+    "whfant3",
+    "whfant4"
+   ]
   },
   {
    "code": "nabant1",
@@ -15661,10 +15703,15 @@
    "bird": false
   },
   {
-   "code": "cregui3",
-   "common": "Eastern Crested Guineafowl",
+   "code": "birdnet:Guttera pucherani",
+   "common": "Crested Guineafowl",
    "scientific": "Guttera pucherani",
-   "bird": true
+   "bird": true,
+   "split": [
+    "cregui2",
+    "cregui3",
+    "cregui4"
+   ]
   },
   {
    "code": "whiter3",
@@ -18535,10 +18582,14 @@
    "bird": true
   },
   {
-   "code": "euhgul1",
-   "common": "European Herring Gull",
+   "code": "y01345",
+   "common": "Herring Gull",
    "scientific": "Larus argentatus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "amhgul1",
+    "euhgul1"
+   ]
   },
   {
    "code": "belgul",
@@ -19885,10 +19936,14 @@
    "bird": true
   },
   {
-   "code": "paradi2",
-   "common": "Halmahera Paradise-crow",
+   "code": "birdnet:Lycocorax pyrrhopterus",
+   "common": "Paradise-crow",
    "scientific": "Lycocorax pyrrhopterus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "paradi2",
+    "paradi3"
+   ]
   },
   {
    "code": "jacsni",
@@ -21211,10 +21266,15 @@
    "bird": true
   },
   {
-   "code": "grnbee3",
-   "common": "Asian Green Bee-eater",
+   "code": "birdnet:Merops orientalis",
+   "common": "Green Bee-eater",
    "scientific": "Merops orientalis",
-   "bird": true
+   "bird": true,
+   "split": [
+    "grnbee1",
+    "grnbee2",
+    "grnbee3"
+   ]
   },
   {
    "code": "rabeat1",
@@ -23479,10 +23539,14 @@
    "bird": true
   },
   {
-   "code": "vivnil3",
-   "common": "Taiwan Vivid Niltava",
+   "code": "birdnet:Niltava vivida",
+   "common": "Vivid Niltava",
    "scientific": "Niltava vivida",
-   "bird": true
+   "bird": true,
+   "split": [
+    "vivnil2",
+    "vivnil3"
+   ]
   },
   {
    "code": "souboo8",
@@ -23749,10 +23813,14 @@
    "bird": true
   },
   {
-   "code": "whimbr5",
-   "common": "Eurasian Whimbrel",
+   "code": "whimbr",
+   "common": "Whimbrel",
    "scientific": "Numenius phaeopus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "whimbr3",
+    "whimbr5"
+   ]
   },
   {
    "code": "brtcur",
@@ -24337,10 +24405,14 @@
    "bird": true
   },
   {
-   "code": "royfly1",
-   "common": "Tropical Royal Flycatcher",
+   "code": "birdnet:Onychorhynchus coronatus",
+   "common": "Royal Flycatcher",
    "scientific": "Onychorhynchus coronatus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "royfly1",
+    "royfly5"
+   ]
   },
   {
    "code": "hoatzi1",
@@ -25117,10 +25189,14 @@
    "bird": true
   },
   {
-   "code": "whtwhi1",
-   "common": "White-throated Fiji Whistler",
+   "code": "birdnet:Pachycephala vitiensis",
+   "common": "Fiji Whistler",
    "scientific": "Pachycephala vitiensis",
-   "bird": true
+   "bird": true,
+   "split": [
+    "fijwhi1",
+    "whtwhi1"
+   ]
   },
   {
    "code": "comwea1",
@@ -25747,10 +25823,15 @@
    "bird": true
   },
   {
-   "code": "bkcbab2",
-   "common": "Javan Black-capped Babbler",
+   "code": "birdnet:Pellorneum capistratum",
+   "common": "Black-capped Babbler",
    "scientific": "Pellorneum capistratum",
-   "bird": true
+   "bird": true,
+   "split": [
+    "bbcbab1",
+    "bkcbab1",
+    "bkcbab2"
+   ]
   },
   {
    "code": "sulbab1",
@@ -28171,10 +28252,17 @@
    "bird": true
   },
   {
-   "code": "wehpit1",
-   "common": "Western Hooded Pitta",
+   "code": "birdnet:Pitta sordida",
+   "common": "Hooded Pitta",
    "scientific": "Pitta sordida",
-   "bird": true
+   "bird": true,
+   "split": [
+    "eahpit1",
+    "hoopit11",
+    "hoopit4",
+    "hoopit8",
+    "wehpit1"
+   ]
   },
   {
    "code": "azbpit1",
@@ -28291,10 +28379,14 @@
    "bird": true
   },
   {
-   "code": "blkmag1",
-   "common": "Malayan Black Magpie",
+   "code": "birdnet:Platysmurus leucopterus",
+   "common": "Black Magpie",
    "scientific": "Platysmurus leucopterus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "blkmag1",
+    "blkmag2"
+   ]
   },
   {
    "code": "rcweye1",
@@ -28795,10 +28887,14 @@
    "bird": true
   },
   {
-   "code": "reftin4",
-   "common": "Southern Red-fronted Tinkerbird",
+   "code": "birdnet:Pogoniulus pusillus",
+   "common": "Red-fronted Tinkerbird",
    "scientific": "Pogoniulus pusillus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "reftin1",
+    "reftin4"
+   ]
   },
   {
    "code": "spetin1",
@@ -31735,10 +31831,15 @@
    "bird": true
   },
   {
-   "code": "ruffan13",
-   "common": "Australian Rufous Fantail",
+   "code": "birdnet:Rhipidura rufifrons",
+   "common": "Rufous Fantail",
    "scientific": "Rhipidura rufifrons",
-   "bird": true
+   "bird": true,
+   "split": [
+    "mirfan1",
+    "ruffan13",
+    "sorfan1"
+   ]
   },
   {
    "code": "norfan1",
@@ -31759,10 +31860,15 @@
    "bird": true
   },
   {
-   "code": "strfan5",
-   "common": "New Caledonian Streaked Fantail",
+   "code": "birdnet:Rhipidura verreauxi",
+   "common": "Streaked Fantail",
    "scientific": "Rhipidura verreauxi",
-   "bird": true
+   "bird": true,
+   "split": [
+    "fisfan1",
+    "strfan2",
+    "strfan5"
+   ]
   },
   {
    "code": "rottan2",
@@ -31843,10 +31949,14 @@
    "bird": true
   },
   {
-   "code": "olifla3",
-   "common": "Eastern Olivaceous Flatbill",
+   "code": "olifla1",
+   "common": "Olivaceous Flatbill",
    "scientific": "Rhynchocyclus olivaceus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "olifla2",
+    "olifla3"
+   ]
   },
   {
    "code": "mcclon",
@@ -33181,10 +33291,14 @@
    "bird": true
   },
   {
-   "code": "manwar1",
-   "common": "Mangrove Yellow Warbler",
+   "code": "yelwar",
+   "common": "Yellow Warbler",
    "scientific": "Setophaga petechia",
-   "bird": true
+   "bird": true,
+   "split": [
+    "manwar1",
+    "yelwar1"
+   ]
   },
   {
    "code": "pinwar",
@@ -34429,10 +34543,15 @@
    "bird": true
   },
   {
-   "code": "obfrob1",
-   "common": "Orange-breasted Forest Robin",
+   "code": "birdnet:Stiphrornis erythrothorax",
+   "common": "Forest Robin",
    "scientific": "Stiphrornis erythrothorax",
-   "bird": true
+   "bird": true,
+   "split": [
+    "forrob4",
+    "forrob6",
+    "obfrob1"
+   ]
   },
   {
    "code": "souemu1",
@@ -34885,10 +35004,15 @@
    "bird": true
   },
   {
-   "code": "spemon1",
-   "common": "Australian Spectacled Monarch",
+   "code": "birdnet:Symposiachrus trivirgatus",
+   "common": "Spectacled Monarch",
    "scientific": "Symposiachrus trivirgatus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "molmon1",
+    "spemon1",
+    "spemon10"
+   ]
   },
   {
    "code": "pabspi1",
@@ -37081,10 +37205,14 @@
    "bird": true
   },
   {
-   "code": "houwre",
-   "common": "Northern House Wren",
+   "code": "y01309",
+   "common": "House Wren",
    "scientific": "Troglodytes aedon",
-   "bird": true
+   "bird": true,
+   "split": [
+    "houwre",
+    "houwre4"
+   ]
   },
   {
    "code": "winwre3",
@@ -37219,10 +37347,16 @@
    "bird": true
   },
   {
-   "code": "bkttro6",
-   "common": "Amazonian Black-throated Trogon",
+   "code": "birdnet:Trogon rufus",
+   "common": "Black-throated Trogon",
    "scientific": "Trogon rufus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "bkttro4",
+    "bkttro5",
+    "bkttro6",
+    "bkttro7"
+   ]
   },
   {
    "code": "surtro1",
@@ -37609,10 +37743,14 @@
    "bird": true
   },
   {
-   "code": "relthr1",
-   "common": "Western Red-legged Thrush",
+   "code": "birdnet:Turdus plumbeus",
+   "common": "Red-legged Thrush",
    "scientific": "Turdus plumbeus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "relthr1",
+    "relthr3"
+   ]
   },
   {
    "code": "norist1",
@@ -37891,10 +38029,15 @@
    "bird": true
   },
   {
-   "code": "webowl1",
-   "common": "Western Barn Owl",
+   "code": "birdnet:Tyto alba",
+   "common": "Barn Owl",
    "scientific": "Tyto alba",
-   "bird": true
+   "bird": true,
+   "split": [
+    "brnowl",
+    "eabowl1",
+    "webowl1"
+   ]
   },
   {
    "code": "aumowl1",
@@ -38299,10 +38442,14 @@
    "bird": true
   },
   {
-   "code": "eawvir1",
-   "common": "Eastern Warbling Vireo",
+   "code": "warvir",
+   "common": "Warbling Vireo",
    "scientific": "Vireo gilvus",
-   "bird": true
+   "bird": true,
+   "split": [
+    "eawvir1",
+    "wewvir2"
+   ]
   },
   {
    "code": "norvir1",

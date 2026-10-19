@@ -166,4 +166,19 @@ Real but unlikely-here birds. This is what the confidence bar exists for. Filter
 - **The old cutoff hid all 40** by design. The steep bar reports 70% of them with high precision, and every one it finds is flagged `unusual`, which is what gets the flourish.
 - **Gentler bars find more rare birds** but cost main-set precision (82.1% vs 84.3%), so steep stays the default.
 
+### Step 6: adaptive gate (built, off by default)
+
+The gate skips a clip unless its level above 1 kHz is clearly over the recent background (the lower quartile of the last 30 clips). It never skips more than 4 clips in a row, and always skips true silence. Filter on, 0.50:
+
+| Gate | Clips skipped | Recall clean | Recall −5 dB noise | Precision clean |
+|---|---|---|---|---|
+| **off (app default)** | 0% | 78.2% | 74.5% | 84.3% |
+| 1.5× background | 48% | 76.4% | 70.9% | 87.5% |
+| 2× background | 56% | 75.5% | 68.2% | 89.2% |
+| 3× background | 63% | 75.5% | 62.7% | 92.2% |
+
+- **Real walks would skip more:** these focal recordings have a bird singing most of the time.
+- **It costs recall, most in city noise:** quiet songs under traffic don't stand out from the background. The precision gain overlaps with what confirmation already does.
+- **It stays off until battery is measured on a device** (todo 6b).
+
 - **Caveat:** xeno-canto is probably part of BirdNET's training data, so these numbers are likely optimistic. Real park audio is harder.

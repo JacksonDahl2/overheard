@@ -105,7 +105,8 @@ apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcc
     BirdClassifier        Core ML audio model
     LocationModel         Core ML location model → LocalSpecies (occurrence per species at a Place)
     SpeciesCatalog        stable species codes/names per output index (species.json)
-    SpeciesFilter         what's reportable (never non-birds; confidence; expected here)
+    SpeciesFilter         assess(): never non-birds; needs base threshold + the ConfidenceBar tier's extra
+    ConfidenceBar         tiers by occurrence → extra confidence + Commonness (common/uncommon/unusual)
     DetectionSession      per-clip detections → HeardBird tally; merges a song's overlapping clips into one call;
                           confirms calls (≥2 clips or one ≥0.70), unconfirmed new species are PendingBird ("sketching")
     SlidingWindow         live samples → 3 s clips every 1 s
@@ -130,6 +131,7 @@ apps/{api,art-worker,web}, packages/{db,shared,observability}, infra/terraform, 
 - **Python:** run it with `.venv/bin/python -I`. Python on this machine resolves through pyenv and conda, so use the venv. `.vscode/settings.json` points the editor and Ruff at `ml/.venv`, and turns off Flake8 and Pylint. `pyrightconfig.json` points basedpyright at `ml/.venv`.
 - **Editor (Swift):** `xcode-build-server config -project apps/ios/Overheard.xcodeproj -scheme Overheard` writes `buildServer.json` (gitignored). Without it, VS Code checks app files as macOS code and flags iOS-only APIs like `AVAudioSession`.
 - **UI:** tokens and fonts come from `docs/design.md`. No emoji, and touch targets are at least 44 pt.
+- **Rarity:** use `HeardBird.commonness` (`.unusual` → the naturalist flourish); never recompute it from model output.
 - **Bird size:** on Listen and Journal pages, a bird's size means call count and nothing else. A call is one song or burst of calls: detections less than 2.5 s apart merge. Rarity is shown with the red-ink "naturalist flourish".
 - **Location privacy:** blur shared points to a ~500 m grid, trim ~200 m from the start and end of routes, and show no location for sensitive species. Detection only needs approximate location.
 - **IDs:** the phone generates walk and detection IDs, which makes uploads safe to retry.
@@ -145,7 +147,7 @@ apps/{api,art-worker,web}, packages/{db,shared,observability}, infra/terraform, 
 - **BirdNET weeks** run 1–48, four per month: `week = (month-1)*4 + min(4, (day-1)/7 + 1)`. Week -1 means "all year".
 - **Labels:** `labels.txt` lines look like `Scientific name_Common name`, where line index = output index. 101 labels aren't birds (sounds, frogs, insects, mammals). One pair of labels shares a code because eBird has since lumped the two species.
 - **FP16:** don't use it. Even with the spectrogram kept at FP32, it shifted confidences by up to ±0.17.
-- **Filter threshold:** 0.03 drops some late migrants (e.g. Black-throated Blue Warbler in mid-October). Step 5 of the detection plan replaces the hard cutoff.
+- **Confidence bar:** `ConfidenceBar.standard` needs base +0 for common species (≥ 10% occurrence here), +0.20 for uncommon (≥ 3%), and +0.40 for unusual (≥ 1%), capped at 0.95. Rarer species are hidden. A rare bird's single-clip confirmation must also clear its bar by 0.15. The eval has no rare targets yet, so only the false-positive cost is measured (step 5b).
 - **Audio session:** use `.record` with `.measurement` mode. Other modes apply voice processing that suppresses birdsong.
 - **Free signing:** builds expire after 7 days. The first install needs Settings → General → VPN & Device Management → Verify App; if that fails, try cellular instead of Wi-Fi.
 - **LFS bandwidth:** GitHub's free LFS tier allows 1 GB a month. CI caches `.git/lfs`, but avoid re-committing the models needlessly; each version adds about 100 MB.

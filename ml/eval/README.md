@@ -122,4 +122,27 @@ A call counts once it has 2 clips above the threshold, or one clip ≥ 0.70. Oth
   "2 clips or 0.70" won on recall in noise.
 - **Option not taken:** a 0.35 threshold with the same rule gives 83.6% recall and 78.6% precision, which beats the pre-overlap baseline on both. We chose 0.50 for fewer wrong birds; see `docs/decisions.md`.
 
+### After step 5: likelihood-scaled confidence bar (the app's current default)
+
+Instead of "expected here (≥ 3%) or hidden", a species needs more confidence the rarer it is here this week: +0 if common (≥ 10%), +0.20 if uncommon (≥ 3%), +0.40 if unusual (≥ 1%). Species rarer than that are hidden.
+
+| Condition | Threshold | Recall | Precision | False/bird-file |
+|---|---|---|---|---|
+| **clean** | **0.50** | **78.2%** | **84.3%** | **0.15** |
+| +10 dB city noise | 0.50 | 75.5% | 84.7% | 0.14 |
+| 0 dB city noise | 0.50 | 76.4% | 87.5% | 0.11 |
+| −5 dB city noise | 0.50 | 74.5% | 88.2% | 0.10 |
+
+Bars compared (0.50, filter on, as recall / precision):
+
+| Bar | Clean | 0 dB city noise |
+|---|---|---|
+| hard cutoff (old) | 79.1% / 83.7% | 76.4% / 85.7% |
+| **steep +0.20/+0.40 (chosen)** | 78.2% / **84.3%** | 76.4% / **87.5%** |
+| first try +0.15/+0.30 | 79.1% / 82.9% | 76.4% / 85.7% |
+| gentle +0.10/+0.20 | 79.1% / 82.1% | 76.4% / 84.0% |
+
+- **The test set has no rare targets.** "Unusual hits" is 0 for every bar: all 110 targets are common, in-season birds where they were recorded. So this table measures only the **cost** of opening the door to rarer species, which is more lookalikes.
+- **Steep is the only bar that comes out ahead of the old cutoff on precision.** The upside, clearly heard rare birds no longer hidden, needs a rare-bird eval set (todo step 5b).
+
 - **Caveat:** xeno-canto is probably part of BirdNET's training data, so these numbers are likely optimistic. Real park audio is harder.

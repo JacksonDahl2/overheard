@@ -76,3 +76,12 @@ A dated log of what we decided and why. Newest at the bottom. To change a decisi
   - Later calls of an already-confirmed species need confirming too, so counts don't inflate.
 - **Operating point:** threshold **0.50** with that confirmation ("option B: fewer wrong birds"). In the eval, wrong species per recording halved (0.32 → 0.15), precision went 72.9% → 83.7%, and recall went 85.5% → 79.1%. The alternative was 0.35 for 83.6% recall and 78.6% precision.
   - *Why:* a wrong bird drawn on a shared journal page is worse than a missed one, and pending birds still show up as sketches.
+
+## 2026-10-18 (detection step 5)
+
+- **Likelihood-scaled confidence bar** (`ConfidenceBar`) replaces the hard "expected (≥ 3%) or hidden" cutoff. Common species need the base threshold (0.50); **uncommon (3–10%) need +0.20; unusual (1–3%) need +0.40**; species under 1% are hidden. Required confidence is capped at 0.95.
+  - Rare birds also need stronger confirmation: one clip must clear its own bar by 0.15, otherwise 2 clips are needed.
+  - *Why steep:* of the tiers tried, it's the only one that beat the old cutoff on precision (84.3% vs 83.7%, and 87.5% vs 85.7% in city noise), at the cost of 1 recording of recall. It still lets clearly heard rare birds through.
+  - *Caveat:* the eval set has no rare targets, so the rare-bird upside is unmeasured. A rare-bird eval set is next (todo step 5b).
+- **`Commonness`** (common / uncommon / unusual) travels with every score, pending bird and heard bird. It's the single source for the rare-bird flourish, sketch styling and life-list badges.
+- **Code license: MIT.** The BirdNET-derived models stay CC BY-NC-SA 4.0. The bird illustrations and logo belong to the owner.

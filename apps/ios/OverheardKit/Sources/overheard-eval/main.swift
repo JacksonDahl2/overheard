@@ -12,6 +12,9 @@
 //
 // Each recording is scored with the location model at the place and week it was recorded,
 // and its clips are played through DetectionSession, exactly like a live session.
+//
+// To try an idea, add a `Variant` (detection rules + confirmation) to `variants` below: every
+// variant is scored on every recording and noise condition, and the tables pick variants by tag.
 
 import CoreML
 import Foundation
@@ -72,6 +75,89 @@ let centralPark = (lat: 40.7812, lon: -73.9665)  // for noise clips, which have 
     (recording.file as NSString).lastPathComponent.padding(toLength: 28, withPad: " ", startingAt: 0)
 }
 
+// MARK: - Variants
+
+/// One way of running the pipeline: which detections are reportable, and when a call counts.
+struct Variant: Hashable {
+    let name: String
+    let tags: Set<String>
+    let rules: DetectionRules
+    let confirmation: Confirmation
+}
+
+let thresholds: [Float] = [0.25, 0.35, 0.5, 0.65, 0.8]
+let defaultConfirmation = Confirmation()
+
+let confirmationRules: [(name: String, rule: Confirmation)] = [
+    ("none", .none),
+    ("2 clips", Confirmation(minClips: 2, strongConfidence: 2)),
+    ("2 clips or 0.90", Confirmation(minClips: 2, strongConfidence: 0.9)),
+    ("2 clips or 0.80", Confirmation(minClips: 2, strongConfidence: 0.8)),
+    ("2 clips or 0.70", Confirmation(minClips: 2, strongConfidence: 0.7)),
+    ("3 clips or 0.80", Confirmation(minClips: 3, strongConfidence: 0.8)),
+]
+
+typealias Tier = ConfidenceBar.Tier
+let bars: [(name: String, bar: ConfidenceBar)] = [
+    ("hard cutoff (old)", .hardCutoff),
+    ("standard +0.20/+0.40", .standard),
+    (
+        "first try +0.15/+0.30",
+        ConfidenceBar(tiers: [
+            Tier(minOccurrence: 0.10, extraConfidence: 0, commonness: .common),
+            Tier(minOccurrence: 0.03, extraConfidence: 0.15, commonness: .uncommon),
+            Tier(minOccurrence: 0.01, extraConfidence: 0.30, commonness: .unusual),
+        ])
+    ),
+    (
+        "gentle +0.10/+0.20",
+        ConfidenceBar(tiers: [
+            Tier(minOccurrence: 0.10, extraConfidence: 0, commonness: .common),
+            Tier(minOccurrence: 0.03, extraConfidence: 0.10, commonness: .uncommon),
+            Tier(minOccurrence: 0.01, extraConfidence: 0.20, commonness: .unusual),
+        ])
+    ),
+    (
+        "wide (unusual ≥0.5%)",
+        ConfidenceBar(tiers: [
+            Tier(minOccurrence: 0.10, extraConfidence: 0, commonness: .common),
+            Tier(minOccurrence: 0.03, extraConfidence: 0.20, commonness: .uncommon),
+            Tier(minOccurrence: 0.005, extraConfidence: 0.40, commonness: .unusual),
+        ])
+    ),
+]
+
+let variants: [Variant] = {
+    var list: [Variant] = []
+    for filtered in [false, true] {
+        for t in thresholds {
+            list.append(
+                Variant(
+                    name: "\(filtered ? "on" : "off") \(t)", tags: ["main"],
+                    rules: DetectionRules(minConfidence: t, useLocationFilter: filtered),
+                    confirmation: defaultConfirmation))
+        }
+    }
+    for (name, rule) in confirmationRules {
+        for t: Float in [0.35, 0.5] {
+            list.append(
+                Variant(
+                    name: name, tags: ["confirmation"], rules: DetectionRules(minConfidence: t), confirmation: rule))
+        }
+    }
+    for (name, bar) in bars {
+        for t: Float in [0.35, 0.5] {
+            list.append(
+                Variant(
+                    name: name, tags: ["bar"], rules: DetectionRules(minConfidence: t, bar: bar),
+                    confirmation: defaultConfirmation))
+        }
+    }
+    return list
+}()
+/// The app's defaults: per-recording extras (first heard, calls, per species) use this one.
+let appDefault = variants.first { $0.tags.contains("main") && $0.rules == DetectionRules() }!
+
 // MARK: - Audio helpers
 
 func rms(_ x: [Float]) -> Float {
@@ -107,33 +193,20 @@ func mix(_ bird: [Float], _ noise: [Float], snr: Float) -> [Float] {
 // Bird-to-noise levels (SNR) for mixing city noise into each bird recording.
 // +10 dB: bird clearly louder · 0 dB: equally loud · -5 dB: noise louder.
 let mixLevels: [Float] = CommandLine.arguments.contains("--no-mix") ? [] : [10, 0, -5]
+let conditions = ["clean"] + mixLevels.map { String(format: "%+.0f dB", $0) }
 let hopSeconds = Double(argument("hop", default: "1")) ?? 1
 let hopSamples = Int(hopSeconds * BirdClassifier.sampleRate)
 // Back-to-back clips (and one missed clip) stay one call at any hop.
 let callGap = max(DetectionSession.defaultCallGap, hopSeconds * 2.5)
-let conditions = ["clean"] + mixLevels.map { String(format: "%+.0f dB", $0) }
-let thresholds: [Float] = [0.25, 0.35, 0.5, 0.65, 0.8]
-
-// Confirmation rules to compare. The main tables use the app's default.
-let confirmationRules: [(name: String, rule: Confirmation)] = [
-    ("none", .none),
-    ("2 clips", Confirmation(minClips: 2, strongConfidence: 2)),
-    ("2 clips or 0.90", Confirmation(minClips: 2, strongConfidence: 0.9)),
-    ("2 clips or 0.80", Confirmation(minClips: 2, strongConfidence: 0.8)),
-    ("2 clips or 0.70", Confirmation(minClips: 2, strongConfidence: 0.7)),
-    ("3 clips or 0.80", Confirmation(minClips: 3, strongConfidence: 0.8)),
-]
-let defaultRule = confirmationRules.first { $0.rule == Confirmation() }!.name
 
 struct Key: Hashable {
     let condition: String
-    let filtered: Bool
-    let threshold: Float
-    var rule = defaultRule
+    let variant: Variant
 }
 struct Counts {
     var birdFiles = 0
     var hits = 0
+    var unusualHits = 0  // target found in the "unusual here" tier
     var falseInBirdFiles = 0
     var noiseFiles = 0
     var falseInNoise = 0
@@ -141,33 +214,37 @@ struct Counts {
     var nonBirdDropped = 0
 }
 var counts: [Key: Counts] = [:]
-var perSpecies: [String: (hits: Int, total: Int)] = [:]  // clean, filter on, 0.50
-var firstDetection: [String: [Double]] = [:]  // condition → seconds into the recording (filter on, 0.50)
-var callCounts: [String: [Int]] = [:]  // condition → target's calls per recording where it was found
-var details: [String] = []  // --verbose lines (clean, filter off, 0.50)
+var perSpecies: [String: (hits: Int, total: Int)] = [:]  // clean, app default
+var firstDetection: [String: [Double]] = [:]  // condition → seconds into the recording (app default)
+var callCounts: [String: [Int]] = [:]  // condition → target's calls per recording where found
+var details: [String] = []  // --verbose lines (clean, app default but filter off)
 var skipped: [String] = []
 var clipsTotal = 0
 let started = Date()
-
-/// Each clip's reportable birds under `rules` (computed once, then replayed per confirmation rule).
-@MainActor func reportable(_ clipConfidences: [[Float]], local: LocalSpecies, rules: DetectionRules) -> [[BirdScore]] {
-    clipConfidences.map { classifier.reportable($0, local: local, rules: rules) }
-}
-
-/// Plays per-clip scores through a fresh DetectionSession, as the app would live. Clip `i` ends
-/// `3 + i × hop` seconds into the recording. Returns the confirmed birds.
-@MainActor func heard(_ scoresPerClip: [[BirdScore]], confirmation: Confirmation) -> [String: HeardBird] {
-    var session = DetectionSession(callGap: callGap, confirmation: confirmation)
-    for (i, scores) in scoresPerClip.enumerated() {
-        session.record(scores, at: defaultDate.addingTimeInterval(3 + Double(i) * hopSeconds))
-    }
-    return session.byCode
-}
 
 @MainActor func score(_ audio: [Float]) throws -> [[Float]] {
     let clips = AudioDecoding.clips(audio, hop: hopSamples)
     clipsTotal += clips.count
     return try clips.map { try classifier.confidences(for: $0) }
+}
+
+/// Runs every variant over one recording's clip confidences. Reportable scores are computed once
+/// per rule set and shared by variants that differ only in confirmation.
+@MainActor func runVariants(_ clipConfidences: [[Float]], local: LocalSpecies) -> [Variant: [String: HeardBird]] {
+    var reportable: [DetectionRules: [[BirdScore]]] = [:]
+    var out: [Variant: [String: HeardBird]] = [:]
+    for variant in variants {
+        let perClip =
+            reportable[variant.rules]
+            ?? clipConfidences.map { classifier.reportable($0, local: local, rules: variant.rules) }
+        reportable[variant.rules] = perClip
+        var session = DetectionSession(callGap: callGap, confirmation: variant.confirmation)
+        for (i, scores) in perClip.enumerated() {
+            session.record(scores, at: defaultDate.addingTimeInterval(3 + Double(i) * hopSeconds))
+        }
+        out[variant] = session.byCode
+    }
+    return out
 }
 
 @MainActor func nonBirdsFired(_ clipConfidences: [[Float]], threshold: Float) -> Int {
@@ -196,28 +273,23 @@ for recording in manifest.recordings where recording.kind == .noise {
     guard let audio = decode(recording) else { continue }
     if rms(audio) > 0 { noiseAudio.append(audio) }
     let clipConfidences = try score(audio)
-    for filtered in [false, true] {
-        for t in thresholds {
-            let rules = DetectionRules(minConfidence: t, useLocationFilter: filtered)
-            let scoresPerClip = reportable(clipConfidences, local: noiseLocal, rules: rules)
-            let nonBirds = nonBirdsFired(clipConfidences, threshold: t)
-            for (ruleName, rule) in confirmationRules {
-                let found = heard(scoresPerClip, confirmation: rule)
-                for condition in conditions {  // noise false positives count against every condition
-                    let key = Key(condition: condition, filtered: filtered, threshold: t, rule: ruleName)
-                    var c = counts[key] ?? Counts()
-                    c.noiseFiles += 1
-                    c.falseInNoise += found.count
-                    c.noiseFilesWithBirds += found.isEmpty ? 0 : 1
-                    c.nonBirdDropped += nonBirds
-                    counts[key] = c
-                }
-                if verbose, !filtered, t == 0.5, ruleName == defaultRule {
-                    let names = found.values.map(\.species.commonName)
-                    let extra = names.isEmpty ? "" : "  · reported: " + names.joined(separator: ", ")
-                    details.append("  \(displayName(recording)) noise: \(recording.category ?? "?")\(extra)")
-                }
-            }
+    for (variant, found) in runVariants(clipConfidences, local: noiseLocal) {
+        let nonBirds = nonBirdsFired(clipConfidences, threshold: variant.rules.minConfidence)
+        for condition in conditions {  // noise false positives count against every condition
+            let key = Key(condition: condition, variant: variant)
+            var c = counts[key] ?? Counts()
+            c.noiseFiles += 1
+            c.falseInNoise += found.count
+            c.noiseFilesWithBirds += found.isEmpty ? 0 : 1
+            c.nonBirdDropped += nonBirds
+            counts[key] = c
+        }
+        if verbose, variant.tags.contains("main"), !variant.rules.useLocationFilter,
+            variant.rules.minConfidence == appDefault.rules.minConfidence
+        {
+            let names = found.values.map(\.species.commonName)
+            let extra = names.isEmpty ? "" : "  · reported: " + names.joined(separator: ", ")
+            details.append("  \(displayName(recording)) noise: \(recording.category ?? "?")\(extra)")
         }
     }
 }
@@ -241,44 +313,37 @@ for (n, recording) in manifest.recordings.enumerated() where recording.kind == .
     for (c, condition) in conditions.enumerated() {
         guard c == 0 || bed != nil else { continue }
         let clipConfidences = try score(c == 0 ? audio : mix(audio, bed!, snr: mixLevels[c - 1]))
-        for filtered in [false, true] {
-            for t in thresholds {
-                let scoresPerClip = reportable(
-                    clipConfidences, local: local, rules: DetectionRules(minConfidence: t, useLocationFilter: filtered))
-                let nonBirds = nonBirdsFired(clipConfidences, threshold: t)
-                for (ruleName, rule) in confirmationRules {
-                    let found = heard(scoresPerClip, confirmation: rule)
-                    let codesFound = Set(found.keys)
-                    let hit = !codesFound.isDisjoint(with: target)
-                    let key = Key(condition: condition, filtered: filtered, threshold: t, rule: ruleName)
-                    var counted = counts[key] ?? Counts()
-                    counted.birdFiles += 1
-                    counted.hits += hit ? 1 : 0
-                    counted.falseInBirdFiles += codesFound.subtracting(target).subtracting(background).count
-                    counted.nonBirdDropped += nonBirds
-                    counts[key] = counted
-                    guard ruleName == defaultRule else { continue }
+        for (variant, found) in runVariants(clipConfidences, local: local) {
+            let targetBird = found.values.first { target.contains($0.id) }
+            let key = Key(condition: condition, variant: variant)
+            var counted = counts[key] ?? Counts()
+            counted.birdFiles += 1
+            counted.hits += targetBird == nil ? 0 : 1
+            counted.unusualHits += targetBird?.commonness == .unusual ? 1 : 0
+            counted.falseInBirdFiles += Set(found.keys).subtracting(target).subtracting(background).count
+            counted.nonBirdDropped += nonBirdsFired(clipConfidences, threshold: variant.rules.minConfidence)
+            counts[key] = counted
 
-                    if filtered, t == 0.5, let bird = found.values.first(where: { target.contains($0.id) }) {
-                        firstDetection[condition, default: []].append(bird.firstHeard.timeIntervalSince(defaultDate))
-                        callCounts[condition, default: []].append(bird.calls)
-                    }
-                    if c == 0, filtered, t == 0.5 {
-                        let name = catalog[targetIndex].commonName
-                        perSpecies[name, default: (0, 0)].total += 1
-                        if hit { perSpecies[name, default: (0, 0)].hits += 1 }
-                    }
-                    if verbose, c == 0, !filtered, t == 0.5 {
-                        let best = clipConfidences.map { $0[targetIndex] }.max() ?? 0
-                        let wrong = found.values.filter { !target.contains($0.id) && !background.contains($0.id) }
-                            .sorted { $0.bestConfidence > $1.bestConfidence }.prefix(4)
-                            .map { "\($0.species.commonName) \(Int($0.bestConfidence * 100))%" }
-                        let extra = wrong.isEmpty ? "" : "  · also reported: " + wrong.joined(separator: ", ")
-                        details.append(
-                            "  \(displayName(recording)) \(hit ? "✓" : "✗") \(catalog[targetIndex].commonName) "
-                                + "\(Int(best * 100))%\(extra)")
-                    }
-                }
+            if variant == appDefault, let targetBird {
+                firstDetection[condition, default: []].append(targetBird.firstHeard.timeIntervalSince(defaultDate))
+                callCounts[condition, default: []].append(targetBird.calls)
+            }
+            if variant == appDefault, c == 0 {
+                let name = catalog[targetIndex].commonName
+                perSpecies[name, default: (0, 0)].total += 1
+                if targetBird != nil { perSpecies[name, default: (0, 0)].hits += 1 }
+            }
+            if verbose, c == 0, variant.tags.contains("main"), !variant.rules.useLocationFilter,
+                variant.rules.minConfidence == appDefault.rules.minConfidence
+            {
+                let best = clipConfidences.map { $0[targetIndex] }.max() ?? 0
+                let wrong = found.values.filter { !target.contains($0.id) && !background.contains($0.id) }
+                    .sorted { $0.bestConfidence > $1.bestConfidence }.prefix(4)
+                    .map { "\($0.species.commonName) \(Int($0.bestConfidence * 100))%" }
+                let extra = wrong.isEmpty ? "" : "  · also reported: " + wrong.joined(separator: ", ")
+                details.append(
+                    "  \(displayName(recording)) \(targetBird == nil ? "✗" : "✓") \(catalog[targetIndex].commonName) "
+                        + "\(Int(best * 100))%\(extra)")
             }
         }
     }
@@ -287,91 +352,99 @@ for (n, recording) in manifest.recordings.enumerated() where recording.kind == .
 // MARK: - Report
 
 struct Row: Encodable {
+    let variant: String
+    let tags: [String]
     let condition: String
-    let rule: String
     let threshold: Float
     let filtered: Bool
     let recall: Double  // bird recordings whose target species was reported
     let precision: Double  // correct species / all species reported (bird + noise files)
     let falsePerBirdFile: Double
+    let unusualHits: Int  // targets found in the "unusual here" tier
     let noiseFilesWithBirds: Double  // share of noise clips where any bird was reported
     let nonBirdDropped: Int  // non-bird labels (Engine, Dog, frogs, …) that fired and were dropped
 }
 
-@MainActor func row(_ key: Key) -> Row {
-    let c = counts[key] ?? Counts()
+@MainActor func row(_ variant: Variant, _ condition: String) -> Row {
+    let c = counts[Key(condition: condition, variant: variant)] ?? Counts()
     let reported = c.hits + c.falseInBirdFiles + c.falseInNoise
     return Row(
-        condition: key.condition, rule: key.rule, threshold: key.threshold, filtered: key.filtered,
+        variant: variant.name, tags: variant.tags.sorted(), condition: condition,
+        threshold: variant.rules.minConfidence, filtered: variant.rules.useLocationFilter,
         recall: c.birdFiles == 0 ? 0 : Double(c.hits) / Double(c.birdFiles),
         precision: reported == 0 ? 0 : Double(c.hits) / Double(reported),
         falsePerBirdFile: c.birdFiles == 0 ? 0 : Double(c.falseInBirdFiles) / Double(c.birdFiles),
+        unusualHits: c.unusualHits,
         noiseFilesWithBirds: c.noiseFiles == 0 ? 0 : Double(c.noiseFilesWithBirds) / Double(c.noiseFiles),
         nonBirdDropped: c.nonBirdDropped)
 }
 
 func pct(_ x: Double) -> String { String(format: "%5.1f%%", x * 100) }
+func padded(_ s: String, _ width: Int) -> String { s.padding(toLength: width, withPad: " ", startingAt: 0) }
 let elapsed = Date().timeIntervalSince(started)
-let summary = counts[Key(condition: "clean", filtered: true, threshold: 0.5)] ?? Counts()
+let summary = counts[Key(condition: "clean", variant: appDefault)] ?? Counts()
+var rows: [Row] = []
 
 print(
     "Overheard eval · \(summary.birdFiles) bird recordings, \(summary.noiseFiles) noise clips, \(clipsTotal) clips"
         + String(
             format: " in %.1f s (%.1f ms/clip incl. decoding)", elapsed, elapsed * 1000 / Double(max(clipsTotal, 1))))
-print("Location filter: BirdNET's location model at each recording's place and week.")
+print("Location: BirdNET's location model at each recording's place and week; standard confidence bar.")
 print(String(format: "Clips: 3 s every %.1f s · calls split after %.1f s without a detection.", hopSeconds, callGap))
-print("Confirmation (main tables): \(defaultRule) — the app's default.\n")
-print("filter  thresh  recall  precision  false/bird-file  noise→bird  non-bird dropped")
-var rows: [Row] = []
-for filtered in [false, true] {
-    for t in thresholds {
-        let r = row(Key(condition: "clean", filtered: filtered, threshold: t))
-        rows.append(r)
-        print(
-            String(
-                format: "%-6@  %5.2f  %@  %@     %6.2f        %@        %d", filtered ? "on" : "off", t,
-                pct(r.recall), pct(r.precision), r.falsePerBirdFile, pct(r.noiseFilesWithBirds), r.nonBirdDropped))
-    }
+print("Confirmation: 2 clips above the bar, or one clip ≥ max(0.70, bar + 0.15).\n")
+
+print("filter  thresh  recall  precision  false/bird-file  unusual hits  noise→bird  non-bird dropped")
+for variant in variants where variant.tags.contains("main") {
+    let r = row(variant, "clean")
+    rows.append(r)
+    print(
+        String(
+            format: "%-6@  %5.2f  %@  %@     %6.2f          %3d        %@        %d", r.filtered ? "on" : "off",
+            r.threshold, pct(r.recall), pct(r.precision), r.falsePerBirdFile, r.unusualHits,
+            pct(r.noiseFilesWithBirds), r.nonBirdDropped))
 }
 print("\nrecall = target bird found · precision = right species / all species reported (bird + noise files)")
-print("Non-bird labels (Engine, Dog, frogs, insects, …) are never reported; \"dropped\" counts how often one fired.")
+print("unusual hits = targets found in the \"unusual here\" tier · non-bird labels are never reported")
 
 if conditions.count > 1 {
     print("\nWith city noise mixed in (filter on; +10 dB = bird louder, -5 dB = noise louder):")
     print("noise    thresh  recall  precision  false/bird-file")
     for condition in conditions {
-        for t in thresholds {
-            let r = row(Key(condition: condition, filtered: true, threshold: t))
+        for variant in variants where variant.tags.contains("main") && variant.rules.useLocationFilter {
+            let r = row(variant, condition)
             if condition != "clean" { rows.append(r) }
             print(
                 String(
-                    format: "%-7@  %5.2f  %@  %@     %6.2f", condition, t, pct(r.recall), pct(r.precision),
+                    format: "%-7@  %5.2f  %@  %@     %6.2f", condition, r.threshold, pct(r.recall), pct(r.precision),
                     r.falsePerBirdFile))
         }
     }
 }
 
-print("\nConfirmation rules (filter on):")
-print("rule               noise    thresh  recall  precision  false/bird-file")
-for (ruleName, _) in confirmationRules {
-    for condition in conditions where condition == "clean" || condition == "+0 dB" {
-        for t: Float in [0.35, 0.5] {
-            let r = row(Key(condition: condition, filtered: true, threshold: t, rule: ruleName))
+/// A sweep table for variants with `tag`, on clean audio and at equal-loudness city noise.
+@MainActor func sweep(_ tag: String, _ title: String) {
+    print("\n\(title) (filter on):")
+    print("\(padded("variant", 22)) noise    thresh  recall  precision  false/bird-file  unusual hits")
+    for variant in variants where variant.tags.contains(tag) {
+        for condition in conditions where condition == "clean" || condition == "+0 dB" {
+            let r = row(variant, condition)
             rows.append(r)
             print(
                 String(
-                    format: "%-17@  %-7@  %5.2f  %@  %@     %6.2f", ruleName, condition, t, pct(r.recall),
-                    pct(r.precision), r.falsePerBirdFile))
+                    format: "%@ %-7@  %5.2f  %@  %@     %6.2f          %3d", padded(variant.name, 22), condition,
+                    r.threshold, pct(r.recall), pct(r.precision), r.falsePerBirdFile, r.unusualHits))
         }
     }
 }
+sweep("confirmation", "Confirmation rules")
+sweep("bar", "Confidence bars")
 
 func median(_ xs: [Double]) -> Double {
     let s = xs.sorted()
     guard !s.isEmpty else { return .nan }
     return s.count % 2 == 1 ? s[s.count / 2] : (s[s.count / 2 - 1] + s[s.count / 2]) / 2
 }
-print("\nWhen the target bird is found (filter on, 0.50):")
+print("\nWhen the target bird is found (app defaults):")
 print("noise    first heard (median / mean)   calls per recording (median / max)")
 for condition in conditions {
     let times = firstDetection[condition] ?? []
@@ -384,14 +457,14 @@ for condition in conditions {
 print("first heard = seconds into the recording when the target was first reported (a clip can't end before 3 s)")
 
 if !perSpecies.isEmpty {
-    print("\nPer species (threshold 0.50, filter on):")
+    print("\nPer species (app defaults):")
     for (name, v) in perSpecies.sorted(by: { $0.key < $1.key }) {
-        print("  \(name.padding(toLength: 30, withPad: " ", startingAt: 0)) \(v.hits)/\(v.total)")
+        print("  \(padded(name, 30)) \(v.hits)/\(v.total)")
     }
 }
 
 if verbose {
-    print("\nPer recording (clean, threshold 0.50, filter off; ✓ = target found):")
+    print("\nPer recording (clean, app defaults but filter off; ✓ = target found):")
     for line in details { print(line) }
 }
 

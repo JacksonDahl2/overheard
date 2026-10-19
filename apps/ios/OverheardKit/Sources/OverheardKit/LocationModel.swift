@@ -40,11 +40,9 @@ public struct LocalSpecies: Sendable, Equatable {
         self.occurrence = occurrence
     }
 
-    /// BirdNET-Analyzer's default cutoff for "expected here".
-    public static let expectedThreshold: Float = 0.03
-
-    public func isExpected(_ index: Int) -> Bool {
-        index < occurrence.count && occurrence[index] >= Self.expectedThreshold
+    /// How likely the species is here this week (0–1); 0 for an unknown index.
+    public func occurrence(of index: Int) -> Float {
+        index < occurrence.count ? occurrence[index] : 0
     }
 
     /// Whether this is still a good estimate for `place`: same week, within `km`.

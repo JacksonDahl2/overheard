@@ -33,6 +33,9 @@ struct ListenView: View {
                                 Text(bird.species.commonName)
                                 Text(bird.species.scientificName).font(.caption).italic()
                                     .foregroundStyle(.secondary)
+                                if let note = Self.note(for: bird.commonness) {
+                                    Text(note).font(.caption).foregroundStyle(.red)
+                                }
                             }
                             Spacer()
                             VStack(alignment: .trailing) {
@@ -50,7 +53,12 @@ struct ListenView: View {
                     Section("Sketching…") {
                         ForEach(listener.pending) { bird in
                             HStack {
-                                Text(bird.species.commonName).foregroundStyle(.secondary)
+                                VStack(alignment: .leading) {
+                                    Text(bird.species.commonName).foregroundStyle(.secondary)
+                                    if let note = Self.note(for: bird.commonness) {
+                                        Text(note).font(.caption).foregroundStyle(.secondary)
+                                    }
+                                }
                                 Spacer()
                                 Text(
                                     "\(Int(bird.peakConfidence * 100))% · \(bird.clips) clip\(bird.clips == 1 ? "" : "s")"
@@ -76,7 +84,9 @@ struct ListenView: View {
 
                 Section("Tuning") {
                     VStack(alignment: .leading) {
-                        Text("Min confidence: \(Int(listener.rules.minConfidence * 100))%")
+                        Text(
+                            "Min confidence (common birds; rarer need more): \(Int(listener.rules.minConfidence * 100))%"
+                        )
                         Slider(value: $listener.rules.minConfidence, in: 0.1...0.95, step: 0.05)
                     }
                     Toggle("Only birds expected here this week", isOn: $listener.rules.useLocationFilter)
@@ -104,6 +114,15 @@ struct ListenView: View {
                 }
             }
             .navigationTitle("Overheard")
+        }
+    }
+
+    /// The spike's stand-in for the rare-bird flourish (docs/design.md).
+    private static func note(for commonness: Commonness?) -> String? {
+        switch commonness {
+        case .unusual: "unusual here this time of year"
+        case .uncommon: "uncommon here"
+        case .common, nil: nil
         }
     }
 

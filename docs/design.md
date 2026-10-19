@@ -56,7 +56,7 @@ All four are on Google Fonts. Bundle them in the app (check each license; all ar
 - **Flock cards:** every bird is the same size, in an even row of up to 3, then "+N more".
 - **Labels** are handwritten (Hand font) next to each bird: name plus `×count`. Use `pageSoft` for the count.
 - **Being sketched:** a newly heard bird appears faint and grayscale inside a dashed red-ink circle, with "sketching…", then draws in.
-- **Naturalist flourish** for rare birds: a red-ink (`accentOnPage`) handwritten note with a hand-drawn arrow, rotated about -3°. Example: "uncommon here this late in October". Rarity comes from BirdNET's location/week occurrence score. Size still means only call count.
+- **Naturalist flourish** for rare birds: a red-ink (`accentOnPage`) handwritten note with a hand-drawn arrow, rotated about -3°. Example: "uncommon here this late in October". It shows on birds whose `HeardBird.commonness` is `.unusual`: under 3% occurrence here this week, and cleared the higher bar. Size still means only call count.
 - **Life birds** get a ★ in the species list, and a flourish if they're also rare.
 
 ## Components

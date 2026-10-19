@@ -363,3 +363,37 @@ final class RareConfirmationTests: XCTestCase {
         XCTAssertEqual(session.byCode["btbwar"]?.commonness, .unusual)
     }
 }
+
+/// Checks the real catalog the app ships (ml/models/coreml/species.json, a plain file in git).
+final class BundledCatalogTests: XCTestCase {
+    func catalog() throws -> SpeciesCatalog {
+        var root = URL(fileURLWithPath: #filePath)
+        for _ in 0..<6 { root.deleteLastPathComponent() }  // apps/ios/OverheardKit/Tests/OverheardKitTests/<file>
+        return try SpeciesCatalog(contentsOf: root.appendingPathComponent("ml/models/coreml/species.json"))
+    }
+
+    func testSplitSpeciesKeepBirdNETsConcept() throws {
+        let species = try catalog().species
+        func named(_ scientific: String) -> Species { species.first { $0.scientificName == scientific }! }
+        // eBird split Yellow Warbler; BirdNET's label must not become the tropical Mangrove Yellow Warbler.
+        let yellowWarbler = named("Setophaga petechia")
+        XCTAssertEqual(yellowWarbler.code, "yelwar")
+        XCTAssertEqual(yellowWarbler.commonName, "Yellow Warbler")
+        XCTAssertEqual(yellowWarbler.splitInto, ["manwar1", "yelwar1"])
+        XCTAssertEqual(named("Larus argentatus").commonName, "Herring Gull")  // not "European Herring Gull"
+        XCTAssertEqual(named("Tyto alba").code, "birdnet:Tyto alba")  // no exact eBird group code
+    }
+
+    func testOrdinarySpeciesAreUnchanged() throws {
+        let species = try catalog().species
+        XCTAssertEqual(species.first { $0.scientificName == "Cardinalis cardinalis" }?.code, "norcar")
+        XCTAssertEqual(species.count, 6522)
+        XCTAssertEqual(species.filter { !$0.isBird }.count, 101)
+    }
+
+    func testCodesAreUniqueApartFromKnownLumps() throws {
+        let codes = try catalog().species.map(\.code)
+        let shared = Dictionary(grouping: codes, by: { $0 }).filter { $0.value.count > 1 }.keys
+        XCTAssertEqual(Set(shared), ["sinbus6"])  // Singing Bushlark: two BirdNET labels, one species now
+    }
+}

@@ -8,12 +8,16 @@ public struct Species: Hashable, Sendable, Codable {
     public let commonName: String
     public let scientificName: String
     public let isBird: Bool
+    /// When eBird has since split this species, the daughter species' codes. BirdNET can't tell
+    /// them apart, so `code` names the whole group; a future version could pick the local one.
+    public let splitInto: [String]
 
-    public init(code: String, commonName: String, scientificName: String, isBird: Bool) {
+    public init(code: String, commonName: String, scientificName: String, isBird: Bool, splitInto: [String] = []) {
         self.code = code
         self.commonName = commonName
         self.scientificName = scientificName
         self.isBird = isBird
+        self.splitInto = splitInto
     }
 }
 
@@ -31,7 +35,9 @@ public struct SpeciesCatalog: Sendable {
         let file = try JSONDecoder().decode(File.self, from: Data(contentsOf: url))
         self.init(
             species: file.species.map {
-                Species(code: $0.code, commonName: $0.common, scientificName: $0.scientific, isBird: $0.bird)
+                Species(
+                    code: $0.code, commonName: $0.common, scientificName: $0.scientific, isBird: $0.bird,
+                    splitInto: $0.split ?? [])
             })
     }
 
@@ -50,6 +56,7 @@ public struct SpeciesCatalog: Sendable {
             let common: String
             let scientific: String
             let bird: Bool
+            let split: [String]?
         }
     }
 }

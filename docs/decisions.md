@@ -86,3 +86,10 @@ A dated log of what we decided and why. Newest at the bottom. To change a decisi
 - **`Commonness`** (common / uncommon / unusual) travels with every score, pending bird and heard bird. It's the single source for the rare-bird flourish, sketch styling and life-list badges.
 - **Code license: MIT.** The BirdNET-derived models stay CC BY-NC-SA 4.0. The bird illustrations and logo belong to the owner.
 - **Rare-bird eval set (5b):** 40 real recordings of birds the location model rated 1–3% where and when they were recorded (`fetch_rare.py`). The old hard cutoff reported **0%** of them; the steep bar reports **70%** at 87.5% precision. This confirms the bar's purpose. Gentler tiers reach 82.5% but cost main-set precision, so steep stays the default.
+
+## 2026-10-18 (species splits)
+
+- **Split species keep BirdNET's concept.** For the 32 BirdNET labels whose species eBird has since split, `species.json` uses BirdNET's name, eBird's group (slash) code when one covers exactly the daughters (8 do; e.g. `yelwar`, `y01345` Herring Gull), otherwise `birdnet:<scientific>`. The daughter codes are recorded in `split`.
+  - *Why:* BirdNET can't tell the daughters apart. Matching by scientific name picked whichever daughter kept it, which in NYC turned Yellow Warbler into Mangrove Yellow Warbler, Herring Gull into European Herring Gull, and Barn Owl into Western Barn Owl.
+  - Fixed before any walks are persisted, since these codes become stored IDs.
+  - A later version could pick the local daughter using the location model.

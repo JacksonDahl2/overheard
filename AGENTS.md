@@ -149,6 +149,7 @@ apps/{api,art-worker,web}, packages/{db,shared,observability}, infra/terraform, 
 - **BirdNET location model:** input `location` is [1, 3]: latitude, longitude, week. Output `Identity` is [1, 6522] occurrence values, 0–1, and "expected here" means occurrence ≥ 0.03.
   - It's a rebuild of the original (`convert.py`'s `meta_function`), because the original encoding layer doesn't convert. The rebuild matches the original within 2e-5.
 - **BirdNET weeks** run 1–48, four per month: `week = (month-1)*4 + min(4, (day-1)/7 + 1)`. Week -1 means "all year".
+- **Species splits:** for the 32 BirdNET species eBird has since split, `species.json` keeps BirdNET's concept (name plus group code) and lists the daughters in `split` (`Species.splitInto`). Don't map them to a daughter by scientific name; `BundledCatalogTests` guards this.
 - **Labels:** `labels.txt` lines look like `Scientific name_Common name`, where line index = output index. 101 labels aren't birds (sounds, frogs, insects, mammals). One pair of labels shares a code because eBird has since lumped the two species.
 - **Adaptive gate:** it's built and tested, but **off by default** (`ListeningPipeline.gateConfig = nil`). In the eval it skipped about half the clips but cost 2–6 points of recall in city noise. Turn it on only after measuring battery on a device.
 - **FP16:** don't use it. Even with the spectrogram kept at FP32, it shifted confidences by up to ±0.17.

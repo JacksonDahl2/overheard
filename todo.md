@@ -63,7 +63,7 @@ Goal: prove the core experience works in Central Park.
   3. [x] Overlapping windows (3 s clip every 1 s) + merge back-to-back detections into one "call" (gap > ~3 s = new call) so ×counts stay honest
   4. [x] Confirmation: a call counts when it has ≥2 clips above the threshold or one clip ≥0.70; until then the species is "pending" (the sketching bird), and it fades if the call ends unconfirmed
   5. [x] Occurrence-scaled confidence bar (`ConfidenceBar`, steep tiers +0.20/+0.40; `Commonness` on every score/bird): replace the hard 0.03 location cutoff with a bar that rises as a species gets less likely here (common ~0.5, unusual ~0.75, very unlikely hidden) — same score drives the rare-bird flourish. (Location model on device: done.)
-  5b. [ ] Rare-bird eval set: ~20 xeno-canto recordings of species the location model rates 1–3% at their place/date (out-of-season migrants, western vagrants) — the current set has none, so the rare-bird upside is unmeasured
+  5b. [x] Rare-bird eval set (`ml/eval/fetch_rare.py`, 40 recordings; steep bar finds 70%, old cutoff 0%): ~20 xeno-canto recordings of species the location model rates 1–3% at their place/date (out-of-season migrants, western vagrants) — the current set has none, so the rare-bird upside is unmeasured
   6. [ ] Adaptive noise gate (relative to recent noise floor) instead of a fixed RMS cutoff
 - [ ] "Start walk" / "End walk" flow with live detection list
 - [ ] Record walk route (CoreLocation) and show on MapKit

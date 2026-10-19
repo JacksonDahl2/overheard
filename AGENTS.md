@@ -115,9 +115,11 @@ apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcc
     overheard-eval        eval CLI · Tests/ unit tests
 ml/                       convert.py, bird_labels.py, verify.py; models/coreml/ in Git LFS, rest gitignored
   eval/                   fetch.py + manifest.json, fetch_rare.py + manifest-rare.json (committed); audio/ gitignored
+                          soundscapes.py + soundscapes-manifest.json: annotated soundscapes (prototype, not yet
+                          read by overheard-eval; see docs/research/soundscape-eval.md); soundscapes/ is gitignored
 art/model-comparison/     image-model trial: prompts.mjs, run.mjs, scoring page
 design/mockups/           screen mockups (.dc.html) + canvas.json
-docs/                     decisions.md, design.md, api.md
+docs/                     decisions.md, design.md, api.md; research/ (notes, e.g. soundscape-eval.md)
 apps/{api,art-worker,web}, packages/{db,shared,observability}, infra/terraform, scripts/   (planned)
 ```
 

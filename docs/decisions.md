@@ -93,3 +93,11 @@ A dated log of what we decided and why. Newest at the bottom. To change a decisi
   - *Why:* BirdNET can't tell the daughters apart. Matching by scientific name picked whichever daughter kept it, which in NYC turned Yellow Warbler into Mangrove Yellow Warbler, Herring Gull into European Herring Gull, and Barn Owl into Western Barn Owl.
   - Fixed before any walks are persisted, since these codes become stored IDs.
   - A later version could pick the local daughter using the location model.
+
+## 2026-10-19 (walk flow)
+
+- **Walks save continuously** on the phone (SwiftData): confirmed birds at once, the route at least every 30 s, everything when the app goes to the background. A walk a killed app left open is closed at its last save and marked interrupted.
+  - *Why:* iOS can kill the app mid-walk, and nothing heard should be lost.
+- **Birds are stored by species code only;** names come from the catalog at display time.
+- **Route:** a fix is kept only if it's accurate (≤ 50 m) and at least 10 m (or the two fixes' uncertainty) from the last point, so standing still to listen doesn't add jitter distance. The route is one encoded blob per walk, since it's only ever read whole.
+- **Background location** (`location` background mode plus `CLBackgroundActivitySession`) so the route keeps recording with the screen locked.

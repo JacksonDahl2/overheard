@@ -2,14 +2,18 @@ import Foundation
 import Observation
 import OverheardKit
 
-/// UI state for a listening session. The detection work happens in `ListeningPipeline`
-/// (an actor in OverheardKit); this class only feeds it clips and locations and publishes
-/// what comes back.
+/// UI state for a walk. The detection work happens in `ListeningPipeline` (an actor in
+/// OverheardKit); this class feeds it clips and locations, publishes what comes back, and
+/// saves the walk through `WalkStore` as it goes.
 @MainActor
 @Observable
 final class Listener {
     var isListening = false
     var errorMessage: String?
+    /// The walk being recorded (nil between walks).
+    private(set) var walk: Walk?
+    /// For showing saved walks, which store species codes only.
+    let catalog: SpeciesCatalog?
 
     var birds: [HeardBird] = []
     var pending: [PendingBird] = []  // heard, not yet confirmed ("sketching…")
@@ -29,19 +33,28 @@ final class Listener {
 
     private let capture = AudioCapture()
     private let locationProvider = LocationProvider()
+    private let store: WalkStore
     private var pipeline: ListeningPipeline?
     private var listening: Task<Void, Never>?
 
-    func toggle() {
-        isListening ? stop() : start()
+    init(store: WalkStore) {
+        self.store = store
+        catalog = try? SpeciesCatalog(contentsOf: BirdNETResources.bundled().catalog)
+        do {
+            try store.closeInterruptedWalks()  // the app was killed mid-walk last time
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     func start() {
+        guard !isListening else { return }
         errorMessage = nil
         do {
             let pipeline = try self.pipeline ?? ListeningPipeline(resources: .bundled())
             self.pipeline = pipeline
             try capture.start()
+            walk = try store.startWalk()
             birds = []
             pending = []
             lastClip = []
@@ -51,6 +64,7 @@ final class Listener {
             isListening = true
 
             locationProvider.onChange = { [weak self] status in self?.locationChanged(status) }
+            locationProvider.onFix = { [weak self] fix in self?.addToRoute(fix) }
             locationProvider.start()
 
             let clips = capture.clips
@@ -62,7 +76,7 @@ final class Listener {
                 for await clip in clips {
                     do {
                         let update = try await pipeline.process(clip.samples, at: clip.time)
-                        self?.apply(update)
+                        self?.apply(update, at: clip.time)
                     } catch {
                         self?.errorMessage = error.localizedDescription
                     }
@@ -73,15 +87,41 @@ final class Listener {
         }
     }
 
+    /// Ends the walk and saves it.
     func stop() {
+        guard isListening else { return }
         capture.stop()
         locationProvider.stop()
         listening?.cancel()
         listening = nil
         isListening = false
+        guard let walk else { return }
+        self.walk = nil
+        do {
+            try store.record(birds, in: walk, at: .now)
+            try store.endWalk(walk)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
-    private func apply(_ update: PipelineUpdate) {
+    /// Saves whatever is pending (call when the app goes to the background).
+    func saveNow() {
+        do { try store.save() } catch { errorMessage = error.localizedDescription }
+    }
+
+    func delete(_ walk: Walk) {
+        do { try store.delete(walk) } catch { errorMessage = error.localizedDescription }
+    }
+
+    private func apply(_ update: PipelineUpdate, at time: Date) {
+        if let walk {
+            do {
+                try store.record(update.birds, in: walk, at: time)
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
         birds = update.birds
         pending = update.pending
         lastClip = update.lastClip
@@ -90,6 +130,11 @@ final class Listener {
         clipsSeen = update.clipsSeen
         if let ms = update.inferenceMs { lastInferenceMs = ms }
         clipsAnalyzed = update.clipsAnalyzed
+    }
+
+    private func addToRoute(_ fix: RoutePoint) {
+        guard let walk else { return }
+        do { try store.addRoutePoint(fix, to: walk) } catch { errorMessage = error.localizedDescription }
     }
 
     private func locationChanged(_ status: LocationProvider.Status) {

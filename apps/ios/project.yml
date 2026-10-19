@@ -36,7 +36,7 @@ targets:
         CFBundleDisplayName: Overheard
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
-        UIBackgroundModes: [audio]
+        UIBackgroundModes: [audio, location]
         NSMicrophoneUsageDescription: Overheard listens for birdsong during your walk. Audio is analyzed on your phone and never uploaded.
         NSLocationWhenInUseUsageDescription: Overheard uses your approximate location to know which birds live nearby this time of year, so it can identify them more accurately. Your location stays on your phone.
     settings:

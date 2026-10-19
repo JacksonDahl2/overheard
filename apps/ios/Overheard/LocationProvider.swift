@@ -1,8 +1,9 @@
 import CoreLocation
 import OverheardKit
 
-/// Where the user is, for BirdNET's location filter. Approximate location is plenty: the
-/// filter works at city scale, so the app also works with "Precise Location" turned off.
+/// Where the user is: for BirdNET's location filter (`status`) and the walk's route (`onFix`).
+/// Approximate location is plenty for the filter, so the app works with "Precise Location"
+/// off; the route is then just coarse (`Route` drops inaccurate fixes).
 @MainActor
 final class LocationProvider {
     enum Status: Equatable {
@@ -15,9 +16,13 @@ final class LocationProvider {
 
     private(set) var status: Status = .idle
     var onChange: ((Status) -> Void)?
+    /// Every fix, for the route.
+    var onFix: ((RoutePoint) -> Void)?
 
     private let manager = CLLocationManager()
     private var updates: Task<Void, Never>?
+    /// Keeps updates coming with the screen locked (with the `location` background mode).
+    private var background: CLBackgroundActivitySession?
 
     func start() {
         guard updates == nil else { return }
@@ -31,11 +36,17 @@ final class LocationProvider {
             break
         }
         set(.waiting)
+        background = CLBackgroundActivitySession()
         updates = Task { [weak self] in
             do {
-                for try await update in CLLocationUpdate.liveUpdates() {
+                for try await update in CLLocationUpdate.liveUpdates(.fitness) {
                     guard let self else { return }
                     if let location = update.location {
+                        self.onFix?(
+                            RoutePoint(
+                                latitude: location.coordinate.latitude,
+                                longitude: location.coordinate.longitude, time: location.timestamp,
+                                accuracy: location.horizontalAccuracy))
                         self.set(
                             .located(
                                 Place(
@@ -56,6 +67,8 @@ final class LocationProvider {
     func stop() {
         updates?.cancel()
         updates = nil
+        background?.invalidate()
+        background = nil
         if case .located = status {} else { set(.idle) }
     }
 

@@ -14,7 +14,6 @@ final class AudioCapture: @unchecked Sendable {
 
     struct Clip: Sendable {
         let samples: [Float]
-        let level: Float  // RMS, used to skip silence
         let time: Date  // when the clip ended
     }
 
@@ -111,7 +110,7 @@ final class AudioCapture: @unchecked Sendable {
         guard error == nil, let samples = out.floatChannelData?[0] else { return }
 
         for clip in window.append(UnsafeBufferPointer(start: samples, count: Int(out.frameLength))) {
-            continuation.yield(Clip(samples: clip, level: Self.rms(clip), time: .now))
+            continuation.yield(Clip(samples: clip, time: .now))
         }
     }
 
@@ -145,12 +144,6 @@ final class AudioCapture: @unchecked Sendable {
                 }
             },
         ]
-    }
-
-    private static func rms(_ clip: [Float]) -> Float {
-        var sum: Float = 0
-        for s in clip { sum += s * s }
-        return (sum / Float(clip.count)).squareRoot()
     }
 
     /// A private copy of a tap buffer, safe to hand to another queue (nothing else holds it).

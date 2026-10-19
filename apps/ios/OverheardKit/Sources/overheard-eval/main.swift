@@ -101,6 +101,8 @@ struct Variant: Hashable {
     let tags: Set<String>
     let rules: DetectionRules
     let confirmation: Confirmation
+    /// Skip clips the adaptive gate rejects (as the app does). nil analyzes every clip.
+    var gate: AdaptiveGate.Config? = nil
 }
 
 let thresholds: [Float] = [0.25, 0.35, 0.5, 0.65, 0.8]
@@ -171,6 +173,17 @@ let variants: [Variant] = {
                     confirmation: defaultConfirmation))
         }
     }
+    let gates: [(String, AdaptiveGate.Config?)] = [
+        ("off (app default)", nil),
+        ("1.5x floor", AdaptiveGate.Config(aboveFloor: 1.5)),
+        ("2x floor", AdaptiveGate.Config()),
+        ("3x floor", AdaptiveGate.Config(aboveFloor: 3)),
+        ("2x, max 8 skipped", AdaptiveGate.Config(maxSkippedInARow: 8)),
+    ]
+    for (name, gate) in gates {
+        list.append(
+            Variant(name: name, tags: ["gate"], rules: DetectionRules(), confirmation: defaultConfirmation, gate: gate))
+    }
     return list
 }()
 /// The app's defaults: per-recording extras (first heard, calls, per species) use this one.
@@ -231,6 +244,8 @@ struct Counts {
     var falseInNoise = 0
     var noiseFilesWithBirds = 0
     var nonBirdDropped = 0
+    var clipsSeen = 0  // bird recordings only
+    var clipsSkipped = 0  // …that the gate skipped
 }
 var counts: [Key: Counts] = [:]
 var perSpecies: [String: (hits: Int, total: Int)] = [:]  // clean, app default
@@ -241,27 +256,43 @@ var skipped: [String] = []
 var clipsTotal = 0
 let started = Date()
 
-@MainActor func score(_ audio: [Float]) throws -> [[Float]] {
+/// Confidences for every clip, plus each clip's bird-band level for the gate.
+@MainActor func score(_ audio: [Float]) throws -> (confidences: [[Float]], levels: [Float]) {
     let clips = AudioDecoding.clips(audio, hop: hopSamples)
     clipsTotal += clips.count
-    return try clips.map { try classifier.confidences(for: $0) }
+    return (try clips.map { try classifier.confidences(for: $0) }, clips.map { LevelMeter.highPassRMS($0) })
+}
+
+struct VariantResult {
+    let heard: [String: HeardBird]
+    let skipped: Int
 }
 
 /// Runs every variant over one recording's clip confidences. Reportable scores are computed once
 /// per rule set and shared by variants that differ only in confirmation.
-@MainActor func runVariants(_ clipConfidences: [[Float]], local: LocalSpecies) -> [Variant: [String: HeardBird]] {
+@MainActor func runVariants(_ clipConfidences: [[Float]], levels: [Float], local: LocalSpecies) -> [Variant:
+    VariantResult]
+{
     var reportable: [DetectionRules: [[BirdScore]]] = [:]
-    var out: [Variant: [String: HeardBird]] = [:]
+    var out: [Variant: VariantResult] = [:]
     for variant in variants {
         let perClip =
             reportable[variant.rules]
             ?? clipConfidences.map { classifier.reportable($0, local: local, rules: variant.rules) }
         reportable[variant.rules] = perClip
         var session = DetectionSession(callGap: callGap, confirmation: variant.confirmation)
+        var gate = variant.gate.map { AdaptiveGate(config: $0) }
+        var skipped = 0
         for (i, scores) in perClip.enumerated() {
-            session.record(scores, at: defaultDate.addingTimeInterval(3 + Double(i) * hopSeconds))
+            let time = defaultDate.addingTimeInterval(3 + Double(i) * hopSeconds)
+            if gate != nil, !gate!.shouldAnalyze(level: levels[i]) {
+                session.advance(to: time)
+                skipped += 1
+                continue
+            }
+            session.record(scores, at: time)
         }
-        out[variant] = session.byCode
+        out[variant] = VariantResult(heard: session.byCode, skipped: skipped)
     }
     return out
 }
@@ -291,8 +322,9 @@ let noiseLocal = try locationModel.localSpecies(
 for recording in recordings where recording.kind == .noise {
     guard let audio = decode(recording) else { continue }
     if rms(audio) > 0 { noiseAudio.append(audio) }
-    let clipConfidences = try score(audio)
-    for (variant, found) in runVariants(clipConfidences, local: noiseLocal) {
+    let (clipConfidences, levels) = try score(audio)
+    for (variant, result) in runVariants(clipConfidences, levels: levels, local: noiseLocal) {
+        let found = result.heard
         let nonBirds = nonBirdsFired(clipConfidences, threshold: variant.rules.minConfidence)
         for condition in conditions {  // noise false positives count against every condition
             let key = Key(condition: condition, variant: variant)
@@ -331,8 +363,9 @@ for (n, recording) in recordings.enumerated() where recording.kind == .bird {
 
     for (c, condition) in conditions.enumerated() {
         guard c == 0 || bed != nil else { continue }
-        let clipConfidences = try score(c == 0 ? audio : mix(audio, bed!, snr: mixLevels[c - 1]))
-        for (variant, found) in runVariants(clipConfidences, local: local) {
+        let (clipConfidences, levels) = try score(c == 0 ? audio : mix(audio, bed!, snr: mixLevels[c - 1]))
+        for (variant, result) in runVariants(clipConfidences, levels: levels, local: local) {
+            let found = result.heard
             let targetBird = found.values.first { target.contains($0.id) }
             let key = Key(condition: condition, variant: variant, set: recording.set)
             var counted = counts[key] ?? Counts()
@@ -341,6 +374,8 @@ for (n, recording) in recordings.enumerated() where recording.kind == .bird {
             counted.unusualHits += targetBird?.commonness == .unusual ? 1 : 0
             counted.falseInBirdFiles += Set(found.keys).subtracting(target).subtracting(background).count
             counted.nonBirdDropped += nonBirdsFired(clipConfidences, threshold: variant.rules.minConfidence)
+            counted.clipsSeen += clipConfidences.count
+            counted.clipsSkipped += result.skipped
             counts[key] = counted
             guard recording.set == "main" else { continue }  // extras describe the main set
 
@@ -383,6 +418,7 @@ struct Row: Encodable {
     let unusualHits: Int  // targets found in the "unusual here" tier
     let noiseFilesWithBirds: Double  // share of noise clips where any bird was reported
     let nonBirdDropped: Int  // non-bird labels (Engine, Dog, frogs, …) that fired and were dropped
+    let skippedClips: Double  // share of bird-recording clips the gate skipped
 }
 
 @MainActor func row(_ variant: Variant, _ condition: String, set: String = "main") -> Row {
@@ -396,7 +432,8 @@ struct Row: Encodable {
         falsePerBirdFile: c.birdFiles == 0 ? 0 : Double(c.falseInBirdFiles) / Double(c.birdFiles),
         unusualHits: c.unusualHits,
         noiseFilesWithBirds: c.noiseFiles == 0 ? 0 : Double(c.noiseFilesWithBirds) / Double(c.noiseFiles),
-        nonBirdDropped: c.nonBirdDropped)
+        nonBirdDropped: c.nonBirdDropped,
+        skippedClips: c.clipsSeen == 0 ? 0 : Double(c.clipsSkipped) / Double(c.clipsSeen))
 }
 
 func pct(_ x: Double) -> String { String(format: "%5.1f%%", x * 100) }
@@ -458,6 +495,20 @@ if conditions.count > 1 {
 }
 sweep("confirmation", "Confirmation rules")
 sweep("bar", "Confidence bars")
+
+print("\nAdaptive gate (app defaults otherwise; skipped = clips not sent to BirdNET):")
+print("\(padded("gate", 22)) noise    skipped  recall  precision  false/bird-file")
+for condition in conditions {
+    for variant in variants where variant.tags.contains("gate") {
+        let r = row(variant, condition)
+        rows.append(r)
+        print(
+            String(
+                format: "%@ %-7@  %@  %@  %@     %6.2f", padded(variant.name, 22), condition, pct(r.skippedClips),
+                pct(r.recall), pct(r.precision), r.falsePerBirdFile))
+    }
+}
+print("focal recordings have a bird singing most of the time, so real walks should skip far more clips")
 
 // Rare-bird set: birds the location model rated unlikely (1–3%) where and when they were recorded.
 // Only bird recordings, so precision here ignores noise clips.

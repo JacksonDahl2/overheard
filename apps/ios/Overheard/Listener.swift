@@ -15,6 +15,8 @@ final class Listener {
     var pending: [PendingBird] = []  // heard, not yet confirmed ("sketching…")
     var lastClip: [BirdScore] = []
     var lastLevel: Float = 0
+    var noiseFloor: Float?
+    var clipsSeen = 0
     var lastInferenceMs: Double = 0
     var clipsAnalyzed = 0
     var startedAt: Date?
@@ -22,7 +24,8 @@ final class Listener {
 
     // Tuning knobs for field testing; pushed to the pipeline when they change.
     var rules = DetectionRules() { didSet { pushSettings() } }
-    var quietThreshold: Float = 0.002 { didSet { pushSettings() } }
+    /// Skip clips with nothing above the background (saves battery). Off analyzes every clip.
+    var useGate = false { didSet { pushSettings() } }  // off until battery is measured on a device
 
     private let capture = AudioCapture()
     private let locationProvider = LocationProvider()
@@ -43,6 +46,7 @@ final class Listener {
             pending = []
             lastClip = []
             clipsAnalyzed = 0
+            clipsSeen = 0
             startedAt = .now
             isListening = true
 
@@ -51,13 +55,13 @@ final class Listener {
 
             let clips = capture.clips
             let rules = rules
-            let quietThreshold = quietThreshold
+            let gate = gateConfig
             listening = Task { [weak self] in
+                await pipeline.configure(rules: rules, gate: gate)
                 await pipeline.reset()
-                await pipeline.configure(rules: rules, quietThreshold: quietThreshold)
                 for await clip in clips {
                     do {
-                        let update = try await pipeline.process(clip.samples, level: clip.level, at: clip.time)
+                        let update = try await pipeline.process(clip.samples, at: clip.time)
                         self?.apply(update)
                     } catch {
                         self?.errorMessage = error.localizedDescription
@@ -82,6 +86,8 @@ final class Listener {
         pending = update.pending
         lastClip = update.lastClip
         lastLevel = update.level
+        noiseFloor = update.noiseFloor
+        clipsSeen = update.clipsSeen
         if let ms = update.inferenceMs { lastInferenceMs = ms }
         clipsAnalyzed = update.clipsAnalyzed
     }
@@ -105,10 +111,12 @@ final class Listener {
         }
     }
 
+    private var gateConfig: AdaptiveGate.Config? { useGate ? AdaptiveGate.Config() : nil }
+
     private func pushSettings() {
         guard let pipeline else { return }
         let rules = rules
-        let quietThreshold = quietThreshold
-        Task { await pipeline.configure(rules: rules, quietThreshold: quietThreshold) }
+        let gate = gateConfig
+        Task { await pipeline.configure(rules: rules, gate: gate) }
     }
 }

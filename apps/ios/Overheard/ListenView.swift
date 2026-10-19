@@ -90,12 +90,15 @@ struct ListenView: View {
                         Slider(value: $listener.rules.minConfidence, in: 0.1...0.95, step: 0.05)
                     }
                     Toggle("Only birds expected here this week", isOn: $listener.rules.useLocationFilter)
+                    Toggle("Skip clips with nothing above the background", isOn: $listener.useGate)
                 }
 
                 Section("Stats") {
-                    LabeledContent("Clips analyzed", value: "\(listener.clipsAnalyzed)")
+                    LabeledContent("Clips analyzed", value: clipsSummary)
                     LabeledContent("Inference", value: String(format: "%.0f ms", listener.lastInferenceMs))
-                    LabeledContent("Level (RMS)", value: String(format: "%.4f", listener.lastLevel))
+                    LabeledContent("Bird-band level", value: String(format: "%.4f", listener.lastLevel))
+                    LabeledContent(
+                        "Background", value: listener.noiseFloor.map { String(format: "%.4f", $0) } ?? "learning…")
                     LabeledContent("Location", value: locationSummary)
                     LabeledContent("BirdNET week", value: "\(SpeciesFilter.birdNETWeek(for: .now))")
                     if let started = listener.startedAt {
@@ -124,6 +127,12 @@ struct ListenView: View {
         case .uncommon: "uncommon here"
         case .common, nil: nil
         }
+    }
+
+    private var clipsSummary: String {
+        guard listener.clipsSeen > 0 else { return "0" }
+        let skipped = 100 * (listener.clipsSeen - listener.clipsAnalyzed) / listener.clipsSeen
+        return "\(listener.clipsAnalyzed) of \(listener.clipsSeen) (\(skipped)% skipped)"
     }
 
     private var locationNote: String? {

@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/platform-iOS%2017%2B-6a5741" alt="Platform: iOS 17+">
   <img src="https://img.shields.io/badge/Swift-6-8b2f1c" alt="Swift 6">
   <a href="ml/models/coreml/README.md"><img src="https://img.shields.io/badge/models-CC%20BY--NC--SA%204.0-665441" alt="Models: CC BY-NC-SA 4.0"></a>
-  <a href="#license"><img src="https://img.shields.io/badge/code%20license-to%20be%20decided-lightgrey" alt="Code license: to be decided"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/code%20license-MIT-blue" alt="Code license: MIT"></a>
 </p>
 
 <p align="center">
@@ -169,5 +169,5 @@ Contributions and bug reports are welcome. It's a small project, so for anything
 ## License
 
 - **BirdNET-derived models** (`ml/models/coreml/`): the Core ML conversions of BirdNET v2.4 are adaptations licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/), the same license as BirdNET itself. That means **non-commercial use only**, **credit required**, and **anything derived from them shares the same license**. See [ml/models/coreml/README.md](ml/models/coreml/README.md).
-- **Code:** _license to be decided._ Until a `LICENSE` file is added, the code is not yet offered under an open-source license.
+- **Code:** [MIT](LICENSE).
 - **Bird illustrations** and the Overheard logo belong to the project owner and are not covered by the code license.

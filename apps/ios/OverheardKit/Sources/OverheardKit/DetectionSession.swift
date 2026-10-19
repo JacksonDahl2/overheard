@@ -11,6 +11,9 @@ public struct HeardBird: Identifiable, Sendable, Equatable {
     public var firstHeard: Date
     /// When the species was last detected (the end of the latest clip it was in).
     public var lastHeard: Date
+    /// The rarest it was here across its confirmed calls (nil if the location was never known).
+    /// `.unusual` gets the rare-bird flourish.
+    public var commonness: Commonness?
 }
 
 /// A new species BirdNET may be hearing but hasn't confirmed yet. In the app it's the faint
@@ -21,27 +24,33 @@ public struct PendingBird: Identifiable, Sendable, Equatable {
     public let clips: Int
     public let peakConfidence: Float
     public let since: Date
+    public let commonness: Commonness?
 }
 
 /// When a call is believable enough to count.
-public struct Confirmation: Sendable, Equatable {
+public struct Confirmation: Sendable, Hashable {
     /// Clips above the confidence threshold a call needs to count…
     public var minClips: Int
-    /// …unless one clip is at least this confident (catches short, clear single calls).
+    /// …unless one clip is at least this confident (catches short, clear single calls)…
     public var strongConfidence: Float
+    /// …and at least this far above the bar the detection had to clear. Rarer species have a
+    /// higher bar (`ConfidenceBar`), so one clip that barely clears it isn't enough on its own.
+    public var strongMargin: Float
 
     /// Defaults chosen with overheard-eval (2026-10-18): at a 0.50 threshold they halve wrong
     /// species per recording (0.32 → 0.15) for ~6 points of recall. See ml/eval/README.md.
-    public init(minClips: Int = 2, strongConfidence: Float = 0.7) {
+    public init(minClips: Int = 2, strongConfidence: Float = 0.7, strongMargin: Float = 0.15) {
         self.minClips = minClips
         self.strongConfidence = strongConfidence
+        self.strongMargin = strongMargin
     }
 
     /// Every detection counts immediately (the behavior before confirmation existed).
-    public static let none = Confirmation(minClips: 1, strongConfidence: 0)
+    public static let none = Confirmation(minClips: 1, strongConfidence: 0, strongMargin: 0)
 
-    func confirms(clips: Int, peak: Float) -> Bool {
-        clips >= minClips || peak >= strongConfidence
+    /// - Parameter required: the highest bar any clip in the call had to clear.
+    func confirms(clips: Int, peak: Float, required: Float) -> Bool {
+        clips >= minClips || peak >= min(max(strongConfidence, required + strongMargin), 0.99)
     }
 }
 
@@ -66,6 +75,8 @@ public struct DetectionSession: Sendable, Equatable {
         let species: Species
         var clips: Int
         var peak: Float
+        var required: Float  // highest bar a clip in this call had to clear
+        var commonness: Commonness?  // rarest seen in this call
         let start: Date
         var last: Date
         var confirmed: Bool
@@ -85,7 +96,11 @@ public struct DetectionSession: Sendable, Equatable {
     public var pending: [PendingBird] {
         calls.values
             .filter { !$0.confirmed && byCode[$0.species.code] == nil }
-            .map { PendingBird(species: $0.species, clips: $0.clips, peakConfidence: $0.peak, since: $0.start) }
+            .map {
+                PendingBird(
+                    species: $0.species, clips: $0.clips, peakConfidence: $0.peak, since: $0.start,
+                    commonness: $0.commonness)
+            }
             .sorted { $0.since < $1.since }
     }
 
@@ -101,28 +116,34 @@ public struct DetectionSession: Sendable, Equatable {
         for (code, score) in best {
             var call =
                 calls[code].flatMap { time.timeIntervalSince($0.last) <= callGap ? $0 : nil }
-                ?? Call(species: score.species, clips: 0, peak: 0, start: time, last: time, confirmed: false)
+                ?? Call(
+                    species: score.species, clips: 0, peak: 0, required: 0, commonness: nil, start: time, last: time,
+                    confirmed: false)
             call.clips += 1
             call.peak = max(call.peak, score.confidence)
+            call.required = max(call.required, score.requiredConfidence)
+            call.commonness = Self.rarer(call.commonness, score.commonness)
             call.last = time
 
             if call.confirmed {
                 if var bird = byCode[code] {
                     bird.bestConfidence = max(bird.bestConfidence, score.confidence)
                     bird.lastHeard = time
+                    bird.commonness = Self.rarer(bird.commonness, call.commonness)
                     byCode[code] = bird
                 }
-            } else if confirmation.confirms(clips: call.clips, peak: call.peak) {
+            } else if confirmation.confirms(clips: call.clips, peak: call.peak, required: call.required) {
                 call.confirmed = true
                 if var bird = byCode[code] {
                     bird.calls += 1
                     bird.bestConfidence = max(bird.bestConfidence, call.peak)
                     bird.lastHeard = time
+                    bird.commonness = Self.rarer(bird.commonness, call.commonness)
                     byCode[code] = bird
                 } else {
                     byCode[code] = HeardBird(
                         species: call.species, calls: 1, bestConfidence: call.peak, firstHeard: call.start,
-                        lastHeard: time)
+                        lastHeard: time, commonness: call.commonness)
                 }
             }
             calls[code] = call
@@ -133,5 +154,12 @@ public struct DetectionSession: Sendable, Equatable {
     /// does this itself; call it directly for clips that weren't classified (e.g. silence).
     public mutating func advance(to time: Date) {
         calls = calls.filter { time.timeIntervalSince($0.value.last) <= callGap }
+    }
+
+    private static func rarer(_ a: Commonness?, _ b: Commonness?) -> Commonness? {
+        switch (a, b) {
+        case (nil, let x), (let x, nil): x
+        case (let a?, let b?): max(a, b)
+        }
     }
 }

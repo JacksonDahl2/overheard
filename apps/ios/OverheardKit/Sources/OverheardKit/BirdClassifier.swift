@@ -1,17 +1,25 @@
 import CoreML
 import Foundation
 
-/// One species BirdNET scored in a clip.
+/// One species BirdNET reported in a clip, with the filter's verdict.
 public struct BirdScore: Hashable, Sendable {
     /// BirdNET output index. Only meaningful inside the pipeline; store `species.code`.
     public let index: Int
     public let species: Species
     public let confidence: Float
+    /// The confidence it had to reach (higher for rarer species here).
+    public let requiredConfidence: Float
+    /// How expected the species is here this week; nil when the location is unknown.
+    public let commonness: Commonness?
 
-    public init(index: Int, species: Species, confidence: Float) {
+    public init(
+        index: Int, species: Species, confidence: Float, requiredConfidence: Float = 0, commonness: Commonness? = nil
+    ) {
         self.index = index
         self.species = species
         self.confidence = confidence
+        self.requiredConfidence = requiredConfidence
+        self.commonness = commonness
     }
 }
 
@@ -43,8 +51,13 @@ public final class BirdClassifier {
     /// The reportable birds among per-label confidences, best first.
     public func reportable(_ confidences: [Float], local: LocalSpecies?, rules: DetectionRules) -> [BirdScore] {
         confidences.enumerated()
-            .filter { filter.isReportable($0.offset, confidence: $0.element, local: local, rules: rules) }
-            .map { BirdScore(index: $0.offset, species: catalog[$0.offset], confidence: $0.element) }
+            .compactMap { index, confidence in
+                filter.assess(index, confidence: confidence, local: local, rules: rules).map {
+                    BirdScore(
+                        index: index, species: catalog[index], confidence: confidence,
+                        requiredConfidence: $0.requiredConfidence, commonness: $0.commonness)
+                }
+            }
             .sorted { $0.confidence > $1.confidence }
     }
 

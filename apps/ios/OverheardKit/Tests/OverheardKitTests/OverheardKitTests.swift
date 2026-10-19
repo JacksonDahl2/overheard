@@ -33,33 +33,85 @@ final class AudioAndCalendarTests: XCTestCase {
 }
 
 final class SpeciesFilterTests: XCTestCase {
-    // Labels 0–2 are birds, 3 is "Engine". Here, label 2 is unlikely (below the 0.03 cutoff).
-    let filter = SpeciesFilter(nonBird: [3])
+    // Label occurrences here: 0 common, 1 uncommon, 2 unusual, 3 very unlikely; label 4 is "Engine".
+    let filter = SpeciesFilter(nonBird: [4])
     let local = LocalSpecies(
-        place: Place(latitude: 40.78, longitude: -73.97, week: 39), occurrence: [0.9, 0.05, 0.01, 0.5])
+        place: Place(latitude: 40.78, longitude: -73.97, week: 39), occurrence: [0.9, 0.05, 0.015, 0.005, 0.5])
+
+    func required(_ index: Int, _ confidence: Float, rules: DetectionRules = DetectionRules()) -> Float? {
+        filter.assess(index, confidence: confidence, local: local, rules: rules)?.requiredConfidence
+    }
 
     func testNonBirdsAreNeverReported() {
         for rules in [DetectionRules(useLocationFilter: true), DetectionRules(useLocationFilter: false)] {
-            XCTAssertFalse(filter.isReportable(3, confidence: 0.99, local: local, rules: rules))
-            XCTAssertFalse(filter.isReportable(3, confidence: 0.99, local: nil, rules: rules))
+            XCTAssertNil(filter.assess(4, confidence: 0.99, local: local, rules: rules))
+            XCTAssertNil(filter.assess(4, confidence: 0.99, local: nil, rules: rules))
         }
     }
 
-    func testConfidenceThreshold() {
-        let rules = DetectionRules(minConfidence: 0.5)
-        XCTAssertTrue(filter.isReportable(0, confidence: 0.5, local: local, rules: rules))
-        XCTAssertFalse(filter.isReportable(0, confidence: 0.49, local: local, rules: rules))
+    func testBarRisesAsSpeciesGetRarer() {
+        XCTAssertEqual(required(0, 0.5), 0.5)  // common: base threshold
+        XCTAssertNil(required(1, 0.65))  // uncommon needs 0.70
+        XCTAssertEqual(required(1, 0.7)!, 0.7, accuracy: 1e-6)
+        XCTAssertNil(required(2, 0.89))  // unusual needs 0.90
+        XCTAssertEqual(required(2, 0.92)!, 0.9, accuracy: 1e-6)
+        XCTAssertNil(required(3, 0.99))  // very unlikely: hidden
     }
 
-    func testLocationFilter() {
-        XCTAssertTrue(filter.isReportable(1, confidence: 0.9, local: local, rules: DetectionRules()))
-        XCTAssertFalse(filter.isReportable(2, confidence: 0.9, local: local, rules: DetectionRules()))
-        XCTAssertTrue(
-            filter.isReportable(2, confidence: 0.9, local: local, rules: DetectionRules(useLocationFilter: false)))
+    func testCommonnessIsReported() {
+        let rules = DetectionRules()
+        XCTAssertEqual(filter.assess(0, confidence: 0.9, local: local, rules: rules)?.commonness, .common)
+        XCTAssertEqual(filter.assess(1, confidence: 0.9, local: local, rules: rules)?.commonness, .uncommon)
+        XCTAssertEqual(filter.assess(2, confidence: 0.9, local: local, rules: rules)?.commonness, .unusual)
     }
 
-    func testUnknownLocationDoesNotFilterByPlace() {
-        XCTAssertTrue(filter.isReportable(2, confidence: 0.9, local: nil, rules: DetectionRules()))
+    func testBaseThresholdShiftsEveryTier() {
+        let strict = DetectionRules(minConfidence: 0.55)
+        XCTAssertNil(required(0, 0.52, rules: strict))
+        XCTAssertEqual(required(1, 0.8, rules: strict)!, 0.75, accuracy: 1e-6)
+        XCTAssertNil(required(2, 0.9, rules: strict))  // unusual now needs 0.95
+        // 0.6 + 0.40 would be 1.0: capped so a rare bird is still reachable.
+        XCTAssertEqual(
+            required(2, 0.97, rules: DetectionRules(minConfidence: 0.6)), SpeciesFilter.maxRequiredConfidence)
+    }
+
+    func testFilterOffJudgesByBaseButKeepsCommonness() {
+        let off = DetectionRules(useLocationFilter: false)
+        let veryUnlikely = filter.assess(3, confidence: 0.6, local: local, rules: off)
+        XCTAssertEqual(veryUnlikely?.requiredConfidence, 0.5)
+        XCTAssertEqual(veryUnlikely?.commonness, .unusual)
+    }
+
+    func testUnknownLocationUsesBaseThreshold() {
+        let verdict = filter.assess(3, confidence: 0.6, local: nil, rules: DetectionRules())
+        XCTAssertEqual(verdict?.requiredConfidence, 0.5)
+        XCTAssertNil(verdict?.commonness)
+        XCTAssertNil(filter.assess(3, confidence: 0.4, local: nil, rules: DetectionRules()))
+    }
+
+    func testHardCutoffPresetMatchesTheOldBehavior() {
+        let old = DetectionRules(bar: .hardCutoff)
+        XCTAssertEqual(required(1, 0.5, rules: old), 0.5)  // ≥ 3%: base threshold
+        XCTAssertNil(required(2, 0.99, rules: old))  // < 3%: hidden however confident
+    }
+}
+
+final class ConfidenceBarTests: XCTestCase {
+    func testTiersAreSortedAndBoundariesInclusive() {
+        let bar = ConfidenceBar(tiers: [
+            .init(minOccurrence: 0.01, extraConfidence: 0.3, commonness: .unusual),
+            .init(minOccurrence: 0.10, extraConfidence: 0, commonness: .common),
+        ])
+        XCTAssertEqual(bar.tiers.map(\.commonness), [.common, .unusual])
+        XCTAssertEqual(bar.tier(forOccurrence: 0.10)?.commonness, .common)
+        XCTAssertEqual(bar.tier(forOccurrence: 0.0999)?.commonness, .unusual)
+        XCTAssertEqual(bar.tier(forOccurrence: 0.01)?.commonness, .unusual)
+        XCTAssertNil(bar.tier(forOccurrence: 0.0099))
+    }
+
+    func testCommonnessOrdersFromCommonToUnusual() {
+        XCTAssertLessThan(Commonness.common, .uncommon)
+        XCTAssertLessThan(Commonness.uncommon, .unusual)
     }
 }
 
@@ -268,5 +320,46 @@ final class ConfirmationTests: XCTestCase {
         var session = DetectionSession(confirmation: .none)
         record(&session, 0.51, at: 3)
         XCTAssertEqual(session.byCode["btbwar"]?.calls, 1)
+    }
+}
+
+final class RareConfirmationTests: XCTestCase {
+    let warbler = Species(
+        code: "btbwar", commonName: "Black-throated Blue Warbler", scientificName: "S. c.", isBird: true)
+    let t0 = Date(timeIntervalSince1970: 0)
+
+    func score(_ confidence: Float, required: Float, _ commonness: Commonness) -> BirdScore {
+        BirdScore(
+            index: 0, species: warbler, confidence: confidence, requiredConfidence: required, commonness: commonness)
+    }
+
+    func testOneClipJustOverARareBarIsNotEnough() {
+        var session = DetectionSession()
+        // An unusual bird needs 0.80 to be reported at all; one clip at 0.85 isn't 0.15 above that.
+        session.record([score(0.85, required: 0.8, .unusual)], at: t0.addingTimeInterval(3))
+        XCTAssertNil(session.byCode["btbwar"])
+        XCTAssertEqual(session.pending.first?.commonness, .unusual)
+    }
+
+    func testOneVeryConfidentClipConfirmsARareBird() {
+        var session = DetectionSession()
+        session.record([score(0.96, required: 0.8, .unusual)], at: t0.addingTimeInterval(3))
+        XCTAssertEqual(session.byCode["btbwar"]?.calls, 1)
+        XCTAssertEqual(session.byCode["btbwar"]?.commonness, .unusual)
+    }
+
+    func testRareBirdConfirmsWithTwoClips() {
+        var session = DetectionSession()
+        session.record([score(0.82, required: 0.8, .unusual)], at: t0.addingTimeInterval(3))
+        session.record([score(0.81, required: 0.8, .unusual)], at: t0.addingTimeInterval(4))
+        XCTAssertEqual(session.byCode["btbwar"]?.calls, 1)
+    }
+
+    func testCommonnessKeepsTheRarestSeen() {
+        var session = DetectionSession(confirmation: .none)
+        session.record([score(0.9, required: 0.5, .common)], at: t0.addingTimeInterval(3))
+        session.record([score(0.9, required: 0.8, .unusual)], at: t0.addingTimeInterval(20))
+        session.record([score(0.9, required: 0.5, .common)], at: t0.addingTimeInterval(40))
+        XCTAssertEqual(session.byCode["btbwar"]?.commonness, .unusual)
     }
 }

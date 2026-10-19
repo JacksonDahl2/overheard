@@ -12,7 +12,14 @@ ml/.venv/bin/python -I ml/eval/fetch.py --rebuild  # re-query sources, rewrite m
 - **Birds:** xeno-canto, 5 recordings each for 22 Central Park species (110 total), quality A, 10–90 s, Northeast US first. Needs `XENO_CANTO_API_KEY` in `.env`; get a free key at https://xeno-canto.org/account.
 - **Noise:** ESC-50 clips (CC BY-NC 3.0) in 13 categories: car horn, siren, engine, train, airplane, dog, footsteps, laughing, coughing, crying baby, church bells, rain, wind.
 
-`manifest.json` is committed so every run uses the same files. `audio/` is gitignored.
+- **Rare birds** (`fetch_rare.py` → `manifest-rare.json`): 40 eastern-US xeno-canto recordings (quality A/B) of birds that BirdNET's location model rated **unlikely, 1–3%, at the place and week they were recorded**. That's the app's "unusual" tier. At most 2 per species; 24 species, e.g. late-May shorebirds and geese, rails, nightjars, woodcock. They're reported in their own table, so the main baseline stays comparable.
+
+`manifest.json` and `manifest-rare.json` are committed so every run uses the same files. `audio/` is gitignored.
+
+```sh
+ml/.venv/bin/python -I ml/eval/fetch_rare.py            # download what manifest-rare.json lists
+ml/.venv/bin/python -I ml/eval/fetch_rare.py --rebuild  # re-query and re-score with the location model
+```
 
 ## Run
 
@@ -144,5 +151,19 @@ Bars compared (0.50, filter on, as recall / precision):
 
 - **The test set has no rare targets.** "Unusual hits" is 0 for every bar: all 110 targets are common, in-season birds where they were recorded. So this table measures only the **cost** of opening the door to rarer species, which is more lookalikes.
 - **Steep is the only bar that comes out ahead of the old cutoff on precision.** The upside, clearly heard rare birds no longer hidden, needs a rare-bird eval set (todo step 5b).
+
+### Step 5b: the rare-bird set
+
+Real but unlikely-here birds. This is what the confidence bar exists for. Filter on:
+
+| Bar | Recall (clean) | Recall (0 dB noise) | Precision (clean) |
+|---|---|---|---|
+| hard cutoff (old) | **0%** | 0% | — |
+| **steep +0.20/+0.40 (default)** | **70.0%** | 60.0% | **87.5%** |
+| first try +0.15/+0.30 | 72.5% | 72.5% | 85.3% |
+| gentle +0.10/+0.20 | 82.5% | 75.0% | 80.5% |
+
+- **The old cutoff hid all 40** by design. The steep bar reports 70% of them with high precision, and every one it finds is flagged `unusual`, which is what gets the flourish.
+- **Gentler bars find more rare birds** but cost main-set precision (82.1% vs 84.3%), so steep stays the default.
 
 - **Caveat:** xeno-canto is probably part of BirdNET's training data, so these numbers are likely optimistic. Real park audio is harder.

@@ -145,6 +145,36 @@ def build_noise():
     return recordings
 
 
+def download(recordings):
+    """Downloads any recordings not already in audio/ and returns how many were fetched.
+
+    xeno-canto serves some WAVs under .mp3 names; files are named by their content (and
+    `recording["file"]` updated), since Apple's decoder trusts the extension.
+    """
+    os.makedirs(AUDIO, exist_ok=True)
+    fetched = 0
+    for r in recordings:
+        wav = os.path.splitext(r["file"])[0] + ".wav"
+        if not r["file"].endswith(".wav") and os.path.exists(os.path.join(HERE, wav)):
+            r["file"] = wav  # renamed on an earlier run
+        path = os.path.join(HERE, r["file"])
+        if not os.path.exists(path):
+            try:
+                data = get(r["url"])
+            except Exception as e:  # keep going; the eval reports missing files
+                print(f"  failed {r['file']}: {e}")
+                continue
+            with open(path, "wb") as f:
+                f.write(data)
+            fetched += 1
+        with open(path, "rb") as f:
+            is_wav = f.read(4) == b"RIFF"
+        if is_wav and not path.endswith(".wav"):
+            os.replace(path, os.path.join(HERE, wav))
+            r["file"] = wav
+    return fetched
+
+
 def main():
     rebuild = "--rebuild" in sys.argv or not os.path.exists(MANIFEST)
     if rebuild:
@@ -156,34 +186,10 @@ def main():
         else:
             print("  XENO_CANTO_API_KEY not set: skipping bird recordings (noise only)")
         manifest = {"recordings": birds + build_noise()}
-        with open(MANIFEST, "w") as f:
-            json.dump(manifest, f, indent=2)
-            f.write("\n")
     else:
         manifest = json.load(open(MANIFEST))
 
-    os.makedirs(AUDIO, exist_ok=True)
-    fetched = 0
-    for r in manifest["recordings"]:
-        path = os.path.join(HERE, r["file"])
-        if not os.path.exists(path):
-            try:
-                data = get(r["url"])
-            except Exception as e:  # keep going; the eval reports missing files
-                print(f"  failed {r['file']}: {e}")
-                continue
-            with open(path, "wb") as f:
-                f.write(data)
-            fetched += 1
-        # xeno-canto serves some WAVs; name files by their content, since
-        # Apple's decoder trusts the extension.
-        with open(path, "rb") as f:
-            is_wav = f.read(4) == b"RIFF"
-        if is_wav and not path.endswith(".wav"):
-            fixed = os.path.splitext(r["file"])[0] + ".wav"
-            os.replace(path, os.path.join(HERE, fixed))
-            r["file"] = fixed
-
+    fetched = download(manifest["recordings"])
     with open(MANIFEST, "w") as f:
         json.dump(manifest, f, indent=2)
         f.write("\n")

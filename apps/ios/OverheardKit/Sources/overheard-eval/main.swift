@@ -5,7 +5,7 @@
 //     [--hop 1]   seconds between clip starts (the app uses 1: a 3 s clip every second)
 //
 // Inputs (defaults relative to the current directory):
-//   --manifest       ml/eval/manifest.json                     (from ml/eval/fetch.py)
+//   --manifest       ml/eval/manifest.json,ml/eval/manifest-rare.json   (fetch.py, fetch_rare.py; missing ones skipped)
 //   --audio-model    ml/models/coreml/BirdNETAudio.mlpackage
 //   --location-model ml/models/coreml/BirdNETMeta.mlpackage
 //   --catalog        ml/models/coreml/species.json
@@ -29,7 +29,8 @@ func argument(_ name: String, default value: String) -> String {
 }
 let verbose = CommandLine.arguments.contains("--verbose")
 let jsonOut = CommandLine.arguments.contains("--json") ? argument("json", default: "") : nil
-let manifestURL = URL(fileURLWithPath: argument("manifest", default: "ml/eval/manifest.json"))
+let manifestURLs = argument("manifest", default: "ml/eval/manifest.json,ml/eval/manifest-rare.json")
+    .split(separator: ",").map { URL(fileURLWithPath: String($0)) }
 
 func compiled(_ path: String) throws -> URL {
     let url = URL(fileURLWithPath: path)
@@ -54,13 +55,30 @@ struct Recording: Decodable {
     let lat: Double?
     let lon: Double?
     let category: String?  // noise category, e.g. "siren"
+    /// Which eval set it belongs to: nil for the main set, "rare" for unlikely-here birds
+    /// (fetch_rare.py). Sets are reported separately so baselines stay comparable.
+    let subset: String?
+    /// Set when loaded: the manifest's folder, which `file` is relative to.
+    var baseDir = URL(fileURLWithPath: ".")
 
     enum Kind: String, Decodable { case bird, noise }
+    enum CodingKeys: String, CodingKey {
+        case file, kind, species, also, date, lat, lon, category
+        case subset = "set"
+    }
+
+    var set: String { subset ?? "main" }
 }
 struct Manifest: Decodable { let recordings: [Recording] }
 
-let manifest = try JSONDecoder().decode(Manifest.self, from: Data(contentsOf: manifestURL))
-let baseDir = manifestURL.deletingLastPathComponent()
+let recordings: [Recording] = try manifestURLs.flatMap { url -> [Recording] in
+    guard FileManager.default.fileExists(atPath: url.path) else { return [] }
+    return try JSONDecoder().decode(Manifest.self, from: Data(contentsOf: url)).recordings.map {
+        var r = $0
+        r.baseDir = url.deletingLastPathComponent()
+        return r
+    }
+}
 
 let dateParser = DateFormatter()
 dateParser.dateFormat = "yyyy-MM-dd"
@@ -202,6 +220,7 @@ let callGap = max(DetectionSession.defaultCallGap, hopSeconds * 2.5)
 struct Key: Hashable {
     let condition: String
     let variant: Variant
+    var set = "main"
 }
 struct Counts {
     var birdFiles = 0
@@ -252,7 +271,7 @@ let started = Date()
 }
 
 @MainActor func decode(_ recording: Recording) -> [Float]? {
-    let url = baseDir.appendingPathComponent(recording.file)
+    let url = recording.baseDir.appendingPathComponent(recording.file)
     guard FileManager.default.fileExists(atPath: url.path) else {
         skipped.append("\(recording.file) (missing; run ml/eval/fetch.py)")
         return nil
@@ -269,7 +288,7 @@ let started = Date()
 var noiseAudio: [[Float]] = []
 let noiseLocal = try locationModel.localSpecies(
     at: Place(latitude: centralPark.lat, longitude: centralPark.lon, date: defaultDate))
-for recording in manifest.recordings where recording.kind == .noise {
+for recording in recordings where recording.kind == .noise {
     guard let audio = decode(recording) else { continue }
     if rms(audio) > 0 { noiseAudio.append(audio) }
     let clipConfidences = try score(audio)
@@ -295,7 +314,7 @@ for recording in manifest.recordings where recording.kind == .noise {
 }
 
 // Bird recordings one at a time, so memory stays flat as the set grows.
-for (n, recording) in manifest.recordings.enumerated() where recording.kind == .bird {
+for (n, recording) in recordings.enumerated() where recording.kind == .bird {
     let targetIndex = catalog.indices(scientificName: recording.species ?? "").first
     guard let targetIndex else {
         skipped.append("\(recording.file) (\(recording.species ?? "no species") isn't in the catalog)")
@@ -315,7 +334,7 @@ for (n, recording) in manifest.recordings.enumerated() where recording.kind == .
         let clipConfidences = try score(c == 0 ? audio : mix(audio, bed!, snr: mixLevels[c - 1]))
         for (variant, found) in runVariants(clipConfidences, local: local) {
             let targetBird = found.values.first { target.contains($0.id) }
-            let key = Key(condition: condition, variant: variant)
+            let key = Key(condition: condition, variant: variant, set: recording.set)
             var counted = counts[key] ?? Counts()
             counted.birdFiles += 1
             counted.hits += targetBird == nil ? 0 : 1
@@ -323,6 +342,7 @@ for (n, recording) in manifest.recordings.enumerated() where recording.kind == .
             counted.falseInBirdFiles += Set(found.keys).subtracting(target).subtracting(background).count
             counted.nonBirdDropped += nonBirdsFired(clipConfidences, threshold: variant.rules.minConfidence)
             counts[key] = counted
+            guard recording.set == "main" else { continue }  // extras describe the main set
 
             if variant == appDefault, let targetBird {
                 firstDetection[condition, default: []].append(targetBird.firstHeard.timeIntervalSince(defaultDate))
@@ -365,8 +385,8 @@ struct Row: Encodable {
     let nonBirdDropped: Int  // non-bird labels (Engine, Dog, frogs, …) that fired and were dropped
 }
 
-@MainActor func row(_ variant: Variant, _ condition: String) -> Row {
-    let c = counts[Key(condition: condition, variant: variant)] ?? Counts()
+@MainActor func row(_ variant: Variant, _ condition: String, set: String = "main") -> Row {
+    let c = counts[Key(condition: condition, variant: variant, set: set)] ?? Counts()
     let reported = c.hits + c.falseInBirdFiles + c.falseInNoise
     return Row(
         variant: variant.name, tags: variant.tags.sorted(), condition: condition,
@@ -438,6 +458,26 @@ if conditions.count > 1 {
 }
 sweep("confirmation", "Confirmation rules")
 sweep("bar", "Confidence bars")
+
+// Rare-bird set: birds the location model rated unlikely (1–3%) where and when they were recorded.
+// Only bird recordings, so precision here ignores noise clips.
+let rareCount = counts[Key(condition: "clean", variant: appDefault, set: "rare")]?.birdFiles ?? 0
+if rareCount > 0 {
+    print("\nRare-bird set (\(rareCount) recordings of unlikely-here birds; filter on):")
+    print("\(padded("variant", 22)) noise    thresh  recall  precision  false/bird-file  unusual hits")
+    for variant in variants where variant.tags.contains("bar") || variant == appDefault {
+        for condition in conditions where condition == "clean" || condition == "+0 dB" {
+            let r = row(variant, condition, set: "rare")
+            rows.append(r)
+            print(
+                String(
+                    format: "%@ %-7@  %5.2f  %@  %@     %6.2f          %3d",
+                    padded(variant == appDefault ? "app default" : variant.name, 22), condition, r.threshold,
+                    pct(r.recall), pct(r.precision), r.falsePerBirdFile, r.unusualHits))
+        }
+    }
+    print("recall here = unlikely-but-real birds reported · the old hard cutoff hides all of them by design")
+}
 
 func median(_ xs: [Double]) -> Double {
     let s = xs.sorted()

@@ -85,3 +85,4 @@ A dated log of what we decided and why. Newest at the bottom. To change a decisi
   - *Caveat:* the eval set has no rare targets, so the rare-bird upside is unmeasured. A rare-bird eval set is next (todo step 5b).
 - **`Commonness`** (common / uncommon / unusual) travels with every score, pending bird and heard bird. It's the single source for the rare-bird flourish, sketch styling and life-list badges.
 - **Code license: MIT.** The BirdNET-derived models stay CC BY-NC-SA 4.0. The bird illustrations and logo belong to the owner.
+- **Rare-bird eval set (5b):** 40 real recordings of birds the location model rated 1–3% where and when they were recorded (`fetch_rare.py`). The old hard cutoff reported **0%** of them; the steep bar reports **70%** at 87.5% precision. This confirms the bar's purpose. Gentler tiers reach 82.5% but cost main-set precision, so steep stays the default.

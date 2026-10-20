@@ -59,6 +59,12 @@ public final class WalkStore {
         if route.points.count == 1 { try save(at: point.time) } else { try saveIfDue(at: point.time) }
     }
 
+    /// Names the walk after where it is (found once, from the first location fix).
+    public func name(_ walk: Walk, placeName: String) throws {
+        walk.placeName = placeName
+        try save()
+    }
+
     public func endWalk(_ walk: Walk, at time: Date = .now) throws {
         walk.endedAt = time
         walk.updatedAt = time

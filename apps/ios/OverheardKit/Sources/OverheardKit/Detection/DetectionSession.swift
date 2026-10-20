@@ -14,6 +14,18 @@ public struct HeardBird: Identifiable, Sendable, Equatable {
     /// The rarest it was here across its confirmed calls (nil if the location was never known).
     /// `.unusual` gets the rare-bird flourish.
     public var commonness: Commonness?
+
+    public init(
+        species: Species, calls: Int, bestConfidence: Float, firstHeard: Date, lastHeard: Date,
+        commonness: Commonness?
+    ) {
+        self.species = species
+        self.calls = calls
+        self.bestConfidence = bestConfidence
+        self.firstHeard = firstHeard
+        self.lastHeard = lastHeard
+        self.commonness = commonness
+    }
 }
 
 /// A new species BirdNET may be hearing but hasn't confirmed yet. In the app it's the faint
@@ -25,6 +37,14 @@ public struct PendingBird: Identifiable, Sendable, Equatable {
     public let peakConfidence: Float
     public let since: Date
     public let commonness: Commonness?
+
+    public init(species: Species, clips: Int, peakConfidence: Float, since: Date, commonness: Commonness?) {
+        self.species = species
+        self.clips = clips
+        self.peakConfidence = peakConfidence
+        self.since = since
+        self.commonness = commonness
+    }
 }
 
 /// When a call is believable enough to count.

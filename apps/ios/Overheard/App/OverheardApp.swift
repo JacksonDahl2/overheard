@@ -9,17 +9,26 @@ struct OverheardApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
+        NavigationBarStyle.apply()
+
         do {
             container = try WalkStore.container()
         } catch {
             fatalError("Can't open the walk store: \(error)")
         }
-        _listener = State(initialValue: Listener(store: WalkStore(context: container.mainContext)))
+
+        let listener = Listener(store: WalkStore(context: container.mainContext))
+        #if DEBUG
+            if DemoWalk.isRequested, let catalog = listener.catalog {
+                listener.showDemo(DemoWalk(catalog: catalog))
+            }
+        #endif
+        _listener = State(initialValue: listener)
     }
 
     var body: some Scene {
         WindowGroup {
-            ListenView(listener: listener)
+            RootView(listener: listener)
         }
         .modelContainer(container)
         .onChange(of: scenePhase) { _, phase in

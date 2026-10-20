@@ -19,6 +19,7 @@ Two themes, chosen in settings (default: follow the system).
 | `tabBg` | `#ece4d2` | `#120c07` | Tab bar |
 | `tabSoft` | `#6e5b46` | `#a98f68` | Inactive tab |
 | `rule` | `rgba(90,66,38,.25)` | `rgba(242,226,192,.14)` | Dividers on chrome |
+| `card` | `#fbf7ee` | `#22180e` | Grouped list rows on chrome (Me, settings) |
 | `accent` | `#8b2f1c` (iron-gall red) | `#e9a24f` (candle flame) | Active tab, primary button, "Listening" |
 | `accentInk` | `#f7efdc` | `#1b130c` | Text on `accent` |
 | `pageInk` | `#2a1f15` | `#2a1f15` | Text on the journal page (both themes) |
@@ -52,9 +53,9 @@ All four are on Google Fonts. Bundle them in the app (check each license; all ar
 ## Page composition rules
 
 - **Size by call count** on the Listen and Journal pages. More calls make a bigger bird, with a minimum and maximum size so one chatty bird can't dominate. On Listen, a bird grows as repeat calls come in.
-- **Cluster** birds closely with slight overlap of empty margins. Avoid a grid.
+- **Scatter** birds like sketches in a notebook: spread over the page, each tilted a few degrees, drawings may tuck into each other's empty margins but never cover a bird or a label. Never a grid or rows. Birds are drawn large and close together. The page may rearrange as new birds arrive, to keep everyone as large as fits; each walk's page is arranged differently (the arrangement comes from the walk and the species).
 - **Flock cards:** every bird is the same size, in an even row of up to 3, then "+N more".
-- **Labels** are handwritten (Hand font) next to each bird: name plus `×count`. Use `pageSoft` for the count.
+- **Labels** are handwritten (Hand font) next to each bird: name plus `×count`. Use `pageSoft` for the count. A label sits below, above or beside its bird (mostly below), text leaning toward the bird; about one in three sits a little apart with a thin ink arrow to the bird. Rare birds keep their red-ink note instead of an arrow.
 - **Being sketched:** a newly heard bird appears faint and grayscale inside a dashed red-ink circle, with "sketching…", then draws in.
 - **Naturalist flourish** for rare birds: a red-ink (`accentOnPage`) handwritten note with a hand-drawn arrow, rotated about -3°. Example: "uncommon here this late in October". It shows on birds whose `HeardBird.commonness` is `.unusual`: under 3% occurrence here this week, and cleared the higher bar. Size still means only call count.
 - **Life birds** get a ★ in the species list, and a flourish if they're also rare.

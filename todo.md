@@ -70,10 +70,12 @@ Goal: prove the core experience works in Central Park.
 - [x] Record walk route (CoreLocation) and show on MapKit
 - [x] Persist walks + detections locally with SwiftData — save continuously during a walk (iOS can kill the app mid-walk); store species by `Species.code`
 - [x] Placeholder art for ~50 NYC-area species (`art/birds/`)
-- [ ] Journal page view: collage of birds heard on a walk + date/time/map
-- [ ] Prototype a "being sketched" reveal animation when a new bird is heard
-- [ ] Size birds on the page by call count (more calls → larger, capped), growing live as repeat calls come in; birds cluster closely. Applies to Listen + Journal page; Flock cards use even sizes
-- [ ] Rare-bird "naturalist flourish": red-ink handwritten note + arrow (e.g. "uncommon here this late in October"); rarity from BirdNET's location/week occurrence score; also mark life birds
+- [x] Journal page view: collage of birds heard on a walk + date/time/map (first version; render-to-image is separate)
+- [ ] Prototype a "being sketched" reveal animation when a new bird is heard (today: faint grayscale in a dashed red circle, easing to full color when confirmed)
+- [x] New-bird alert: a light haptic (and a notification when the screen is locked) the moment a new species is confirmed on a walk; easy to turn off in Me
+- [ ] Plumage variants: female and non-breeding drawings for the ~25 of the 50 birds where they differ; the page picks by date
+- [x] Size birds on the page by call count (more calls → larger, capped), growing live as repeat calls come in; birds cluster closely. Applies to Listen + Journal page; Flock cards use even sizes
+- [x] Rare-bird "naturalist flourish": red-ink handwritten note + arrow (e.g. "uncommon here this late in October"); rarity from BirdNET's location/week occurrence score; also mark life birds
 - [ ] Render journal page to image + share sheet
 - [ ] Life list (all species ever heard)
 - [ ] Field test in Central Park; tune thresholds; measure battery drain

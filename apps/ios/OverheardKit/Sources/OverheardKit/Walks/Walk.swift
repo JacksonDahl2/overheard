@@ -6,6 +6,8 @@ import SwiftData
 public final class Walk {
     @Attribute(.unique) public var id: UUID
     public var startedAt: Date
+    /// Where it was, e.g. "The Ramble, Central Park"; nil until a place name is found.
+    public var placeName: String?
     /// nil while the walk is going. A walk found open at launch was cut short (see `WalkStore`).
     public var endedAt: Date?
     /// Last time anything was saved: where an interrupted walk is considered to have ended.
@@ -25,6 +27,9 @@ public final class Walk {
     }
 
     public var isActive: Bool { endedAt == nil }
+
+    /// The place name, or a time-of-day name ("Morning walk") until there is one.
+    public var title: String { placeName ?? WalkTitle.default(for: startedAt) }
 
     public var duration: TimeInterval { (endedAt ?? updatedAt).timeIntervalSince(startedAt) }
 

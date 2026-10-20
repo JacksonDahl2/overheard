@@ -69,7 +69,7 @@ Goal: prove the core experience works in Central Park.
 - [x] "Start walk" / "End walk" flow with live detection list
 - [x] Record walk route (CoreLocation) and show on MapKit
 - [x] Persist walks + detections locally with SwiftData — save continuously during a walk (iOS can kill the app mid-walk); store species by `Species.code`
-- [ ] Placeholder art for ~50 NYC-area species
+- [x] Placeholder art for ~50 NYC-area species (`art/birds/`)
 - [ ] Journal page view: collage of birds heard on a walk + date/time/map
 - [ ] Prototype a "being sketched" reveal animation when a new bird is heard
 - [ ] Size birds on the page by call count (more calls → larger, capped), growing live as repeat calls come in; birds cluster closely. Applies to Listen + Journal page; Flock cards use even sizes

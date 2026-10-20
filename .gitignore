@@ -18,3 +18,4 @@ buildServer.json
 .claude/worktrees/
 ml/eval/soundscapes/
 __pycache__/
+art/birds/out/

@@ -1,2 +1,5 @@
 # BirdNET Core ML models (~100 MB): stored in Git LFS so the app builds without the TensorFlow pipeline.
 ml/models/coreml/*.mlpackage/** filter=lfs diff=lfs merge=lfs -text
+
+# Bird illustrations (transparent PNGs, art/birds): also in LFS, so redrawing a bird doesn't bloat history.
+art/birds/cutouts/*.png filter=lfs diff=lfs merge=lfs -text

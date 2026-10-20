@@ -53,7 +53,7 @@ All four are on Google Fonts. Bundle them in the app (check each license; all ar
 ## Page composition rules
 
 - **Size by call count** on the Listen and Journal pages. More calls make a bigger bird, with a minimum and maximum size so one chatty bird can't dominate. On Listen, a bird grows as repeat calls come in.
-- **Cluster** birds closely with slight overlap of empty margins. Avoid a grid.
+- **Scatter** birds like sketches in a notebook: spread over the page, each tilted a few degrees, drawings may tuck into each other's empty margins but never cover a bird or a label. Never a grid or rows. A bird keeps its spot and tilt as the page fills (they come from its species code and the order it was heard).
 - **Flock cards:** every bird is the same size, in an even row of up to 3, then "+N more".
 - **Labels** are handwritten (Hand font) next to each bird: name plus `×count`. Use `pageSoft` for the count.
 - **Being sketched:** a newly heard bird appears faint and grayscale inside a dashed red-ink circle, with "sketching…", then draws in.

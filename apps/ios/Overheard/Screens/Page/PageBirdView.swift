@@ -1,8 +1,8 @@
 import OverheardKit
 import SwiftUI
 
-/// A bird on the journal page: its drawing, and its handwritten label underneath.
-/// The layout (`JournalPage`) decides where it goes and how big it is.
+/// A bird on the journal page: its drawing, and its handwritten label underneath, tilted a
+/// little as if sketched by hand. The layout (`JournalPage`) decides where, how big and how tilted.
 struct PageBirdView: View {
     let bird: PageBird
     let placement: PageLayout.Placement
@@ -10,15 +10,18 @@ struct PageBirdView: View {
     @Environment(\.theme) private var theme
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
+        VStack(spacing: 0) {
             drawing
                 .frame(width: placement.art.width, height: placement.art.height)
-                .offset(x: placement.art.minX, y: placement.art.minY)
 
+            // Handwriting may spill into the gap the layout keeps around every label, so long names
+            // and glyph flourishes aren't clipped at the box's edge.
             label
+                .frame(width: placement.label.width + PageLayout.labelGap * 2, alignment: .top)
                 .frame(width: placement.label.width, height: placement.label.height, alignment: .top)
-                .offset(x: placement.label.minX, y: placement.label.minY)
         }
+        .rotationEffect(.degrees(placement.tilt))
+        .position(x: placement.frame.midX, y: placement.frame.midY)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
     }
@@ -63,7 +66,7 @@ struct PageBirdView: View {
                 Flourish(note: "unusual here this time of year")
             }
         }
-        .font(.hand(19))
+        .font(.hand(18))
         .multilineTextAlignment(.center)
         .lineSpacing(-4)
         .minimumScaleFactor(0.8)

@@ -127,7 +127,8 @@ apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcc
                           (tiers → Commonness), DetectionSession (clips → calls → HeardBird; PendingBird = "sketching"),
                           BirdArrivals (a species' first confirmation on a walk)
     Walks/                Walk + WalkBird (SwiftData, species by code), WalkStore (saves as it goes), Route, WalkTitle
-    Page/                 BirdSize (calls → size, log scale, capped), PageLayout (stable cluster, no overlaps)
+    Page/                 BirdSize (calls → size, log scale, capped), PageLayout (notebook scatter: per-bird spot
+                          and tilt from its species code; nothing covered; new birds never move old ones)
     overheard-eval        eval CLI · Tests/ unit tests
 ml/                       convert.py, bird_labels.py, verify.py; models/coreml/ in Git LFS, rest gitignored
   eval/                   fetch.py + manifest.json, fetch_rare.py + manifest-rare.json (committed); audio/ gitignored

@@ -16,9 +16,13 @@ final class BirdSizeTests: XCTestCase {
         XCTAssertEqual(BirdSize.fraction(calls: 40), 1, accuracy: 1e-9)  // a chatty bird stops growing
     }
 
+    func testABirdHeardOftenIsMuchBigger() {
+        XCTAssertGreaterThan(BirdSize.fraction(calls: 6) / BirdSize.fraction(calls: 1), 2.5)
+    }
+
     func testEarlyCallsMatterMostOnALogScale() {
         let firstStep = BirdSize.fraction(calls: 2) - BirdSize.fraction(calls: 1)
-        let laterStep = BirdSize.fraction(calls: 11) - BirdSize.fraction(calls: 10)
+        let laterStep = BirdSize.fraction(calls: 10) - BirdSize.fraction(calls: 9)
         XCTAssertGreaterThan(firstStep, laterStep * 3)
     }
 }
@@ -30,28 +34,47 @@ final class PageLayoutTests: XCTestCase {
         PageLayout.Item(id: id, side: side, labelHeight: 40)
     }
 
+    /// On the page, and no drawing or label covers another (drawings may tuck into margins).
     func assertValid(_ layout: PageLayout, file: StaticString = #filePath, line: UInt = #line) {
-        let frames = Array(layout.placements.values.map(\.frame))
-        for (i, a) in frames.enumerated() {
-            XCTAssertTrue(page.contains(a), "off the page: \(a)", file: file, line: line)
-            for b in frames[(i + 1)...] {
-                XCTAssertFalse(a.intersects(b), "overlap: \(a) and \(b)", file: file, line: line)
+        let placements = Array(layout.placements.values)
+        for (i, a) in placements.enumerated() {
+            XCTAssertTrue(page.contains(a.frame), "off the page: \(a.frame)", file: file, line: line)
+            for b in placements[(i + 1)...] {
+                XCTAssertTrue(
+                    PageLayout.fits(a, among: [b]), "overlap: \(a.frame) and \(b.frame)", file: file, line: line)
             }
         }
     }
 
-    func testOneBirdSitsNearTheFocalPoint() throws {
+    func testTheFirstBirdSitsNearTheTop() throws {
         let layout = PageLayout(items: [item("norcar")], in: page)
         let art = try XCTUnwrap(layout.placements["norcar"]).art
-        XCTAssertEqual(art.midX, page.midX, accuracy: 0.5)
+        XCTAssertLessThan(art.midY, page.midY)
+        XCTAssertEqual(art.midX, page.midX, accuracy: page.width * 0.12)
         XCTAssertEqual(layout.scale, 1)
     }
 
-    func testBirdsClusterWithoutOverlapping() {
+    func testBirdsScatterWithoutCoveringEachOther() {
         let layout = PageLayout(items: [item("a", 150), item("b", 120), item("c", 100), item("d", 80)], in: page)
         XCTAssertEqual(layout.placements.count, 4)
         XCTAssertEqual(layout.scale, 1)
         assertValid(layout)
+    }
+
+    func testBirdsAreNotInAGrid() {
+        let ids = ["whtspa", "blujay", "norcar", "rethaw", "scatan", "btbwar"]
+        let layout = PageLayout(items: ids.map { item($0, 90) }, in: page)
+        let rows = Set(layout.placements.values.map { Int($0.art.minY) })
+        let columns = Set(layout.placements.values.map { Int($0.art.minX) })
+        XCTAssertGreaterThan(rows.count, 3)
+        XCTAssertGreaterThan(columns.count, 3)
+    }
+
+    func testEachBirdHasASmallSteadyTilt() throws {
+        let first = try XCTUnwrap(PageLayout(items: [item("norcar")], in: page).placements["norcar"])
+        let again = try XCTUnwrap(PageLayout(items: [item("norcar")], in: page).placements["norcar"])
+        XCTAssertEqual(first.tilt, again.tilt)
+        XCTAssertLessThanOrEqual(abs(first.tilt), PageLayout.maxTilt)
     }
 
     func testANewBirdDoesNotMoveTheOthers() {
@@ -92,14 +115,21 @@ final class PageLayoutTests: XCTestCase {
         XCTAssertLessThan(PageLayout(items: items, in: page, maxScale: 1.5).scale, 1)
     }
 
-    func testLabelSitsUnderItsDrawing() throws {
-        let placement = try XCTUnwrap(PageLayout(items: [item("a")], in: page).placements["a"])
+    func testASmallBirdKeepsAReadableLabel() throws {
+        let small = PageLayout.Item(id: "a", side: 60, labelHeight: 40, labelWidth: 110)
+        let placement = try XCTUnwrap(PageLayout(items: [small], in: page).placements["a"])
+        XCTAssertEqual(placement.label.width, 110)
         XCTAssertEqual(placement.label.minY, placement.art.maxY)
-        XCTAssertEqual(placement.label.width, placement.art.width)
+        XCTAssertEqual(placement.label.midX, placement.art.midX, accuracy: 0.001)  // centered under it
     }
 
     func testIsDeterministic() {
         let items = [item("a", 140), item("b", 100), item("c", 90), item("d", 120)]
         XCTAssertEqual(PageLayout(items: items, in: page), PageLayout(items: items, in: page))
+    }
+
+    func testStableHashIsTheSameOnEveryRun() {
+        XCTAssertEqual(StableHash.of("a"), 0xAF63_DC4C_8601_EC8C)  // the published FNV-1a 64 value
+        XCTAssertNotEqual(StableHash.of("norcar"), StableHash.of("blujay"))
     }
 }

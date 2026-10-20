@@ -71,6 +71,10 @@ What's settled, and why. Grouped by topic and kept current. When a decision chan
 
 - **A hand-drawn field journal on parchment, across the whole app;** the dark mode is **"By Candlelight"**. Details are in `docs/design.md`.
 - **Page rules:** bird size = call count (Listen and Journal); Flock cards use even sizes; rare birds get the red-ink naturalist flourish, not a bigger size.
+- **First bird art:** 50 Central Park birds, bundled with the app for now (`art/birds/cutouts`, Git LFS). Birds drawn on demand move to R2 with the backend.
+  - **True-to-life color,** as in a modern field guide. *Rejected:* a "muted, faded" style; checked against photos, red birds read brown and black birds gray.
+  - **Cut out with Vision** subject lifting on the Mac, then defringed (white removed from soft edges). *Rejected:* BiRefNet (a ~1 GB model download, for no gain on flat white).
+  - **Every bird is checked against a real photo** before it ships; field marks in `species.mjs` are tightened when a drawing is wrong.
 - **Bird art:** `gemini-3-pro-image` via the Batch API (~$0.067 per image), on flat white, then cut out to transparent PNGs.
   - *Why:* best field-journal style and variations in the trial (`art/model-comparison/`).
   - *Rejected:* OpenAI image models (halos, a digital-painting look).

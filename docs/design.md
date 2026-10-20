@@ -6,17 +6,17 @@ Everything in the app looks like a naturalist's field journal: hand-drawn birds 
 
 Two themes, chosen in settings (default: follow the system).
 
-- **Parchment** (light): warm paper chrome, with a lighter journal page sitting on it.
+- **Parchment** (light): near-white warm paper chrome, with an even whiter journal page sitting on it. Lighter than aged parchment: cream paper, not old vellum (lightened 2026-10-19 at the owner's request).
 - **By Candlelight** (dark): a dark room with the journal page lit warmly from the center. It is not an inverted palette. The page stays paper-colored and keeps dark ink.
 
 ### Color tokens
 
 | Token | Parchment | By Candlelight | Use |
 |---|---|---|---|
-| `chromeBg` | `#ebdfc3` | `#17100a` | Screen background around the page |
+| `chromeBg` | `#f3ede0` | `#17100a` | Screen background around the page |
 | `chromeInk` | `#2a1f15` | `#f2e2c0` | Text on chrome |
 | `chromeSoft` | `#665441` | `#c4a77b` | Secondary text on chrome |
-| `tabBg` | `#e5d7b8` | `#120c07` | Tab bar |
+| `tabBg` | `#ece4d2` | `#120c07` | Tab bar |
 | `tabSoft` | `#6e5b46` | `#a98f68` | Inactive tab |
 | `rule` | `rgba(90,66,38,.25)` | `rgba(242,226,192,.14)` | Dividers on chrome |
 | `accent` | `#8b2f1c` (iron-gall red) | `#e9a24f` (candle flame) | Active tab, primary button, "Listening" |
@@ -26,7 +26,7 @@ Two themes, chosen in settings (default: follow the system).
 | `accentOnPage` | `#8b2f1c` | `#7a2812` | Red-ink notes and flourishes on the page |
 
 **Journal page fill** (a radial gradient that reads as paper):
-- Parchment: `radial-gradient(120% 90% at 50% 30%, #f6edd6, #efe3c6 60%, #e0cfa8)`
+- Parchment: `radial-gradient(120% 90% at 50% 30%, #fdfaf3, #f8f2e5 60%, #ede3cd)`
 - Candlelight: `radial-gradient(115% 100% at 50% 38%, #ecd3a4, #d8b986 50%, #b8935e 85%, #8f6d42)`
 
 Keep page text inside the lit area. Don't let the candlelight edges get darker than `#8f6d42`, or the dark ink stops being readable.

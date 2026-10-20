@@ -107,7 +107,7 @@ apps/ios/            SwiftUI app (XcodeGen) and the OverheardKit package: the de
 ml/                  BirdNET → Core ML conversion and checks; models/coreml/ holds the built models (Git LFS)
 ml/eval/             Evaluation data manifest and fetch script
 design/mockups/      Screen mockups in both themes
-art/                 Image-model trial for the bird illustrations
+art/                 Bird illustrations (art/birds) and the image-model trial
 docs/                Design system, decision log, planned API
 ```
 

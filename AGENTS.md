@@ -18,7 +18,7 @@ Onboarding for coding agents (and humans). **Keep this file current.** When you 
   - The eval harness (`ml/eval/`, `overheard-eval`) runs the app's own pipeline on 110 labeled recordings and 26 noise clips.
   - Next: a field test (and battery, todo 6b), then the parchment UI and the journal page.
 - **Phases 2–6 (Cloudflare infrastructure, backend, social, art pipeline, launch):** not started.
-- **Exists today:** `apps/ios`, `ml/`, `art/model-comparison/`, `docs/`, `design/mockups/`, `.github/workflows/ci.yml`.
+- **Exists today:** `apps/ios`, `ml/`, `art/birds/`, `art/model-comparison/`, `docs/`, `design/mockups/`, `.github/workflows/ci.yml`.
 - **Planned but empty:** `apps/api`, `apps/art-worker`, `apps/web`, `packages/*`, `infra/terraform`, `scripts/`.
 
 The source of truth for what's next is `todo.md`.
@@ -82,6 +82,11 @@ cd ml && uv venv --python 3.11 .venv && uv pip install --python .venv/bin/python
 
 # Image model trial (needs GEMINI_API_KEY / OPENAI_API_KEY in .env)
 node --env-file=.env art/model-comparison/run.mjs
+
+# Bird art (needs GEMINI_API_KEY; full steps in art/birds/README.md)
+node --env-file=.env art/birds/generate.mjs                   # draw missing birds as one batch
+swift art/birds/cutout.swift art/birds/out/raw art/birds/cutouts   # cut out to transparent PNGs
+node art/birds/review.mjs && open art/birds/out/review.html   # check them
 ```
 
 ## Formatting
@@ -122,6 +127,8 @@ ml/                       convert.py, bird_labels.py, verify.py; models/coreml/ 
   eval/                   fetch.py + manifest.json, fetch_rare.py + manifest-rare.json (committed); audio/ gitignored
                           soundscapes.py + soundscapes-manifest.json: annotated soundscapes (prototype, not yet
                           read by overheard-eval; see docs/research/soundscape-eval.md); soundscapes/ is gitignored
+art/birds/                bird art: species.mjs (birds + style prompt), generate.mjs (Gemini batch), cutout.swift
+                          (Vision cutout + defringe), review.mjs; cutouts/<code>.png in Git LFS, out/ gitignored
 art/model-comparison/     image-model trial: prompts.mjs, run.mjs, scoring page
 design/mockups/           screen mockups (.dc.html) + canvas.json
 docs/                     decisions.md, design.md, api.md; research/ (notes, e.g. soundscape-eval.md)
@@ -164,6 +171,7 @@ apps/{api,art-worker,web}, packages/{db,shared,observability}, infra/terraform, 
 - **Free signing:** builds expire after 7 days. The first install needs Settings → General → VPN & Device Management → Verify App; if that fails, try cellular instead of Wi-Fi.
 - **LFS bandwidth:** GitHub's free LFS tier allows 1 GB a month. CI caches `.git/lfs`, but avoid re-committing the models needlessly; each version adds about 100 MB.
 - **Gemini images:** they come back as JPEG, even when saved as `.png`.
+- **Bird art files** are named by species code (`art/birds/cutouts/<code>.png`), so split species use their group code (House Wren is `y01309`). Cut out with `cutout.swift`, which defringes edges; a plain mask leaves a white halo on the darker Candlelight page.
 - **Shell noise:** the user's shell prints `_encode`/`_decode` noise from gvm on `cd`. It's harmless.
 
 ## Settled decisions (don't redo without new evidence)

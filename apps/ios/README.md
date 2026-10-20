@@ -34,7 +34,9 @@ Free-signed builds expire after 7 days. Run again from Xcode to reinstall.
 
 ## Demo walk (design work)
 
-To see the screens filled in without going outside, turn on the `-demo` argument: **Product → Scheme → Edit Scheme → Run → Arguments**, tick `-demo`, and run. The app opens on a sample walk in the Ramble, with five birds, one rare bird, and one still being sketched. It's Debug-only and never saves anything.
+To see the screens filled in without going outside, turn on the `-demo` argument: **Product → Scheme → Edit Scheme → Run → Arguments**, tick `-demo`, and run. The app opens on a sample walk in the Ramble, with five birds, one rare bird, and one still being sketched. A robin arrives 3 seconds in, to show how a new bird appears. It's Debug-only and never saves anything.
+
+To tune the journal page, open **Me → Field-test tools → Page tuning** (Debug builds): sliders for size, spacing, tilt, spread and names, over a live sample page. Your values apply to every page while you tune and survive relaunches. **Copy as code** puts the Swift for `PageStyle.standard` on the clipboard, to paste into `OverheardKit/Page/PageStyle.swift`.
 
 To force a theme, add the argument `-themeChoice candlelight` (or `parchment`) next to it. `-startTab journal` (or `flock`, `me`) opens on another tab.
 

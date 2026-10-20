@@ -31,7 +31,8 @@ struct ListenScreen: View {
                 seed: walk.id.uuidString,
                 dateLine: Formatting.pageDate(walk.startedAt),
                 birds: PageBird.onPage(birds: listener.birds, pending: listener.pending),
-                emptyNote: "Listening…\nthe birds you hear\nwill be sketched here"
+                emptyNote: "Listening…\nthe birds you hear\nwill be sketched here",
+                isLive: true
             )
             .padding(.horizontal, 12)
 

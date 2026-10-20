@@ -7,6 +7,9 @@ struct RootView: View {
     @AppStorage("themeChoice") private var themeChoice: ThemeChoice = .system
     @Environment(\.colorScheme) private var systemScheme
     @State private var tab: Tab = Self.startingTab
+    #if DEBUG
+        @State private var pageTuning = PageTuning()
+    #endif
 
     var body: some View {
         let theme = themeChoice.theme(for: systemScheme)
@@ -18,6 +21,11 @@ struct RootView: View {
             TabBar(selection: $tab)
         }
         .environment(\.theme, theme)
+        #if DEBUG
+            // While tuning (Me → Field-test tools → Page tuning), every page uses the values being tried.
+            .environment(\.pageStyle, pageTuning.style)
+            .environment(pageTuning)
+        #endif
         .tint(theme.accent)
         // A fixed theme also fixes light/dark for system controls. "Match the phone" must leave it
         // unset, or `systemScheme` would report our override instead of the phone's setting.

@@ -6,11 +6,18 @@ import SwiftUI
 struct FieldTestView: View {
     @Bindable var listener: Listener
 
+    #if DEBUG
+        @Environment(PageTuning.self) private var pageTuning
+    #endif
+
     var body: some View {
         List {
             lastClipSection
             tuningSection
             statsSection
+            #if DEBUG
+                designSection
+            #endif
         }
         .navigationTitle("Field-test tools")
     }
@@ -39,6 +46,14 @@ struct FieldTestView: View {
             Toggle("Skip clips with nothing above the background", isOn: $listener.useGate)
         }
     }
+
+    #if DEBUG
+        private var designSection: some View {
+            Section("Design") {
+                NavigationLink("Page tuning") { PageTuningView(tuning: pageTuning, catalog: listener.catalog) }
+            }
+        }
+    #endif
 
     private var statsSection: some View {
         Section("Stats") {

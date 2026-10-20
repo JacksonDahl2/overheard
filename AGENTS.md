@@ -111,14 +111,14 @@ apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcc
                           NewBirdAlert (tap, or a notification when locked, for each new species),
                           DemoWalk (Debug: `-demo` opens on a sample walk)
     Design/               Theme (Parchment + Candlelight tokens), Typography (the four fonts), NavigationBarStyle,
-                          BirdArt, Formatting
+                          BirdArt, Formatting, PageStyle+Environment, PageTuning (Debug: the style being tried)
     Components/           PillButtonStyle, ListeningBadge, LevelBars, TabBar
-    Screens/Page/         JournalPage (paper + PageLayout), PageBirdView, PageBird, Flourish, PointerArrow — shared by
-                          Listen and Journal
+    Screens/Page/         JournalPage (paper + PageLayout), PageBirdView (tap shows the name), NameTag, PageBird,
+                          Flourish — shared by Listen and Journal
     Screens/Listen/       ListenScreen, ListenHeader, ListenFooter
     Screens/Journal/      WalksScreen (+ WalkRow), WalkDetailView (finished page + map), RouteMap
     Screens/Flock/        placeholder until the backend
-    Screens/Me/           MeScreen (theme, credits), FieldTestView (tuning, stats)
+    Screens/Me/           MeScreen (theme, credits), FieldTestView (tuning, stats), PageTuningView (Debug: page sliders)
     Resources/Fonts/      IM Fell English, EB Garamond, Caveat (static .ttf) + their OFL licenses
   OverheardKit/           Swift package shared with the Mac; sources and tests in matching folders:
     Audio/                SlidingWindow (3 s clips every 1 s), ClipGate (LevelMeter + AdaptiveGate, off by default),
@@ -128,8 +128,8 @@ apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcc
                           (tiers → Commonness), DetectionSession (clips → calls → HeardBird; PendingBird = "sketching"),
                           BirdArrivals (a species' first confirmation on a walk)
     Walks/                Walk + WalkBird (SwiftData, species by code), WalkStore (saves as it goes), Route, WalkTitle
-    Page/                 BirdSize (calls → size, log scale, capped), PageLayout (notebook scatter: spot, tilt, label
-                          side and arrow per walk + species; nothing covered; rearranges to keep birds large)
+    Page/                 PageStyle (every page setting), BirdSize (calls → size), PageLayout (notebook scatter: spot
+                          and tilt per walk + species; nothing covered; rearranges to keep birds large)
     overheard-eval        eval CLI · Tests/ unit tests
 ml/                       convert.py, bird_labels.py, verify.py; models/coreml/ in Git LFS, rest gitignored
   eval/                   fetch.py + manifest.json, fetch_rare.py + manifest-rare.json (committed); audio/ gitignored
@@ -180,7 +180,8 @@ apps/{api,art-worker,web}, packages/{db,shared,observability}, infra/terraform, 
 - **LFS bandwidth:** GitHub's free LFS tier allows 1 GB a month. CI caches `.git/lfs`, but avoid re-committing the models needlessly; each version adds about 100 MB.
 - **Gemini images:** they come back as JPEG, even when saved as `.png`.
 - **Fonts:** the app bundles static weights (EB Garamond and Caveat are instanced from Google's variable fonts with fontTools). `Font.display/smallCaps/body/hand` use PostScript names like `IM_FELL_English_Roman`; a wrong name silently falls back to the system font.
-- **Demo walk:** Debug builds launched with `-demo` (a scheme argument, off by default) open on a sample walk. Use it for screenshots and design work; it never touches the walk store.
+- **Demo walk:** Debug builds launched with `-demo` (a scheme argument, off by default) open on a sample walk, and a robin arrives 3 s in. Use it for screenshots and design work; it never touches the walk store.
+- **Tuning the page:** every journal-page setting is in `OverheardKit/Page/PageStyle.swift` (`PageStyle.standard`). Debug builds have Me → Field-test tools → Page tuning: sliders over a live sample page, applied app-wide, kept across launches, with "Copy as code" to paste back into `standard`.
 - **Bird art files** are named by species code (`art/birds/cutouts/<code>.png`), so split species use their group code (House Wren is `y01309`). Cut out with `cutout.swift`, which defringes edges; a plain mask leaves a white halo on the darker Candlelight page.
 - **Shell noise:** the user's shell prints `_encode`/`_decode` noise from gvm on `cd`. It's harmless.
 

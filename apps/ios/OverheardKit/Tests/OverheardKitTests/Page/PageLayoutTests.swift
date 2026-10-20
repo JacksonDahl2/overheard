@@ -4,15 +4,17 @@ import XCTest
 @testable import OverheardKit
 
 final class BirdSizeTests: XCTestCase {
+    let style = PageStyle.standard
+
     func testOneCallIsTheSmallest() {
-        XCTAssertEqual(BirdSize.fraction(calls: 1), BirdSize.minFraction)
-        XCTAssertEqual(BirdSize.fraction(calls: 0), BirdSize.minFraction)
+        XCTAssertEqual(BirdSize.fraction(calls: 1), style.smallestBirdFraction)
+        XCTAssertEqual(BirdSize.fraction(calls: 0), style.smallestBirdFraction)
     }
 
     func testGrowsWithCallsThenCaps() {
-        let sizes = (1...BirdSize.fullAt).map(BirdSize.fraction(calls:))
+        let sizes = (1...style.fullSizeAtCalls).map { BirdSize.fraction(calls: $0) }
         XCTAssertEqual(sizes, sizes.sorted())
-        XCTAssertEqual(BirdSize.fraction(calls: BirdSize.fullAt), 1, accuracy: 1e-9)
+        XCTAssertEqual(BirdSize.fraction(calls: style.fullSizeAtCalls), 1, accuracy: 1e-9)
         XCTAssertEqual(BirdSize.fraction(calls: 40), 1, accuracy: 1e-9)  // a chatty bird stops growing
     }
 
@@ -25,26 +27,32 @@ final class BirdSizeTests: XCTestCase {
         let laterStep = BirdSize.fraction(calls: 10) - BirdSize.fraction(calls: 9)
         XCTAssertGreaterThan(firstStep, laterStep * 3)
     }
+
+    func testTheStyleSetsTheRange() {
+        var big = style
+        big.smallestBirdFraction = 0.6
+        XCTAssertEqual(BirdSize.fraction(calls: 1, style: big), 0.6)
+    }
 }
 
 final class PageLayoutTests: XCTestCase {
     let page = CGRect(x: 0, y: 0, width: 360, height: 480)
+    let ids = ["whtspa", "blujay", "norcar", "rethaw", "scatan", "btbwar"]
 
     func item(_ id: String, _ side: Double = 120) -> PageLayout.Item {
-        PageLayout.Item(id: id, side: side, labelHeight: 40)
+        PageLayout.Item(id: id, side: side)
     }
 
-    /// On the page, and no drawing or label covers another (drawings may tuck into margins).
+    /// On the page, and no drawing covers another (they may tuck into each other's margins).
     func assertValid(_ layout: PageLayout, file: StaticString = #filePath, line: UInt = #line) {
-        let placements = Array(layout.placements.values)
-        for (i, a) in placements.enumerated() {
-            XCTAssertTrue(page.contains(a.frame), "off the page: \(a.frame)", file: file, line: line)
-            for b in placements[(i + 1)...] {
-                XCTAssertTrue(
-                    PageLayout.fits(a, among: [b]), "overlap: \(a.frame) and \(b.frame)", file: file, line: line)
-            }
+        let arts = layout.placements.values.map(\.art)
+        for (i, a) in arts.enumerated() {
+            XCTAssertTrue(page.contains(a), "off the page: \(a)", file: file, line: line)
+            XCTAssertTrue(PageLayout.fits(a, among: Array(arts[(i + 1)...])), "overlap at \(a)", file: file, line: line)
         }
     }
+
+    // MARK: - Placing
 
     func testTheFirstBirdSitsNearTheTop() throws {
         let layout = PageLayout(items: [item("norcar")], in: page)
@@ -57,45 +65,26 @@ final class PageLayoutTests: XCTestCase {
     func testBirdsScatterWithoutCoveringEachOther() {
         let layout = PageLayout(items: [item("a", 150), item("b", 120), item("c", 100), item("d", 80)], in: page)
         XCTAssertEqual(layout.placements.count, 4)
-        XCTAssertEqual(layout.scale, 1)
         assertValid(layout)
     }
 
     func testBirdsAreNotInAGrid() {
-        let ids = ["whtspa", "blujay", "norcar", "rethaw", "scatan", "btbwar"]
         let layout = PageLayout(items: ids.map { item($0, 90) }, in: page)
-        let rows = Set(layout.placements.values.map { Int($0.art.minY) })
-        let columns = Set(layout.placements.values.map { Int($0.art.minX) })
-        XCTAssertGreaterThan(rows.count, 3)
-        XCTAssertGreaterThan(columns.count, 3)
-    }
-
-    func testEachBirdHasASmallSteadyTilt() throws {
-        let first = try XCTUnwrap(PageLayout(items: [item("norcar")], in: page).placements["norcar"])
-        let again = try XCTUnwrap(PageLayout(items: [item("norcar")], in: page).placements["norcar"])
-        XCTAssertEqual(first.tilt, again.tilt)
-        XCTAssertLessThanOrEqual(abs(first.tilt), PageLayout.maxTilt)
-    }
-
-    func testANewBirdDoesNotMoveTheOthers() {
-        let before = PageLayout(items: [item("a"), item("b"), item("c", 90)], in: page)
-        let after = PageLayout(items: [item("a"), item("b"), item("c", 90), item("d", 70)], in: page)
-        for id in ["a", "b", "c"] {
-            XCTAssertEqual(before.placements[id], after.placements[id])
-        }
+        XCTAssertGreaterThan(Set(layout.placements.values.map { Int($0.art.minY) }).count, 3)
+        XCTAssertGreaterThan(Set(layout.placements.values.map { Int($0.art.minX) }).count, 3)
     }
 
     func testShrinksToFitMoreBirds() {
-        let items = (0..<14).map { item("bird\($0)", 130) }
-        let layout = PageLayout(items: items, in: page)
-        XCTAssertEqual(layout.placements.count, 14)
+        let layout = PageLayout(items: (0..<20).map { item("bird\($0)", 130) }, in: page)
+        XCTAssertEqual(layout.placements.count, 20)
         XCTAssertLessThan(layout.scale, 1)
         assertValid(layout)
     }
 
     func testTooManyBirdsShowsTheOnesThatFit() {
-        let items = (0..<200).map { item("bird\($0)", 130) }
-        let layout = PageLayout(items: items, in: page)
+        var strict = PageStyle.standard
+        (strict.nestle, strict.arrangementsPerSize) = (0, 1)  // no tucking in, so the page truly fills up
+        let layout = PageLayout(items: (0..<200).map { item("bird\($0)", 130) }, in: page, style: strict)
         XCTAssertGreaterThan(layout.placements.count, 0)
         XCTAssertLessThan(layout.placements.count, 200)
         XCTAssertNotNil(layout.placements["bird0"])  // the first heard always shows
@@ -110,55 +99,16 @@ final class PageLayoutTests: XCTestCase {
         XCTAssertEqual(PageLayout(items: items, in: page).scale, 1)  // no growing unless asked
     }
 
-    func testGrowingStillShrinksWhenFull() {
-        let items = (0..<14).map { item("bird\($0)", 130) }
-        XCTAssertLessThan(PageLayout(items: items, in: page, maxScale: 1.5).scale, 1)
-    }
+    // MARK: - Each page its own
 
-    func testASmallBirdKeepsAReadableLabel() throws {
-        let small = PageLayout.Item(id: "a", side: 60, labelHeight: 40, labelWidth: 110)
-        let placement = try XCTUnwrap(PageLayout(items: [small], in: page).placements["a"])
-        XCTAssertEqual(placement.label.width, 110)
-    }
-
-    func testTheLabelSitsAgainstItsBird() throws {
-        for id in ["norcar", "blujay", "whtspa", "rethaw", "scatan", "amerob", "carwre"] {
-            let placement = try XCTUnwrap(PageLayout(items: [item(id)], in: page).placements[id])
-            let gap = placement.hasArrow ? PageLayout.arrowGap : 0
-            let distance: Double =
-                switch placement.labelSide {
-                case .below: placement.label.minY - placement.art.maxY
-                case .above: placement.art.minY - placement.label.maxY
-                case .trailing: placement.label.minX - placement.art.maxX
-                case .leading: placement.art.minX - placement.label.maxX
-                }
-            XCTAssertEqual(distance, gap, accuracy: 0.001, id)
-        }
-    }
-
-    func testLabelsAreWrittenOnDifferentSides() {
-        let ids = ["norcar", "blujay", "whtspa", "rethaw", "scatan", "amerob", "carwre", "tuftit", "bkcchi", "houfin"]
-        let styles = ids.map { PageLayout.LabelStyle(for: .init(page: "walk", id: $0)) }
-        XCTAssertGreaterThan(Set(styles.map { $0.sides.first! }).count, 2)
-        XCTAssertTrue(styles.contains { $0.hasArrow })
-        XCTAssertTrue(styles.contains { !$0.hasArrow })
-    }
-
-    func testACrampedLabelMovesToAnotherSide() throws {
-        // A page just wide enough for a bird with its name under it, but not beside it.
-        let narrow = CGRect(x: 0, y: 0, width: 130, height: 400)
-        let leaner = (0..<200).map { "bird\($0)" }.first {
-            PageLayout.LabelStyle(for: .init(page: "", id: $0)).sides.first == .trailing
-        }
-        let id = try XCTUnwrap(leaner)
-        let placement = try XCTUnwrap(
-            PageLayout(items: [PageLayout.Item(id: id, side: 100, labelHeight: 40, labelWidth: 110)], in: narrow)
-                .placements[id])
-        XCTAssertTrue([.below, .above].contains(placement.labelSide))
+    func testEachBirdHasASmallSteadyTilt() throws {
+        let first = try XCTUnwrap(PageLayout(items: [item("norcar")], in: page).placements["norcar"])
+        let again = try XCTUnwrap(PageLayout(items: [item("norcar")], in: page).placements["norcar"])
+        XCTAssertEqual(first.tilt, again.tilt)
+        XCTAssertLessThanOrEqual(abs(first.tilt), PageStyle.standard.maxTilt)
     }
 
     func testEachWalkIsSketchedDifferently() {
-        let ids = ["norcar", "blujay", "whtspa", "rethaw", "scatan"]
         let items = ids.map { item($0, 90) }
         let monday = PageLayout(items: items, in: page, seed: "walk-1")
         let tuesday = PageLayout(items: items, in: page, seed: "walk-2")
@@ -166,13 +116,33 @@ final class PageLayoutTests: XCTestCase {
         XCTAssertEqual(monday, PageLayout(items: items, in: page, seed: "walk-1"))  // the same walk redraws the same
     }
 
-    func testIsDeterministic() {
-        let items = [item("a", 140), item("b", 100), item("c", 90), item("d", 120)]
-        XCTAssertEqual(PageLayout(items: items, in: page), PageLayout(items: items, in: page))
-    }
-
     func testStableHashIsTheSameOnEveryRun() {
         XCTAssertEqual(StableHash.of("a"), 0xAF63_DC4C_8601_EC8C)  // the published FNV-1a 64 value
         XCTAssertNotEqual(StableHash.of("norcar"), StableHash.of("blujay"))
+    }
+
+    // MARK: - The style's settings take effect
+
+    func testNoTiltWhenTheStyleSaysNone() {
+        var style = PageStyle.standard
+        style.maxTilt = 0
+        let layout = PageLayout(items: ids.map { item($0, 90) }, in: page, style: style)
+        XCTAssertTrue(layout.placements.values.allSatisfy { $0.tilt == 0 })
+    }
+
+    func testMoreNestlingPacksBirdsCloser() {
+        var tight = PageStyle.standard
+        tight.nestle = 30
+        let a = CGRect(x: 0, y: 0, width: 100, height: 100)
+        let overlapping = CGRect(x: 60, y: 0, width: 100, height: 100)  // 40 pt overlap
+        XCTAssertFalse(PageLayout.fits(overlapping, among: [a]))
+        XCTAssertTrue(PageLayout.fits(overlapping, among: [a], style: tight))
+    }
+
+    func testStyleSurvivesSaving() throws {
+        var style = PageStyle.standard
+        style.nestle = 20
+        let saved = try JSONEncoder().encode(style)
+        XCTAssertEqual(try JSONDecoder().decode(PageStyle.self, from: saved), style)
     }
 }

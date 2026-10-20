@@ -125,7 +125,7 @@ struct Placer {
 
                 guard distance < (best?.distance ?? .infinity), PageLayout.fits(art, among: taken, style: style)
                 else { continue }
-                best = (art, distance)
+                best = (art, Double(distance))  // CGFloat → Double: older Swift won't convert inside a tuple
             }
         }
 

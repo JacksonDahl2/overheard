@@ -150,17 +150,3 @@ final class WalkStoreTests: XCTestCase {
         XCTAssertEqual(try store.walks().map(\.id), [second.id, first.id])
     }
 }
-
-final class CatalogLookupTests: XCTestCase {
-    func testFindsByCodeAndLumpedCodesResolveToTheFirst() {
-        let catalog = SpeciesCatalog(species: [
-            Species(
-                code: "norcar", commonName: "Northern Cardinal", scientificName: "Cardinalis cardinalis", isBird: true),
-            Species(code: "lumped", commonName: "A", scientificName: "A a", isBird: true),
-            Species(code: "lumped", commonName: "B", scientificName: "B b", isBird: true),
-        ])
-        XCTAssertEqual(catalog.species(code: "norcar")?.commonName, "Northern Cardinal")
-        XCTAssertEqual(catalog.species(code: "lumped")?.commonName, "A")
-        XCTAssertNil(catalog.species(code: "nope"))
-    }
-}

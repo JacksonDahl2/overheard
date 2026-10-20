@@ -113,7 +113,8 @@ apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcc
     Design/               Theme (Parchment + Candlelight tokens), Typography (the four fonts), NavigationBarStyle,
                           BirdArt, Formatting
     Components/           PillButtonStyle, ListeningBadge, LevelBars, TabBar
-    Screens/Page/         JournalPage (paper + PageLayout), PageBirdView, PageBird, Flourish — shared by Listen and Journal
+    Screens/Page/         JournalPage (paper + PageLayout), PageBirdView, PageBird, Flourish, PointerArrow — shared by
+                          Listen and Journal
     Screens/Listen/       ListenScreen, ListenHeader, ListenFooter
     Screens/Journal/      WalksScreen (+ WalkRow), WalkDetailView (finished page + map), RouteMap
     Screens/Flock/        placeholder until the backend
@@ -127,8 +128,8 @@ apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcc
                           (tiers → Commonness), DetectionSession (clips → calls → HeardBird; PendingBird = "sketching"),
                           BirdArrivals (a species' first confirmation on a walk)
     Walks/                Walk + WalkBird (SwiftData, species by code), WalkStore (saves as it goes), Route, WalkTitle
-    Page/                 BirdSize (calls → size, log scale, capped), PageLayout (notebook scatter: per-bird spot
-                          and tilt from its species code; nothing covered; new birds never move old ones)
+    Page/                 BirdSize (calls → size, log scale, capped), PageLayout (notebook scatter: spot, tilt, label
+                          side and arrow per walk + species; nothing covered; new birds never move old ones)
     overheard-eval        eval CLI · Tests/ unit tests
 ml/                       convert.py, bird_labels.py, verify.py; models/coreml/ in Git LFS, rest gitignored
   eval/                   fetch.py + manifest.json, fetch_rare.py + manifest-rare.json (committed); audio/ gitignored

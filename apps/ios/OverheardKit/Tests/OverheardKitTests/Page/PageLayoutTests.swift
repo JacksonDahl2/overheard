@@ -119,8 +119,51 @@ final class PageLayoutTests: XCTestCase {
         let small = PageLayout.Item(id: "a", side: 60, labelHeight: 40, labelWidth: 110)
         let placement = try XCTUnwrap(PageLayout(items: [small], in: page).placements["a"])
         XCTAssertEqual(placement.label.width, 110)
-        XCTAssertEqual(placement.label.minY, placement.art.maxY)
-        XCTAssertEqual(placement.label.midX, placement.art.midX, accuracy: 0.001)  // centered under it
+    }
+
+    func testTheLabelSitsAgainstItsBird() throws {
+        for id in ["norcar", "blujay", "whtspa", "rethaw", "scatan", "amerob", "carwre"] {
+            let placement = try XCTUnwrap(PageLayout(items: [item(id)], in: page).placements[id])
+            let gap = placement.hasArrow ? PageLayout.arrowGap : 0
+            let distance: Double =
+                switch placement.labelSide {
+                case .below: placement.label.minY - placement.art.maxY
+                case .above: placement.art.minY - placement.label.maxY
+                case .trailing: placement.label.minX - placement.art.maxX
+                case .leading: placement.art.minX - placement.label.maxX
+                }
+            XCTAssertEqual(distance, gap, accuracy: 0.001, id)
+        }
+    }
+
+    func testLabelsAreWrittenOnDifferentSides() {
+        let ids = ["norcar", "blujay", "whtspa", "rethaw", "scatan", "amerob", "carwre", "tuftit", "bkcchi", "houfin"]
+        let styles = ids.map { PageLayout.LabelStyle(for: .init(page: "walk", id: $0)) }
+        XCTAssertGreaterThan(Set(styles.map { $0.sides.first! }).count, 2)
+        XCTAssertTrue(styles.contains { $0.hasArrow })
+        XCTAssertTrue(styles.contains { !$0.hasArrow })
+    }
+
+    func testACrampedLabelMovesToAnotherSide() throws {
+        // A page just wide enough for a bird with its name under it, but not beside it.
+        let narrow = CGRect(x: 0, y: 0, width: 130, height: 400)
+        let leaner = (0..<200).map { "bird\($0)" }.first {
+            PageLayout.LabelStyle(for: .init(page: "", id: $0)).sides.first == .trailing
+        }
+        let id = try XCTUnwrap(leaner)
+        let placement = try XCTUnwrap(
+            PageLayout(items: [PageLayout.Item(id: id, side: 100, labelHeight: 40, labelWidth: 110)], in: narrow)
+                .placements[id])
+        XCTAssertTrue([.below, .above].contains(placement.labelSide))
+    }
+
+    func testEachWalkIsSketchedDifferently() {
+        let ids = ["norcar", "blujay", "whtspa", "rethaw", "scatan"]
+        let items = ids.map { item($0, 90) }
+        let monday = PageLayout(items: items, in: page, seed: "walk-1")
+        let tuesday = PageLayout(items: items, in: page, seed: "walk-2")
+        XCTAssertNotEqual(monday, tuesday)
+        XCTAssertEqual(monday, PageLayout(items: items, in: page, seed: "walk-1"))  // the same walk redraws the same
     }
 
     func testIsDeterministic() {

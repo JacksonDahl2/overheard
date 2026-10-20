@@ -28,6 +28,7 @@ struct ListenScreen: View {
                 .padding(.horizontal, 22)
 
             JournalPage(
+                seed: walk.id.uuidString,
                 dateLine: Formatting.pageDate(walk.startedAt),
                 birds: PageBird.onPage(birds: listener.birds, pending: listener.pending),
                 emptyNote: "Listening…\nthe birds you hear\nwill be sketched here"
@@ -61,6 +62,7 @@ struct ListenScreen: View {
             .padding(.horizontal, 22)
 
             JournalPage(
+                seed: "",
                 dateLine: Formatting.pageDate(.now),
                 birds: [],
                 emptyNote: "Start a walk, and the birds you hear\nwill be drawn on this page"

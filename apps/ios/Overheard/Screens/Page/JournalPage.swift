@@ -4,6 +4,8 @@ import SwiftUI
 /// The journal page: paper, a handwritten date line, and the birds laid out by `PageLayout`.
 /// Each bird's size is its call count (`BirdSize`); nothing else changes how big it is.
 struct JournalPage: View {
+    /// Which page this is (the walk's id): each walk's birds are arranged their own way.
+    let seed: String
     let dateLine: String?
     let birds: [PageBird]
     /// Shown in the middle of an empty page.
@@ -25,7 +27,7 @@ struct JournalPage: View {
         GeometryReader { geometry in
             let bounds = birdArea(in: geometry.size)
             let items = birds.map { item(for: $0, pageWidth: bounds.width) }
-            let layout = PageLayout(items: items, in: bounds, maxScale: Self.fillScale)
+            let layout = PageLayout(items: items, in: bounds, maxScale: Self.fillScale, seed: seed)
 
             ZStack(alignment: .topLeading) {
                 if let dateLine {

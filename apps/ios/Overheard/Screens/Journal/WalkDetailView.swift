@@ -15,6 +15,7 @@ struct WalkDetailView: View {
                 title
 
                 JournalPage(
+                    seed: walk.id.uuidString,
                     dateLine: Formatting.pageDate(walk.startedAt),
                     birds: pageBirds,
                     emptyNote: "No birds on this walk"

@@ -1,19 +1,28 @@
 import OverheardKit
+import SwiftData
 import SwiftUI
 
-/// Bare-bones spike UI: start/stop, live detections, and tuning controls.
+/// Bare-bones spike UI: start/end a walk, live detections, and past walks.
 /// The real parchment design comes later (docs/design.md).
 struct ListenView: View {
     @Bindable var listener: Listener
+    @Query(sort: \Walk.startedAt, order: .reverse) private var walks: [Walk]
+    @State private var confirmingEnd = false
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    Button(listener.isListening ? "Stop listening" : "Start listening") {
-                        listener.toggle()
+                    if listener.isListening {
+                        Button("End walk", role: .destructive) { confirmingEnd = true }
+                            .font(.headline)
+                            .confirmationDialog("End this walk?", isPresented: $confirmingEnd) {
+                                Button("End walk", role: .destructive) { listener.stop() }
+                            }
+                        if let walk = listener.walk { WalkProgress(walk: walk) }
+                    } else {
+                        Button("Start walk") { listener.start() }.font(.headline)
                     }
-                    .font(.headline)
                     if let error = listener.errorMessage {
                         Text(error).foregroundStyle(.red)
                     }
@@ -22,117 +31,64 @@ struct ListenView: View {
                     }
                 }
 
-                Section("Heard") {
-                    if listener.birds.isEmpty {
-                        Text(listener.isListening ? "Listening…" : "Nothing yet")
-                            .foregroundStyle(.secondary)
-                    }
-                    ForEach(listener.birds) { bird in
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text(bird.species.commonName)
-                                Text(bird.species.scientificName).font(.caption).italic()
-                                    .foregroundStyle(.secondary)
-                                if let note = Self.note(for: bird.commonness) {
-                                    Text(note).font(.caption).foregroundStyle(.red)
-                                }
-                            }
-                            Spacer()
-                            VStack(alignment: .trailing) {
-                                Text("×\(bird.calls)").monospacedDigit()
-                                Text("best \(Int(bird.bestConfidence * 100))%").font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
+                if listener.isListening {
+                    Section("Heard") {
+                        if listener.birds.isEmpty {
+                            Text("Listening…").foregroundStyle(.secondary)
+                        }
+                        ForEach(listener.birds) { bird in
+                            BirdRow(
+                                species: bird.species, calls: bird.calls, confidence: bird.bestConfidence,
+                                commonness: bird.commonness)
                         }
                     }
-                }
 
-                if !listener.pending.isEmpty {
-                    // In the real UI these are the faint birds being sketched: they finish drawing
-                    // when confirmed, or fade if the call ends first.
-                    Section("Sketching…") {
-                        ForEach(listener.pending) { bird in
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(bird.species.commonName).foregroundStyle(.secondary)
-                                    if let note = Self.note(for: bird.commonness) {
-                                        Text(note).font(.caption).foregroundStyle(.secondary)
+                    if !listener.pending.isEmpty {
+                        // In the real UI these are the faint birds being sketched: they finish drawing
+                        // when confirmed, or fade if the call ends first.
+                        Section("Sketching…") {
+                            ForEach(listener.pending) { bird in
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text(bird.species.commonName).foregroundStyle(.secondary)
+                                        if let note = BirdRow.note(for: bird.commonness) {
+                                            Text(note).font(.caption).foregroundStyle(.secondary)
+                                        }
                                     }
+                                    Spacer()
+                                    Text(
+                                        "\(Int(bird.peakConfidence * 100))% · \(bird.clips) clip\(bird.clips == 1 ? "" : "s")"
+                                    )
+                                    .font(.caption).monospacedDigit().foregroundStyle(.secondary)
                                 }
-                                Spacer()
-                                Text(
-                                    "\(Int(bird.peakConfidence * 100))% · \(bird.clips) clip\(bird.clips == 1 ? "" : "s")"
-                                )
-                                .font(.caption).monospacedDigit().foregroundStyle(.secondary)
                             }
                         }
                     }
                 }
 
-                Section("Last 3 seconds") {
-                    if listener.lastClip.isEmpty {
-                        Text("No birds above threshold").foregroundStyle(.secondary)
+                Section("Walks") {
+                    let past = walks.filter { !$0.isActive }
+                    if past.isEmpty {
+                        Text("No walks yet").foregroundStyle(.secondary)
                     }
-                    ForEach(listener.lastClip.prefix(5), id: \.index) { score in
-                        HStack {
-                            Text(score.species.commonName)
-                            Spacer()
-                            Text("\(Int(score.confidence * 100))%").monospacedDigit()
+                    ForEach(past) { walk in
+                        NavigationLink {
+                            WalkDetailView(walk: walk, catalog: listener.catalog)
+                        } label: {
+                            WalkRow(walk: walk)
                         }
                     }
-                }
-
-                Section("Tuning") {
-                    VStack(alignment: .leading) {
-                        Text(
-                            "Min confidence (common birds; rarer need more): \(Int(listener.rules.minConfidence * 100))%"
-                        )
-                        Slider(value: $listener.rules.minConfidence, in: 0.1...0.95, step: 0.05)
-                    }
-                    Toggle("Only birds expected here this week", isOn: $listener.rules.useLocationFilter)
-                    Toggle("Skip clips with nothing above the background", isOn: $listener.useGate)
-                }
-
-                Section("Stats") {
-                    LabeledContent("Clips analyzed", value: clipsSummary)
-                    LabeledContent("Inference", value: String(format: "%.0f ms", listener.lastInferenceMs))
-                    LabeledContent("Bird-band level", value: String(format: "%.4f", listener.lastLevel))
-                    LabeledContent(
-                        "Background", value: listener.noiseFloor.map { String(format: "%.4f", $0) } ?? "learning…")
-                    LabeledContent("Location", value: locationSummary)
-                    LabeledContent("BirdNET week", value: "\(SpeciesFilter.birdNETWeek(for: .now))")
-                    if let started = listener.startedAt {
-                        LabeledContent("Started", value: started.formatted(date: .omitted, time: .shortened))
+                    .onDelete { offsets in
+                        for i in offsets { listener.delete(past[i]) }
                     }
                 }
 
-                Section("Credits") {
-                    Text(
-                        "Bird identification by BirdNET (K. Lisa Yang Center for Conservation Bioacoustics, "
-                            + "Cornell Lab of Ornithology, and Chemnitz University of Technology), "
-                            + "used under CC BY-NC-SA 4.0. Species names from the eBird/Clements taxonomy."
-                    )
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                Section {
+                    NavigationLink("Field-test tools") { FieldTestView(listener: listener) }
                 }
             }
             .navigationTitle("Overheard")
         }
-    }
-
-    /// The spike's stand-in for the rare-bird flourish (docs/design.md).
-    private static func note(for commonness: Commonness?) -> String? {
-        switch commonness {
-        case .unusual: "unusual here this time of year"
-        case .uncommon: "uncommon here"
-        case .common, nil: nil
-        }
-    }
-
-    private var clipsSummary: String {
-        guard listener.clipsSeen > 0 else { return "0" }
-        let skipped = 100 * (listener.clipsSeen - listener.clipsAnalyzed) / listener.clipsSeen
-        return "\(listener.clipsAnalyzed) of \(listener.clipsSeen) (\(skipped)% skipped)"
     }
 
     private var locationNote: String? {
@@ -142,14 +98,78 @@ struct ListenView: View {
         case .idle, .waiting, .located: nil
         }
     }
+}
 
-    private var locationSummary: String {
-        switch listener.location {
-        case .idle: "—"
-        case .waiting: "Finding…"
-        case .located(let place): String(format: "%.2f, %.2f", place.latitude, place.longitude)
-        case .denied: "Off"
-        case .unavailable: "Unavailable"
+/// Time and distance so far, ticking once a second.
+private struct WalkProgress: View {
+    let walk: Walk
+
+    var body: some View {
+        TimelineView(.periodic(from: walk.startedAt, by: 1)) { context in
+            LabeledContent(
+                Duration.seconds(context.date.timeIntervalSince(walk.startedAt))
+                    .formatted(.time(pattern: .hourMinuteSecond)),
+                value: WalkRow.distance(walk.route.distance))
         }
+        .monospacedDigit()
+    }
+}
+
+/// One species: name, the rare-bird note, call count and best confidence.
+struct BirdRow: View {
+    let species: Species
+    let calls: Int
+    let confidence: Float
+    let commonness: Commonness?
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading) {
+                Text(species.commonName)
+                Text(species.scientificName).font(.caption).italic().foregroundStyle(.secondary)
+                if let note = Self.note(for: commonness) {
+                    Text(note).font(.caption).foregroundStyle(.red)
+                }
+            }
+            Spacer()
+            VStack(alignment: .trailing) {
+                Text("×\(calls)").monospacedDigit()
+                Text("best \(Int(confidence * 100))%").font(.caption).foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    /// The spike's stand-in for the rare-bird flourish (docs/design.md).
+    static func note(for commonness: Commonness?) -> String? {
+        switch commonness {
+        case .unusual: "unusual here this time of year"
+        case .uncommon: "uncommon here"
+        case .common, nil: nil
+        }
+    }
+}
+
+struct WalkRow: View {
+    let walk: Walk
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text(walk.startedAt.formatted(date: .abbreviated, time: .shortened))
+            Text(summary).font(.caption).foregroundStyle(.secondary)
+        }
+    }
+
+    private var summary: String {
+        let species = walk.birds.count
+        return [
+            "\(species) species",
+            Duration.seconds(walk.duration).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated)),
+            Self.distance(walk.route.distance),
+        ].joined(separator: " · ")
+    }
+
+    static func distance(_ meters: Double) -> String {
+        Measurement(value: meters, unit: UnitLength.meters)
+            .formatted(.measurement(width: .abbreviated, usage: .road))
     }
 }

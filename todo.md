@@ -66,9 +66,9 @@ Goal: prove the core experience works in Central Park.
   5b. [x] Rare-bird eval set (`ml/eval/fetch_rare.py`, 40 recordings; steep bar finds 70%, old cutoff 0%): ~20 xeno-canto recordings of species the location model rates 1–3% at their place/date (out-of-season migrants, western vagrants) — the current set has none, so the rare-bird upside is unmeasured
   6. [x] Adaptive noise gate (`AdaptiveGate`: bird-band level vs. recent background) — built and evaluated, **off by default** (cost 2–6 pts recall, most in city noise)
   6b. [ ] Measure battery on a device (Xcode energy gauge, 30+ min walk) with the gate off vs. 1.5×; turn it on only if it matters
-- [ ] "Start walk" / "End walk" flow with live detection list
-- [ ] Record walk route (CoreLocation) and show on MapKit
-- [ ] Persist walks + detections locally with SwiftData — save continuously during a walk (iOS can kill the app mid-walk); store species by `Species.code`
+- [x] "Start walk" / "End walk" flow with live detection list
+- [x] Record walk route (CoreLocation) and show on MapKit
+- [x] Persist walks + detections locally with SwiftData — save continuously during a walk (iOS can kill the app mid-walk); store species by `Species.code`
 - [ ] Placeholder art for ~50 NYC-area species
 - [ ] Journal page view: collage of birds heard on a walk + date/time/map
 - [ ] Prototype a "being sketched" reveal animation when a new bird is heard

@@ -2,6 +2,7 @@ import UIKit
 
 /// Navigation titles ("Journal", "Me", a walk's name) in IM Fell English, like every other
 /// title in the app. UIKit draws these bars, so the font is set once, app-wide, at launch.
+@MainActor
 enum NavigationBarStyle {
     static func apply() {
         let bar = UINavigationBar.appearance()

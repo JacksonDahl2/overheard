@@ -7,6 +7,8 @@
     struct DemoWalk {
         let walk: Walk
         let birds: [HeardBird]
+        /// A bird heard a few seconds after the sample walk opens, to show a new arrival.
+        let arrival: HeardBird?
         let pending: [PendingBird]
         let justHeard: BirdScore?
         let levels: [(level: Float, heardBird: Bool)]
@@ -33,6 +35,8 @@
                 heard("rethaw", calls: 1, minute: 20),
                 heard("scatan", calls: 1, minute: 31, .unusual),
             ].compactMap { $0 }
+
+            arrival = heard("amerob", calls: 1, minute: 42)
 
             let warbler = catalog.species(code: "btbwar")
             pending =

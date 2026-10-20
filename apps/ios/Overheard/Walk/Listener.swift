@@ -245,6 +245,14 @@ final class Listener {
             pending = demo.pending
             justHeard = demo.justHeard
             for sample in demo.levels { levels.append(level: sample.level, heardBird: sample.heardBird) }
+
+            // A new bird a few seconds in, so the page shows an arrival.
+            if let arrival = demo.arrival {
+                Task {
+                    try? await Task.sleep(for: .seconds(3))
+                    birds.append(arrival)
+                }
+            }
         }
     }
 #endif

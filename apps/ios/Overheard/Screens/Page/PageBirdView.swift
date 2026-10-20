@@ -1,57 +1,52 @@
 import OverheardKit
 import SwiftUI
 
-/// A bird on the journal page: its drawing and its handwritten name, tilted a little as if
-/// sketched by hand. The name sits on whichever side the layout chose (below, above or beside),
-/// sometimes a little apart with an arrow. `JournalPage` decides where, how big and how tilted.
+/// A bird on the journal page: its drawing, tilted a little as if sketched by hand. Tapping it
+/// shows its name for a few seconds; on the live page a new bird shows its name once on arrival.
+/// `JournalPage` decides where it goes, how big it is and how it's tilted.
 struct PageBirdView: View {
     let bird: PageBird
     let placement: PageLayout.Placement
+    /// The whole page, so a name near an edge stays on the page.
+    let pageSize: CGSize
+    /// Show the name when the bird is first drawn (and when a sketch is confirmed).
+    let introducesItself: Bool
 
     @Environment(\.theme) private var theme
+    @Environment(\.pageStyle) private var style
+    @AppStorage("hasTappedABird") private var hasTappedABird = false
+
+    @State private var isNameShown = false
+    @State private var hideName: Task<Void, Never>?
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            // A rare bird's red-ink note already points at it; a second arrow would be clutter.
-            if placement.hasArrow && !bird.hasFlourish { arrow }
+        let tag = tagPlacement
 
-            drawing
-                .frame(width: art.width, height: art.height)
-                .offset(x: art.minX, y: art.minY)
-
-            // Handwriting may spill into the gap the layout keeps around every label, so long names
-            // and glyph flourishes aren't clipped at the box's edge.
-            labelText
-                .padding(.horizontal, 4)  // Caveat's letters reach past their box; keep them uncut
-                .frame(width: label.width + PageLayout.labelGap * 2, alignment: textAlignment.frame)
-                .frame(width: label.width, height: label.height, alignment: textAlignment.frame)
-                .offset(x: label.minX, y: label.minY)
-        }
-        .frame(width: placement.frame.width, height: placement.frame.height, alignment: .topLeading)
-        .rotationEffect(.degrees(placement.tilt))
-        .position(x: placement.frame.midX, y: placement.frame.midY)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityText)
+        drawing
+            .frame(width: art.width, height: art.height)
+            .overlay(alignment: tag.anchor) {
+                if isNameShown {
+                    NameTag(bird: bird)
+                        .fixedSize()
+                        .alignmentGuide(tag.anchor.vertical) { tag.guide($0) }
+                        .transition(.opacity)
+                }
+            }
+            .rotationEffect(.degrees(placement.tilt))
+            .position(x: art.midX, y: art.midY)
+            .zIndex(isNameShown ? 1 : 0)  // a shown name sits over neighbors
+            .contentShape(Rectangle())
+            .onTapGesture { showName(tapped: true) }
+            .onAppear { if introducesItself { showName() } }
+            .onChange(of: bird.isSketching) { _, isSketching in
+                if !isSketching && introducesItself { showName() }  // a sketch just became a bird
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(accessibilityText)
+            .accessibilityAddTraits(.isButton)
     }
 
-    // MARK: - Geometry, relative to this bird's footprint
-
-    private var art: CGRect { local(placement.art) }
-    private var label: CGRect { local(placement.label) }
-
-    private func local(_ rect: CGRect) -> CGRect {
-        rect.offsetBy(dx: -placement.frame.minX, dy: -placement.frame.minY)
-    }
-
-    /// Text leans toward the bird: right-aligned when it's written to the bird's left, and so on.
-    private var textAlignment: (frame: Alignment, text: TextAlignment) {
-        switch placement.labelSide {
-        case .below: (.top, .center)
-        case .above: (.bottom, .center)
-        case .leading: (.trailing, .trailing)
-        case .trailing: (.leading, .leading)
-        }
-    }
+    private var art: CGRect { placement.art }
 
     // MARK: - Drawing
 
@@ -77,54 +72,30 @@ struct PageBirdView: View {
         }
     }
 
-    // MARK: - Label
+    // MARK: - Name
 
-    private var labelText: some View {
-        VStack(spacing: 2) {
-            if bird.isSketching {
-                Text("sketching…\n\(bird.species.commonName)")
-                    .foregroundStyle(theme.accentOnPage)
-            } else {
-                (Text(bird.species.commonName) + Text(callCount).foregroundStyle(theme.pageSoft))
-                    .foregroundStyle(theme.pageInk)
-            }
+    /// Shows the name, then fades it after the style's `nameShowsFor` seconds. Tapping again
+    /// restarts the clock.
+    private func showName(tapped: Bool = false) {
+        if tapped { hasTappedABird = true }
+        withAnimation(.easeOut(duration: 0.25)) { isNameShown = true }
 
-            if bird.hasFlourish {
-                Flourish(note: "unusual here this time of year")
-            }
+        hideName?.cancel()
+        hideName = Task {
+            try? await Task.sleep(for: .seconds(style.nameShowsFor))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeIn(duration: 0.6)) { isNameShown = false }
         }
-        .font(.hand(18))
-        .multilineTextAlignment(textAlignment.text)
-        .fixedSize(horizontal: false, vertical: true)  // wrap fully; never cut a name short
     }
 
-    /// "×3" after the name; a single call needs no count.
-    private var callCount: String {
-        bird.calls > 1 ? " ×\(bird.calls)" : ""
+    /// Where the name hangs: under the bird, or above it when the bird is near the bottom; lined
+    /// up with the bird's left or right edge when it's near a side of the page.
+    private var tagPlacement: TagPlacement {
+        let below = art.maxY + 70 < pageSize.height
+        let horizontal: HorizontalAlignment =
+            art.midX < 110 ? .leading : (art.midX > pageSize.width - 110 ? .trailing : .center)
+        return TagPlacement(below: below, horizontal: horizontal)
     }
-
-    // MARK: - Arrow
-
-    /// From the edge of the name to just inside the drawing (cutouts are cropped close to the bird).
-    private var arrow: some View {
-        let reach = art.width * 0.12
-        let (start, end): (CGPoint, CGPoint) =
-            switch placement.labelSide {
-            case .below:
-                (CGPoint(x: label.midX, y: label.minY - 2), CGPoint(x: art.midX, y: art.maxY - reach))
-            case .above:
-                (CGPoint(x: label.midX, y: label.maxY + 2), CGPoint(x: art.midX, y: art.minY + reach))
-            case .leading:
-                (CGPoint(x: label.maxX + 2, y: label.midY), CGPoint(x: art.minX + reach, y: art.midY))
-            case .trailing:
-                (CGPoint(x: label.minX - 2, y: label.midY), CGPoint(x: art.maxX - reach, y: art.midY))
-            }
-
-        return PointerArrow(start: start, end: end)
-            .stroke(theme.pageInk.opacity(0.7), style: StrokeStyle(lineWidth: 1.3, lineCap: .round, lineJoin: .round))
-    }
-
-    // MARK: - Accessibility
 
     private var accessibilityText: String {
         let name = bird.species.commonName
@@ -132,6 +103,20 @@ struct PageBirdView: View {
 
         let times = bird.calls == 1 ? "once" : "\(bird.calls) times"
         return bird.hasFlourish ? "\(name), heard \(times), unusual here" : "\(name), heard \(times)"
+    }
+}
+
+/// How a name tag hangs off its bird's drawing.
+private struct TagPlacement: Sendable {
+    let below: Bool
+    let horizontal: HorizontalAlignment
+
+    /// The drawing's edge the tag attaches to.
+    var anchor: Alignment { Alignment(horizontal: horizontal, vertical: below ? .bottom : .top) }
+
+    /// Moves the tag's far edge onto that anchor, so it hangs outside the drawing, not over it.
+    func guide(_ tag: ViewDimensions) -> CGFloat {
+        below ? tag[.top] - 2 : tag[.bottom] + 2
     }
 }
 

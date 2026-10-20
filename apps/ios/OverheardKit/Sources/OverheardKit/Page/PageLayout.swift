@@ -7,7 +7,8 @@ import Foundation
 /// Birds are placed one at a time, in the order given (the app passes first-heard order).
 /// Each goes in the open spot, touching a bird already placed, that's closest to the page's
 /// focal point. Earlier birds never depend on later ones, so a newly heard bird doesn't move
-/// the rest. If they don't all fit, everything shrinks a step and is laid out again.
+/// the rest. If they don't all fit, everything shrinks a step and is laid out again; with
+/// room to spare (`maxScale` > 1), a few birds are drawn larger so they fill the page.
 public struct PageLayout: Sendable, Equatable {
 
     public struct Item: Sendable, Equatable {
@@ -44,8 +45,9 @@ public struct PageLayout: Sendable, Equatable {
     static let smallestScale = 0.3
 
     /// Lays out `items` inside `bounds` (the page, minus its margins and date line).
-    public init(items: [Item], in bounds: CGRect) {
-        var scale = 1.0
+    /// `maxScale` is the most birds may grow beyond their own size when the page has room.
+    public init(items: [Item], in bounds: CGRect, maxScale: Double = 1) {
+        var scale = max(1, maxScale)
 
         // Shrink until every bird fits, or until birds are as small as they get.
         while scale * Self.shrinkStep >= Self.smallestScale {
@@ -100,9 +102,10 @@ public struct PageLayout: Sendable, Equatable {
 
     // MARK: - Geometry
 
-    /// Where the cluster gathers: centered, a little above the middle, since the eye reads top-down.
+    /// Where the cluster gathers: centered, in the upper part of the page. Pages fill from the
+    /// top, like a notebook, so a short walk doesn't leave an empty band above its birds.
     static func focalPoint(of bounds: CGRect) -> CGPoint {
-        CGPoint(x: bounds.midX, y: bounds.minY + bounds.height * 0.42)
+        CGPoint(x: bounds.midX, y: bounds.minY + bounds.height * 0.3)
     }
 
     /// The origin that centers a frame of `size` on `point`, kept inside `bounds` vertically.

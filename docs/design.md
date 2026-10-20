@@ -19,6 +19,7 @@ Two themes, chosen in settings (default: follow the system).
 | `tabBg` | `#ece4d2` | `#120c07` | Tab bar |
 | `tabSoft` | `#6e5b46` | `#a98f68` | Inactive tab |
 | `rule` | `rgba(90,66,38,.25)` | `rgba(242,226,192,.14)` | Dividers on chrome |
+| `card` | `#fbf7ee` | `#22180e` | Grouped list rows on chrome (Me, settings) |
 | `accent` | `#8b2f1c` (iron-gall red) | `#e9a24f` (candle flame) | Active tab, primary button, "Listening" |
 | `accentInk` | `#f7efdc` | `#1b130c` | Text on `accent` |
 | `pageInk` | `#2a1f15` | `#2a1f15` | Text on the journal page (both themes) |

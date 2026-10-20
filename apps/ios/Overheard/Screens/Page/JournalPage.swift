@@ -16,11 +16,14 @@ struct JournalPage: View {
     private static let dateLineHeight: CGFloat = 34
     private static let smallestArt: CGFloat = 104
     private static let largestArt: CGFloat = 210
+    /// How much a handful of birds may grow to fill an empty page.
+    private static let fillScale = 1.4
 
     var body: some View {
         GeometryReader { geometry in
             let bounds = birdArea(in: geometry.size)
-            let layout = PageLayout(items: birds.map { item(for: $0, pageWidth: bounds.width) }, in: bounds)
+            let items = birds.map { item(for: $0, pageWidth: bounds.width) }
+            let layout = PageLayout(items: items, in: bounds, maxScale: Self.fillScale)
 
             ZStack(alignment: .topLeading) {
                 if let dateLine {

@@ -110,7 +110,8 @@ apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcc
     Walk/                 Listener (runs a walk: start/pause/end, publishes what's heard), LevelHistory, ListeningStats,
                           NewBirdAlert (tap, or a notification when locked, for each new species),
                           DemoWalk (Debug: `-demo` opens on a sample walk)
-    Design/               Theme (Parchment + Candlelight tokens), Typography (the four fonts), BirdArt, Formatting
+    Design/               Theme (Parchment + Candlelight tokens), Typography (the four fonts), NavigationBarStyle,
+                          BirdArt, Formatting
     Components/           PillButtonStyle, ListeningBadge, LevelBars, TabBar
     Screens/Page/         JournalPage (paper + PageLayout), PageBirdView, PageBird, Flourish — shared by Listen and Journal
     Screens/Listen/       ListenScreen, ListenHeader, ListenFooter

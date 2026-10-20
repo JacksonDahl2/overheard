@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The Me tab: appearance, field-test tools, and credits. Profile and life list come later.
+/// The Me tab: appearance, alerts, field-test tools, and credits. Profile and life list come later.
 struct MeScreen: View {
     @Bindable var listener: Listener
     @Binding var themeChoice: ThemeChoice
@@ -17,22 +17,26 @@ struct MeScreen: View {
                     }
                     .pickerStyle(.inline)
                     .labelsHidden()
+                    .listRowBackground(theme.card)
                 }
 
                 Section {
                     Toggle("New-bird alerts", isOn: $newBirdAlerts)
+                        .listRowBackground(theme.card)
                 } footer: {
                     Text("A light tap when a new species joins your walk, or a notification if your phone is locked.")
                 }
 
                 Section("Testing") {
                     NavigationLink("Field-test tools") { FieldTestView(listener: listener) }
+                        .listRowBackground(theme.card)
                 }
 
                 Section("Credits") {
                     Text(Self.credits)
                         .font(.body(15))
                         .foregroundStyle(theme.chromeSoft)
+                        .listRowBackground(theme.card)
                 }
             }
             .font(.body(17))

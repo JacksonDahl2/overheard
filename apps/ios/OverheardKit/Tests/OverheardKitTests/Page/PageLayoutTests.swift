@@ -79,6 +79,19 @@ final class PageLayoutTests: XCTestCase {
         assertValid(layout)
     }
 
+    func testAFewBirdsGrowToFillThePage() {
+        let items = [item("a", 100), item("b", 80)]
+        let grown = PageLayout(items: items, in: page, maxScale: 1.5)
+        XCTAssertEqual(grown.scale, 1.5)
+        assertValid(grown)
+        XCTAssertEqual(PageLayout(items: items, in: page).scale, 1)  // no growing unless asked
+    }
+
+    func testGrowingStillShrinksWhenFull() {
+        let items = (0..<14).map { item("bird\($0)", 130) }
+        XCTAssertLessThan(PageLayout(items: items, in: page, maxScale: 1.5).scale, 1)
+    }
+
     func testLabelSitsUnderItsDrawing() throws {
         let placement = try XCTUnwrap(PageLayout(items: [item("a")], in: page).placements["a"])
         XCTAssertEqual(placement.label.minY, placement.art.maxY)

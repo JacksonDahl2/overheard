@@ -10,6 +10,8 @@ struct Theme {
     let tabBackground: Color
     let tabSoft: Color
     let rule: Color
+    /// Grouped rows in settings-style lists (Me), so they don't fall back to system gray.
+    let card: Color
 
     // Accent: the active tab, primary button and "Listening".
     let accent: Color
@@ -41,6 +43,7 @@ extension Theme {
         tabBackground: Color(hex: 0xECE4D2),
         tabSoft: Color(hex: 0x6E5B46),
         rule: Color(hex: 0x5A4226, opacity: 0.25),
+        card: Color(hex: 0xFBF7EE),
         accent: Color(hex: 0x8B2F1C),
         accentInk: Color(hex: 0xF7EFDC),
         accentHalo: Color(hex: 0x8B2F1C, opacity: 0.18),
@@ -63,6 +66,7 @@ extension Theme {
         tabBackground: Color(hex: 0x120C07),
         tabSoft: Color(hex: 0xA98F68),
         rule: Color(hex: 0xF2E2C0, opacity: 0.14),
+        card: Color(hex: 0x22180E),
         accent: Color(hex: 0xE9A24F),
         accentInk: Color(hex: 0x1B130C),
         accentHalo: Color(hex: 0xE9A24F, opacity: 0.22),

@@ -36,7 +36,7 @@ Free-signed builds expire after 7 days. Run again from Xcode to reinstall.
 
 To see the screens filled in without going outside, turn on the `-demo` argument: **Product → Scheme → Edit Scheme → Run → Arguments**, tick `-demo`, and run. The app opens on a sample walk in the Ramble, with five birds, one rare bird, and one still being sketched. It's Debug-only and never saves anything.
 
-To force a theme, add the argument `-themeChoice candlelight` (or `parchment`) next to it.
+To force a theme, add the argument `-themeChoice candlelight` (or `parchment`) next to it. `-startTab journal` (or `flock`, `me`) opens on another tab.
 
 ## Editor (VS Code / Cursor)
 

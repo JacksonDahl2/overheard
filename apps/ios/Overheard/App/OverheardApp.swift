@@ -9,6 +9,8 @@ struct OverheardApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
+        NavigationBarStyle.apply()
+
         do {
             container = try WalkStore.container()
         } catch {

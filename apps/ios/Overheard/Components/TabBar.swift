@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The four tabs (docs/design.md): Listen, Journal, Flock, Me.
-enum Tab: CaseIterable, Identifiable {
+enum Tab: String, CaseIterable, Identifiable {
     case listen, journal, flock, me
 
     var id: Self { self }

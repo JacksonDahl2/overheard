@@ -30,6 +30,10 @@ targets:
       - path: ../../ml/models/coreml/BirdNETMeta.mlpackage
       - path: ../../ml/models/coreml/species.json
         buildPhase: resources
+      # Bird drawings, one PNG per species code; kept as a folder so they load from "cutouts/".
+      - path: ../../art/birds/cutouts
+        type: folder
+        buildPhase: resources
     info:
       path: Overheard/Info.plist
       properties:
@@ -37,8 +41,22 @@ targets:
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIBackgroundModes: [audio, location]
+        UIAppFonts:
+          - IMFellEnglish-Regular.ttf
+          - IMFellEnglish-Italic.ttf
+          - IMFellEnglishSC-Regular.ttf
+          - EBGaramond-Regular.ttf
+          - EBGaramond-Medium.ttf
+          - EBGaramond-SemiBold.ttf
+          - EBGaramond-Italic.ttf
+          - Caveat-Medium.ttf
+          - Caveat-SemiBold.ttf
         NSMicrophoneUsageDescription: Overheard listens for birdsong during your walk. Audio is analyzed on your phone and never uploaded.
         NSLocationWhenInUseUsageDescription: Overheard uses your approximate location to know which birds live nearby this time of year, so it can identify them more accurately. Your location stays on your phone.
+    scheme:
+      # Turn on in Xcode (Product → Scheme → Edit Scheme → Arguments) to open on a sample walk.
+      commandLineArguments:
+        "-demo": false
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.overheardbirds.Overheard

@@ -28,9 +28,15 @@ This is currently a **bare spike app**. It listens through the mic, runs BirdNET
 2. Make sure your Apple ID is added in Xcode → Settings → Accounts. If Xcode says the bundle ID is taken, change `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml`.
 3. Select your phone as the run destination and press **Run** (⌘R).
 4. The first time, the phone asks you to trust the developer: Settings → General → VPN & Device Management → **Verify App**. If verifying fails, switch the phone to cellular and try again.
-5. When you tap **Start listening**, the app asks for the microphone and then your location. "Approximate" location is enough.
+5. When you tap **Start walk**, the app asks for the microphone and then your location. "Approximate" location is enough.
 
 Free-signed builds expire after 7 days. Run again from Xcode to reinstall.
+
+## Demo walk (design work)
+
+To see the screens filled in without going outside, turn on the `-demo` argument: **Product → Scheme → Edit Scheme → Run → Arguments**, tick `-demo`, and run. The app opens on a sample walk in the Ramble, with five birds, one rare bird, and one still being sketched. It's Debug-only and never saves anything.
+
+To force a theme, add the argument `-themeChoice candlelight` (or `parchment`) next to it.
 
 ## Editor (VS Code / Cursor)
 

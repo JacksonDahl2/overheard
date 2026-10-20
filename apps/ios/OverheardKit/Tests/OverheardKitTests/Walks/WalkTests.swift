@@ -135,6 +135,13 @@ final class WalkStoreTests: XCTestCase {
         XCTAssertEqual(try next.closeInterruptedWalks(), 0)
     }
 
+    func testPlaceNameBecomesTheTitle() throws {
+        let walk = try store.startWalk(at: t0)
+        XCTAssertEqual(walk.title, WalkTitle.default(for: t0))
+        try store.name(walk, placeName: "The Ramble, Central Park")
+        XCTAssertEqual(try reloaded().first?.title, "The Ramble, Central Park")
+    }
+
     func testDeleteRemovesItsBirds() throws {
         let walk = try store.startWalk(at: t0)
         try store.record([heard("norcar"), heard("blujay")], in: walk, at: t0.addingTimeInterval(5))
@@ -148,5 +155,23 @@ final class WalkStoreTests: XCTestCase {
         try store.endWalk(first, at: t0.addingTimeInterval(60))
         let second = try store.startWalk(at: t0.addingTimeInterval(3600))
         XCTAssertEqual(try store.walks().map(\.id), [second.id, first.id])
+    }
+}
+
+final class WalkTitleTests: XCTestCase {
+    func testNamesTheTimeOfDay() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "America/New_York")!
+
+        func title(atHour hour: Int) -> String {
+            let date = calendar.date(from: DateComponents(year: 2026, month: 10, day: 19, hour: hour))!
+            return WalkTitle.default(for: date, calendar: calendar)
+        }
+
+        XCTAssertEqual(title(atHour: 7), "Morning walk")
+        XCTAssertEqual(title(atHour: 13), "Afternoon walk")
+        XCTAssertEqual(title(atHour: 18), "Evening walk")
+        XCTAssertEqual(title(atHour: 23), "Night walk")
+        XCTAssertEqual(title(atHour: 3), "Night walk")
     }
 }

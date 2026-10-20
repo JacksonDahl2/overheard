@@ -69,6 +69,10 @@ What's settled, and why. Grouped by topic and kept current. When a decision chan
 
 ## Look and art
 
+- **One journal page view** draws both the live Listen page and a finished walk's page. Birds are placed in first-heard order by `PageLayout`, so a new bird never moves the ones already drawn; if they don't fit, everything shrinks together.
+- **Own tab bar** (not the system one) so the icons and type match the mockups; the system TabView still holds each tab's state.
+- **Static font weights** bundled with the app, rather than variable fonts, so each weight has a reliable name.
+
 - **A hand-drawn field journal on parchment, across the whole app;** the dark mode is **"By Candlelight"**. Details are in `docs/design.md`.
 - **Page rules:** bird size = call count (Listen and Journal); Flock cards use even sizes; rare birds get the red-ink naturalist flourish, not a bigger size.
 - **First bird art:** 50 Central Park birds, bundled with the app for now (`art/birds/cutouts`, Git LFS). Birds drawn on demand move to R2 with the backend.

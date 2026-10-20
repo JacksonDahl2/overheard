@@ -12,7 +12,7 @@ Onboarding for coding agents (and humans). **Keep this file current.** When you 
 ## Status (update as phases progress)
 
 - **Phase 0 (planning):** done. All decisions are in `docs/decisions.md`.
-- **Phase 1 (on-device MVP):** detection pipeline and walk flow done (Start/End walk, route, walks saved on the phone with SwiftData); the UI is still a bare spike list.
+- **Phase 1 (on-device MVP):** detection, walk flow (route, SwiftData), 50 bird drawings, and the parchment Listen screen and journal pages are done.
   - BirdNET's audio and location models run on the phone. The location filter works anywhere, from GPS.
   - Inference is about 21 ms per 3 s clip on an iPhone 17 Pro.
   - The eval harness (`ml/eval/`, `overheard-eval`) runs the app's own pipeline on 110 labeled recordings and 26 noise clips.
@@ -103,25 +103,28 @@ npx prettier@3.3.3 --write "art/**/*.mjs"                                # JS (c
 
 ```
 apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcconfigs)
-  Overheard/Audio/        AudioCapture (mic → 48 kHz, 3 s clips every 1 s as an AsyncStream; survives route changes),
-                          BirdNETResources+Bundle (bundled model URLs)
-  Overheard/              Listener (UI state; runs a walk), LocationProvider (CoreLocation: filter place + route fixes),
-                          ListenView (spike UI: walk + past walks), WalkDetailView (map + birds), FieldTestView (tuning, stats)
-  OverheardKit/           Swift package shared with the Mac:
-    ListeningPipeline     actor: clip → BirdNET → filter → session; recomputes local species on move/week
-    BirdClassifier        Core ML audio model
-    LocationModel         Core ML location model → LocalSpecies (occurrence per species at a Place)
-    SpeciesCatalog        stable species codes/names per output index (species.json)
-    SpeciesFilter         assess(): never non-birds; needs base threshold + the ConfidenceBar tier's extra
-    ConfidenceBar         tiers by occurrence → extra confidence + Commonness (common/uncommon/unusual)
-    DetectionSession      per-clip detections → HeardBird tally; merges a song's overlapping clips into one call;
-                          confirms calls (≥2 clips or one ≥0.70), unconfirmed new species are PendingBird ("sketching")
-    SlidingWindow         live samples → 3 s clips every 1 s
-    ClipGate              LevelMeter (bird-band RMS) + AdaptiveGate (skip clips near the background) — off by default
-    Route                 GPS fixes → walk path + distance (drops inaccurate fixes and standing-still jitter)
-    Walk, WalkBird        SwiftData models: a walk, its route, and its birds by species code
-    WalkStore             saves a walk as it goes (birds at once, route every 30 s); closes walks a killed app left open
-    AudioDecoding         file → 48 kHz clips (eval)
+  Overheard/              the app, one folder per area:
+    App/                  OverheardApp (SwiftData container, demo launch), RootView (tabs + theme)
+    Audio/                AudioCapture (mic → 48 kHz, 3 s clips every 1 s; survives route changes), bundled model URLs
+    Location/             LocationProvider (filter place + route fixes), PlaceNamer (walk name from the first fix)
+    Walk/                 Listener (runs a walk: start/pause/end, publishes what's heard), LevelHistory, ListeningStats,
+                          DemoWalk (Debug: `-demo` opens on a sample walk)
+    Design/               Theme (Parchment + Candlelight tokens), Typography (the four fonts), BirdArt, Formatting
+    Components/           PillButtonStyle, ListeningBadge, LevelBars, TabBar
+    Screens/Page/         JournalPage (paper + PageLayout), PageBirdView, PageBird, Flourish — shared by Listen and Journal
+    Screens/Listen/       ListenScreen, ListenHeader, ListenFooter
+    Screens/Journal/      WalksScreen (+ WalkRow), WalkDetailView (finished page + map), RouteMap
+    Screens/Flock/        placeholder until the backend
+    Screens/Me/           MeScreen (theme, credits), FieldTestView (tuning, stats)
+    Resources/Fonts/      IM Fell English, EB Garamond, Caveat (static .ttf) + their OFL licenses
+  OverheardKit/           Swift package shared with the Mac; sources and tests in matching folders:
+    Audio/                SlidingWindow (3 s clips every 1 s), ClipGate (LevelMeter + AdaptiveGate, off by default),
+                          AudioDecoding (file → clips, eval)
+    Models/               BirdClassifier (audio model), LocationModel (→ LocalSpecies), SpeciesCatalog (codes/names)
+    Detection/            ListeningPipeline (actor: clip → BirdNET → filter → session), SpeciesFilter, ConfidenceBar
+                          (tiers → Commonness), DetectionSession (clips → calls → HeardBird; PendingBird = "sketching")
+    Walks/                Walk + WalkBird (SwiftData, species by code), WalkStore (saves as it goes), Route, WalkTitle
+    Page/                 BirdSize (calls → size, log scale, capped), PageLayout (stable cluster, no overlaps)
     overheard-eval        eval CLI · Tests/ unit tests
 ml/                       convert.py, bird_labels.py, verify.py; models/coreml/ in Git LFS, rest gitignored
   eval/                   fetch.py + manifest.json, fetch_rare.py + manifest-rare.json (committed); audio/ gitignored
@@ -171,6 +174,8 @@ apps/{api,art-worker,web}, packages/{db,shared,observability}, infra/terraform, 
 - **Free signing:** builds expire after 7 days. The first install needs Settings → General → VPN & Device Management → Verify App; if that fails, try cellular instead of Wi-Fi.
 - **LFS bandwidth:** GitHub's free LFS tier allows 1 GB a month. CI caches `.git/lfs`, but avoid re-committing the models needlessly; each version adds about 100 MB.
 - **Gemini images:** they come back as JPEG, even when saved as `.png`.
+- **Fonts:** the app bundles static weights (EB Garamond and Caveat are instanced from Google's variable fonts with fontTools). `Font.display/smallCaps/body/hand` use PostScript names like `IM_FELL_English_Roman`; a wrong name silently falls back to the system font.
+- **Demo walk:** Debug builds launched with `-demo` (a scheme argument, off by default) open on a sample walk. Use it for screenshots and design work; it never touches the walk store.
 - **Bird art files** are named by species code (`art/birds/cutouts/<code>.png`), so split species use their group code (House Wren is `y01309`). Cut out with `cutout.swift`, which defringes edges; a plain mask leaves a white halo on the darker Candlelight page.
 - **Shell noise:** the user's shell prints `_encode`/`_decode` noise from gvm on `cd`. It's harmless.
 

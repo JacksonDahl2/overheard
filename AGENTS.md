@@ -108,6 +108,7 @@ apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcc
     Audio/                AudioCapture (mic → 48 kHz, 3 s clips every 1 s; survives route changes), bundled model URLs
     Location/             LocationProvider (filter place + route fixes), PlaceNamer (walk name from the first fix)
     Walk/                 Listener (runs a walk: start/pause/end, publishes what's heard), LevelHistory, ListeningStats,
+                          NewBirdAlert (tap, or a notification when locked, for each new species),
                           DemoWalk (Debug: `-demo` opens on a sample walk)
     Design/               Theme (Parchment + Candlelight tokens), Typography (the four fonts), BirdArt, Formatting
     Components/           PillButtonStyle, ListeningBadge, LevelBars, TabBar
@@ -122,7 +123,8 @@ apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcc
                           AudioDecoding (file → clips, eval)
     Models/               BirdClassifier (audio model), LocationModel (→ LocalSpecies), SpeciesCatalog (codes/names)
     Detection/            ListeningPipeline (actor: clip → BirdNET → filter → session), SpeciesFilter, ConfidenceBar
-                          (tiers → Commonness), DetectionSession (clips → calls → HeardBird; PendingBird = "sketching")
+                          (tiers → Commonness), DetectionSession (clips → calls → HeardBird; PendingBird = "sketching"),
+                          BirdArrivals (a species' first confirmation on a walk)
     Walks/                Walk + WalkBird (SwiftData, species by code), WalkStore (saves as it goes), Route, WalkTitle
     Page/                 BirdSize (calls → size, log scale, capped), PageLayout (stable cluster, no overlaps)
     overheard-eval        eval CLI · Tests/ unit tests

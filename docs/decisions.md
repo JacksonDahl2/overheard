@@ -70,6 +70,7 @@ What's settled, and why. Grouped by topic and kept current. When a decision chan
 ## Look and art
 
 - **One journal page view** draws both the live Listen page and a finished walk's page. Birds are placed in first-heard order by `PageLayout`, so a new bird never moves the ones already drawn; if they don't fit, everything shrinks together.
+- **New-bird alerts** fire once per species, when it's first confirmed (never for a repeat call or a sketch): a light tap, a stronger one for unusual birds, or a notification when the phone is locked. On by default; a switch in Me.
 - **Own tab bar** (not the system one) so the icons and type match the mockups; the system TabView still holds each tab's state.
 - **Static font weights** bundled with the app, rather than variable fonts, so each weight has a reliable name.
 

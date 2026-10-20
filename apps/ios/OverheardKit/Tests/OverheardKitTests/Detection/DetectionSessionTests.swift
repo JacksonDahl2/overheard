@@ -189,3 +189,26 @@ final class RareConfirmationTests: XCTestCase {
         XCTAssertEqual(session.byCode["btbwar"]?.commonness, .unusual)
     }
 }
+
+final class BirdArrivalsTests: XCTestCase {
+    func bird(_ code: String, calls: Int = 1) -> HeardBird {
+        HeardBird(
+            species: Species(code: code, commonName: code, scientificName: code, isBird: true), calls: calls,
+            bestConfidence: 0.8, firstHeard: .now, lastHeard: .now, commonness: .common)
+    }
+
+    func testEachSpeciesArrivesOnce() {
+        var arrivals = BirdArrivals()
+        XCTAssertEqual(arrivals.newBirds(in: [bird("norcar")]).map(\.species.code), ["norcar"])
+        XCTAssertEqual(arrivals.newBirds(in: [bird("norcar", calls: 2)]).count, 0)  // a repeat call
+        XCTAssertEqual(
+            arrivals.newBirds(in: [bird("norcar", calls: 3), bird("blujay")]).map(\.species.code), ["blujay"])
+    }
+
+    func testResetStartsANewWalk() {
+        var arrivals = BirdArrivals()
+        _ = arrivals.newBirds(in: [bird("norcar")])
+        arrivals.reset()
+        XCTAssertEqual(arrivals.newBirds(in: [bird("norcar")]).count, 1)
+    }
+}

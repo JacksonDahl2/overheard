@@ -4,6 +4,7 @@ import SwiftUI
 struct MeScreen: View {
     @Bindable var listener: Listener
     @Binding var themeChoice: ThemeChoice
+    @AppStorage(NewBirdAlert.settingKey) private var newBirdAlerts = true
 
     @Environment(\.theme) private var theme
 
@@ -16,6 +17,12 @@ struct MeScreen: View {
                     }
                     .pickerStyle(.inline)
                     .labelsHidden()
+                }
+
+                Section {
+                    Toggle("New-bird alerts", isOn: $newBirdAlerts)
+                } footer: {
+                    Text("A light tap when a new species joins your walk, or a notification if your phone is locked.")
                 }
 
                 Section("Testing") {

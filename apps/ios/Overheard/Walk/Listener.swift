@@ -53,6 +53,8 @@ final class Listener {
 
     private let capture = AudioCapture()
     private let locationProvider = LocationProvider()
+    private let newBirdAlert = NewBirdAlert()
+    private var arrivals = BirdArrivals()
     private let store: WalkStore
     private var pipeline: ListeningPipeline?
     private var listening: Task<Void, Never>?
@@ -79,6 +81,7 @@ final class Listener {
             try capture.start()
             walk = try store.startWalk()
             clearWhatWasHeard()
+            newBirdAlert.prepare()
             phase = .listening
 
             startLocation()
@@ -153,6 +156,8 @@ final class Listener {
     private func show(_ update: PipelineUpdate, at time: Date) {
         if let walk { attempt { try store.record(update.birds, in: walk, at: time) } }
 
+        for bird in arrivals.newBirds(in: update.birds) { newBirdAlert.announce(bird) }
+
         birds = update.birds
         pending = update.pending
         if let top = update.lastClip.first { justHeard = top }
@@ -164,6 +169,7 @@ final class Listener {
         birds = []
         pending = []
         justHeard = nil
+        arrivals.reset()
         levels.reset()
         stats = ListeningStats()
     }

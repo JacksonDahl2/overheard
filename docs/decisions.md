@@ -71,7 +71,8 @@ What's settled, and why. Grouped by topic and kept current. When a decision chan
 
 - **One journal page view** draws both the live Listen page and a finished walk's page. Birds are placed in first-heard order by `PageLayout`, so a new bird never moves the ones already drawn; if they don't fit, everything shrinks together.
 - **Notebook scatter, not a cluster:** each bird aims for its own spot (an even spread by heard order, nudged by species code) with a small tilt, and takes the nearest free space. *Replaced:* a tidy cluster around one point, which read as a grid. Sizes run from 30% (one call) to full size at 10 calls; *replaced:* 47% to 12 calls, too similar.
-- **Labels move around their bird** (below, above, beside, sometimes apart with an arrow) and the arrangement is seeded by the walk, so the same species looks different on different walks but never jumps within one.
+- **Labels move around their bird** (below, above, beside, sometimes apart with an arrow) and the arrangement is seeded by the walk, so the same species looks different on different walks.
+- **Bigger birds over a fixed arrangement:** when the next bird doesn't fit, a few alternative arrangements are tried before anything shrinks, so the page can rearrange as birds arrive (the owner prefers that to small birds). Largest drawing 280 pt (70% of the page width), smallest 96 pt; a few birds may grow 1.7× to fill the page.
 - **New-bird alerts** fire once per species, when it's first confirmed (never for a repeat call or a sketch): a light tap, a stronger one for unusual birds, or a notification when the phone is locked. On by default; a switch in Me.
 - **Own tab bar** (not the system one) so the icons and type match the mockups; the system TabView still holds each tab's state.
 - **Static font weights** bundled with the app, rather than variable fonts, so each weight has a reliable name.

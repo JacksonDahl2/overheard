@@ -22,6 +22,7 @@ struct PageBirdView: View {
             // Handwriting may spill into the gap the layout keeps around every label, so long names
             // and glyph flourishes aren't clipped at the box's edge.
             labelText
+                .padding(.horizontal, 4)  // Caveat's letters reach past their box; keep them uncut
                 .frame(width: label.width + PageLayout.labelGap * 2, alignment: textAlignment.frame)
                 .frame(width: label.width, height: label.height, alignment: textAlignment.frame)
                 .offset(x: label.minX, y: label.minY)
@@ -94,8 +95,7 @@ struct PageBirdView: View {
         }
         .font(.hand(18))
         .multilineTextAlignment(textAlignment.text)
-        .lineSpacing(-4)
-        .minimumScaleFactor(0.8)
+        .fixedSize(horizontal: false, vertical: true)  // wrap fully; never cut a name short
     }
 
     /// "×3" after the name; a single call needs no count.

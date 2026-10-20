@@ -13,8 +13,9 @@ import Foundation
 /// differently, but within one page nothing is random: a bird keeps its place as the page
 /// updates, and earlier birds never depend on later ones, so a newly heard bird doesn't move the rest.
 ///
-/// If they don't all fit, everything shrinks a step and is laid out again; with room to spare
-/// (`maxScale` > 1), a few birds are drawn larger so they fill the page.
+/// If they don't all fit, a few other arrangements are tried before everything shrinks a step,
+/// so one awkward gap doesn't make a whole page small. With room to spare (`maxScale` > 1), a few
+/// birds are drawn larger so they fill the page.
 public struct PageLayout: Sendable, Equatable {
 
     public struct Item: Sendable, Equatable {
@@ -60,7 +61,7 @@ public struct PageLayout: Sendable, Equatable {
     public let scale: Double
 
     /// Drawings have a little empty paper around the bird, so neighbors may tuck this far into each other.
-    public static let nestle: Double = 4
+    public static let nestle: Double = 14
     /// Space kept around every label, so handwriting never runs into a drawing (tilts included).
     public static let labelGap: Double = 6
     /// How far apart a label sits from its bird when an arrow joins them.
@@ -72,6 +73,8 @@ public struct PageLayout: Sendable, Equatable {
     /// How much farther (in points) a bird will sit from its spot to keep its label's favorite side.
     static let sidePreference: Double = 14
     static let shrinkStep = 0.9
+    /// Arrangements tried at each size before shrinking.
+    static let arrangementsPerSize = 4
     static let smallestScale = 0.3
 
     /// Lays out `items` inside `bounds` (the page, minus its margins and date line).
@@ -79,10 +82,12 @@ public struct PageLayout: Sendable, Equatable {
     public init(items: [Item], in bounds: CGRect, maxScale: Double = 1, seed: String = "") {
         var scale = max(1, maxScale)
 
-        // Shrink until every bird fits, or until birds are as small as they get.
+        // The largest size at which some arrangement fits every bird.
         while scale * Self.shrinkStep >= Self.smallestScale {
-            if Self.place(items, in: bounds, scale: scale, seed: seed, stopAtFirstMiss: true).count == items.count {
-                break
+            if let arrangement = Self.firstArrangementThatFits(items, in: bounds, scale: scale, seed: seed) {
+                self.placements = arrangement
+                self.scale = scale
+                return
             }
             scale *= Self.shrinkStep
         }
@@ -93,6 +98,19 @@ public struct PageLayout: Sendable, Equatable {
     }
 
     // MARK: - Placing
+
+    /// Tries a few arrangements of the page (the first is the page's own; the rest are derived
+    /// from it) and returns the first that fits every bird at this scale.
+    static func firstArrangementThatFits(_ items: [Item], in bounds: CGRect, scale: Double, seed: String)
+        -> [String: Placement]?
+    {
+        for attempt in 0..<arrangementsPerSize {
+            let arrangementSeed = attempt == 0 ? seed : "\(seed)#\(attempt)"
+            let placed = place(items, in: bounds, scale: scale, seed: arrangementSeed, stopAtFirstMiss: true)
+            if placed.count == items.count { return placed }
+        }
+        return nil
+    }
 
     /// Places each item that fits at this scale, in order; items that don't fit are left out.
     /// `stopAtFirstMiss` gives up as soon as one doesn't fit (enough to know this scale is too big).
@@ -251,7 +269,7 @@ public struct PageLayout: Sendable, Equatable {
         let spread =
             index == 0
             ? CGPoint(x: 0.5, y: 0.14)
-            : CGPoint(x: 0.12 + 0.76 * halton(index, base: 2), y: 0.06 + 0.84 * halton(index, base: 3))
+            : CGPoint(x: 0.2 + 0.6 * halton(index, base: 2), y: 0.08 + 0.74 * halton(index, base: 3))
 
         var seed = key.hash
         let nudge = CGPoint(x: StableHash.unit(&seed) - 0.5, y: StableHash.unit(&seed) - 0.5)

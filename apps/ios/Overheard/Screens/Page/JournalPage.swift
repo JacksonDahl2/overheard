@@ -16,12 +16,12 @@ struct JournalPage: View {
     // Page geometry, in points.
     private static let margin: CGFloat = 14
     private static let dateLineHeight: CGFloat = 34
-    private static let smallestArt: CGFloat = 76
-    private static let largestArt: CGFloat = 240
+    private static let smallestArt: CGFloat = 96
+    private static let largestArt: CGFloat = 280
     /// Labels stay at least this wide, so a small bird's name doesn't wrap word by word.
     private static let smallestLabel: CGFloat = 104
     /// How much a handful of birds may grow to fill an empty page.
-    private static let fillScale = 1.4
+    private static let fillScale = 1.7
 
     var body: some View {
         GeometryReader { geometry in
@@ -65,7 +65,7 @@ struct JournalPage: View {
     }
 
     private func item(for bird: PageBird, pageWidth: CGFloat) -> PageLayout.Item {
-        let largest = min(Self.largestArt, pageWidth * 0.62)
+        let largest = min(Self.largestArt, pageWidth * 0.7)
         let side = max(Self.smallestArt, largest * BirdSize.fraction(calls: bird.calls))
         return PageLayout.Item(
             id: bird.id, side: side, labelHeight: labelHeight(for: bird), labelWidth: Self.smallestLabel)
@@ -73,8 +73,8 @@ struct JournalPage: View {
 
     /// Two lines of handwriting for a name; more for a sketch's "sketching…" or a flourish.
     private func labelHeight(for bird: PageBird) -> Double {
-        if bird.isSketching { return 58 }
-        return bird.hasFlourish ? 78 : 42
+        if bird.isSketching { return 72 }
+        return bird.hasFlourish ? 96 : 50
     }
 
     // MARK: - Pieces

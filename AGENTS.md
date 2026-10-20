@@ -129,7 +129,7 @@ apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcc
                           BirdArrivals (a species' first confirmation on a walk)
     Walks/                Walk + WalkBird (SwiftData, species by code), WalkStore (saves as it goes), Route, WalkTitle
     Page/                 BirdSize (calls → size, log scale, capped), PageLayout (notebook scatter: spot, tilt, label
-                          side and arrow per walk + species; nothing covered; new birds never move old ones)
+                          side and arrow per walk + species; nothing covered; rearranges to keep birds large)
     overheard-eval        eval CLI · Tests/ unit tests
 ml/                       convert.py, bird_labels.py, verify.py; models/coreml/ in Git LFS, rest gitignored
   eval/                   fetch.py + manifest.json, fetch_rare.py + manifest-rare.json (committed); audio/ gitignored

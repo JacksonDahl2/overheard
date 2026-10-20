@@ -40,6 +40,14 @@ What's settled, and why. Grouped by topic and kept current. When a decision chan
   - *Why:* BirdNET can't tell the daughters apart, and matching by scientific name picked the wrong one (NYC's Yellow Warbler had become the tropical Mangrove Yellow Warbler).
   - A future version could pick the local daughter by location.
 
+## Walks (on device)
+
+- **Walks save continuously** with SwiftData: confirmed birds at once, the route at least every 30 s, everything when the app goes to the background. A walk a killed app left open is closed at its last save and marked interrupted.
+  - *Why:* iOS can kill the app mid-walk, and nothing heard should be lost.
+- **Birds are stored by species code only;** names come from the catalog at display time.
+- **Route:** a fix is kept only if it's accurate (≤ 50 m) and at least 10 m (or the two fixes' uncertainty) from the last point, so standing still to listen doesn't add jitter distance. One encoded blob per walk, since it's only read whole.
+- **Background location** (`location` background mode plus `CLBackgroundActivitySession`) keeps the route recording with the screen locked.
+
 ## Evaluation and testing
 
 - **`overheard-eval` runs the app's exact Swift pipeline on the Mac** against labeled sets:

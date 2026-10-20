@@ -49,6 +49,7 @@ Without it, the editor checks app files as macOS code and flags iOS-only APIs li
 - **False positives:** try lowering **Min confidence** to see what's borderline, and check how many wrong birds appear at 50%.
 - **Location filter:** compare **Only birds expected here this week** on and off. The Stats section shows the location the filter is using.
 - **Inference time:** check the Stats section. It should be well under 3,000 ms.
-- **Screen locked:** does listening keep going when the phone is locked or in a pocket?
+- **Screen locked:** does listening keep going when the phone is locked or in a pocket? Does the route keep recording?
+- **Walks:** after End walk, does the walk show under Walks with the right birds, time, distance and map? Force-quit mid-walk: on relaunch the walk should be there, marked as cut short.
 - **AirPods:** connect or disconnect them mid-session; listening should continue.
 - **Battery:** how much drains per hour?

@@ -12,11 +12,11 @@ Onboarding for coding agents (and humans). **Keep this file current.** When you 
 ## Status (update as phases progress)
 
 - **Phase 0 (planning):** done. All decisions are in `docs/decisions.md`.
-- **Phase 1 (on-device MVP):** detection pipeline done; app UI is still a bare spike list.
+- **Phase 1 (on-device MVP):** detection pipeline and walk flow done (Start/End walk, route, walks saved on the phone with SwiftData); the UI is still a bare spike list.
   - BirdNET's audio and location models run on the phone. The location filter works anywhere, from GPS.
   - Inference is about 21 ms per 3 s clip on an iPhone 17 Pro.
   - The eval harness (`ml/eval/`, `overheard-eval`) runs the app's own pipeline on 110 labeled recordings and 26 noise clips.
-  - Next: steps 3–6 of the detection-quality plan in `todo.md`, then walk flow, SwiftData, the parchment UI and the journal page.
+  - Next: a field test (and battery, todo 6b), then the parchment UI and the journal page.
 - **Phases 2–6 (Cloudflare infrastructure, backend, social, art pipeline, launch):** not started.
 - **Exists today:** `apps/ios`, `ml/`, `art/model-comparison/`, `docs/`, `design/mockups/`, `.github/workflows/ci.yml`.
 - **Planned but empty:** `apps/api`, `apps/art-worker`, `apps/web`, `packages/*`, `infra/terraform`, `scripts/`.
@@ -100,7 +100,8 @@ npx prettier@3.3.3 --write "art/**/*.mjs"                                # JS (c
 apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcconfigs)
   Overheard/Audio/        AudioCapture (mic → 48 kHz, 3 s clips every 1 s as an AsyncStream; survives route changes),
                           BirdNETResources+Bundle (bundled model URLs)
-  Overheard/              Listener (UI state), LocationProvider (CoreLocation), ListenView (spike UI)
+  Overheard/              Listener (UI state; runs a walk), LocationProvider (CoreLocation: filter place + route fixes),
+                          ListenView (spike UI: walk + past walks), WalkDetailView (map + birds), FieldTestView (tuning, stats)
   OverheardKit/           Swift package shared with the Mac:
     ListeningPipeline     actor: clip → BirdNET → filter → session; recomputes local species on move/week
     BirdClassifier        Core ML audio model
@@ -112,6 +113,9 @@ apps/ios/                 SwiftUI app (XcodeGen project.yml; Config/ signing xcc
                           confirms calls (≥2 clips or one ≥0.70), unconfirmed new species are PendingBird ("sketching")
     SlidingWindow         live samples → 3 s clips every 1 s
     ClipGate              LevelMeter (bird-band RMS) + AdaptiveGate (skip clips near the background) — off by default
+    Route                 GPS fixes → walk path + distance (drops inaccurate fixes and standing-still jitter)
+    Walk, WalkBird        SwiftData models: a walk, its route, and its birds by species code
+    WalkStore             saves a walk as it goes (birds at once, route every 30 s); closes walks a killed app left open
     AudioDecoding         file → 48 kHz clips (eval)
     overheard-eval        eval CLI · Tests/ unit tests
 ml/                       convert.py, bird_labels.py, verify.py; models/coreml/ in Git LFS, rest gitignored
@@ -151,6 +155,8 @@ apps/{api,art-worker,web}, packages/{db,shared,observability}, infra/terraform, 
 - **BirdNET weeks** run 1–48, four per month: `week = (month-1)*4 + min(4, (day-1)/7 + 1)`. Week -1 means "all year".
 - **Species splits:** for the 32 BirdNET species eBird has since split, `species.json` keeps BirdNET's concept (name plus group code) and lists the daughters in `split` (`Species.splitInto`). Don't map them to a daughter by scientific name; `BundledCatalogTests` guards this.
 - **Labels:** `labels.txt` lines look like `Scientific name_Common name`, where line index = output index. 101 labels aren't birds (sounds, frogs, insects, mammals). One pair of labels shares a code because eBird has since lumped the two species.
+- **Saving walks:** iOS can kill the app mid-walk, so `WalkStore` never waits for End walk: confirmed birds save immediately, the route at least every 30 s, and everything on going to the background. At launch, open walks are closed at their last save and marked `interrupted`. `WalkBird` stores only `speciesCode`; names come from `SpeciesCatalog.species(code:)`.
+- **Background location:** `UIBackgroundModes` includes `location`, and `LocationProvider` holds a `CLBackgroundActivitySession` during a walk so the route keeps recording with the screen locked.
 - **Adaptive gate:** it's built and tested, but **off by default** (`ListeningPipeline.gateConfig = nil`). In the eval it skipped about half the clips but cost 2–6 points of recall in city noise. Turn it on only after measuring battery on a device.
 - **FP16:** don't use it. Even with the spectrogram kept at FP32, it shifted confidences by up to ±0.17.
 - **Confidence bar:** `ConfidenceBar.standard` needs base +0 for common species (≥ 10% occurrence here), +0.20 for uncommon (≥ 3%), and +0.40 for unusual (≥ 1%), capped at 0.95. Rarer species are hidden. A rare bird's single-clip confirmation must also clear its bar by 0.15. On the rare-bird eval set it reports 70% of real unlikely-here birds, where the old cutoff reported 0%.

@@ -25,10 +25,13 @@ public struct Species: Hashable, Sendable, Codable {
 public struct SpeciesCatalog: Sendable {
     public let species: [Species]  // index = BirdNET output index
     public let nonBird: Set<Int>
+    private let indexByCode: [String: Int]
 
     public init(species: [Species]) {
         self.species = species
         nonBird = Set(species.indices.filter { !species[$0].isBird })
+        // Lumped species share a code; the first label stands for both.
+        indexByCode = Dictionary(species.indices.map { (species[$0].code, $0) }, uniquingKeysWith: { a, _ in a })
     }
 
     public init(contentsOf url: URL) throws {
@@ -43,6 +46,11 @@ public struct SpeciesCatalog: Sendable {
 
     public var count: Int { species.count }
     public subscript(index: Int) -> Species { species[index] }
+
+    /// The species with this code (how walks store birds), or nil if this model doesn't know it.
+    public func species(code: String) -> Species? {
+        indexByCode[code].map { species[$0] }
+    }
 
     /// Indices whose scientific name matches (eval manifests label recordings this way).
     public func indices(scientificName: String) -> [Int] {

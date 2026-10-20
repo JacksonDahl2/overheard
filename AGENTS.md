@@ -165,3 +165,15 @@ apps/{api,art-worker,web}, packages/{db,shared,observability}, infra/terraform, 
 - **LFS bandwidth:** GitHub's free LFS tier allows 1 GB a month. CI caches `.git/lfs`, but avoid re-committing the models needlessly; each version adds about 100 MB.
 - **Gemini images:** they come back as JPEG, even when saved as `.png`.
 - **Shell noise:** the user's shell prints `_encode`/`_decode` noise from gvm on `cd`. It's harmless.
+
+## Settled decisions (don't redo without new evidence)
+
+These were tried and measured. Reasons are in `docs/decisions.md`, numbers in `ml/eval/README.md`.
+
+- FP32 models, not FP16.
+- Base threshold 0.50 ("fewer wrong birds"), not 0.35.
+- Confirmation: 2 clips or one clip ≥ max(0.70, bar + 0.15).
+- Steep confidence bar (+0.20 / +0.40), not gentler tiers.
+- Adaptive gate off until battery is measured on a device.
+- A 3 s clip every 1 s; "×count" means separate songs (≤ 2.5 s apart merge).
+- Species are stored by code. Split species keep BirdNET's concept.

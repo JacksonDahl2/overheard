@@ -183,6 +183,7 @@ apps/{api,art-worker,web}, packages/{db,shared,observability}, infra/terraform, 
 - **Demo walk:** Debug builds launched with `-demo` (a scheme argument, off by default) open on a sample walk, and a robin arrives 3 s in. Use it for screenshots and design work; it never touches the walk store.
 - **Tuning the page:** every journal-page setting is in `OverheardKit/Page/PageStyle.swift` (`PageStyle.standard`). Debug builds have Me → Field-test tools → Page tuning: sliders over a live sample page, applied app-wide, kept across launches, with "Copy as code" to paste back into `standard`.
 - **Bird art files** are named by species code (`art/birds/cutouts/<code>.png`), so split species use their group code (House Wren is `y01309`). Cut out with `cutout.swift`, which defringes edges; a plain mask leaves a white halo on the darker Candlelight page.
+- **CI's Swift is older than a current Mac's:** CI runs `macos-15`'s default Xcode, while a local Xcode may be newer and accept code CI rejects (e.g. a `CGFloat` going into a `Double` tuple without `Double(...)`). Watch the PR's CI run, not just the local build.
 - **Shell noise:** the user's shell prints `_encode`/`_decode` noise from gvm on `cd`. It's harmless.
 
 ## Settled decisions (don't redo without new evidence)

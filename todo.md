@@ -26,6 +26,7 @@ Inspired by [AvianVisitors](https://theodore.net/projects/AvianVisitors/).
 - [ ] Species data source (later): seed from BirdNET labels / eBird taxonomy, progressively add art + species
 - [x] Sketch core screens → Listen, Journal page, Flock in both themes (`design/mockups/`)
 - [ ] Mock up remaining screens: Profile, Life list, Bird detail
+- [ ] Logo: make the chosen "Field note" direction final: vector wordmark and icon (text as outlines), the app icon set in both themes, and replace `docs/assets/logo-*.svg` / `mark-*.svg` (direction in `docs/decisions.md`)
 - [x] Define data model → D1 + Drizzle; users, follows, walks, detections, species, art_variants, likes, comments, blocks, reports, push_tokens (images in R2, keys in D1)
 - [x] Monorepo layout → pnpm workspaces (no Turborepo): `apps/{ios,api,art-worker,web}`, `packages/{db,shared,observability}`, `infra/terraform`, `ml/`, `art/`, `design/`, `scripts/`, `docs/`
 - [x] API framework → Hono on Workers; OpenAPI generated from zod → Swift client via `swift-openapi-generator`

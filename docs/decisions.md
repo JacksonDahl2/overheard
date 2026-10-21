@@ -69,6 +69,8 @@ What's settled, and why. Grouped by topic and kept current. When a decision chan
 
 ## Look and art
 
+- **Logo direction: "Field note"** (chosen 2026-10-19). The wordmark is a handwritten lowercase *overheard* (Caveat) with a red-ink underline, over *A Bird Journal* in IM Fell English SC. The app icon is the handwritten *o* with the red underline and a small arrow pointing at it, on page cream (Parchment) or near-black (Candlelight, with candle-flame ink). Explorations are on the Overheard Logo Directions canvas (private). *Rejected:* the earlier sketched-bird mark, a birdsong-sonogram mark, quotation marks, the watercolor chickadee as icon, a field stamp, a serif "O" with sound arcs, and the Field note variants (notebook paper, sketching circle, "heard here" annotation, capital swash).
+
 - **One journal page view** draws both the live Listen page and a finished walk's page. Birds are placed in first-heard order by `PageLayout`, so a new bird never moves the ones already drawn; if they don't fit, everything shrinks together.
 - **Notebook scatter, not a cluster:** each bird aims for its own spot (an even spread by heard order, nudged by species code) with a small tilt, and takes the nearest free space. *Replaced:* a tidy cluster around one point, which read as a grid. Sizes run from 30% (one call) to full size at 10 calls; *replaced:* 47% to 12 calls, too similar.
 - **Names on tap, not printed on the page.** Tapping a bird shows its name for a few seconds; new arrivals on the Listen page show theirs once. *Replaced:* labels beside each bird (below/above/beside, some with arrows), which crowded the page and read as belonging to the wrong bird. The page arrangement is still seeded by the walk.
